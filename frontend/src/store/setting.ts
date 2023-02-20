@@ -17,4 +17,7 @@ export const useSettingStore = defineStore(
             darkMode,
         };
     },
+    {
+        persist: true
+    }
 );

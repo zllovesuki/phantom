@@ -53,3 +53,24 @@ export namespace client {
 
 }
 
+export namespace specter {
+	
+	export class Target {
+	    protocol: string;
+	    destination: string;
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Target(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.protocol = source["protocol"];
+	        this.destination = source["destination"];
+	        this.error = source["error"];
+	    }
+	}
+
+}
+

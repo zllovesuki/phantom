@@ -12,7 +12,7 @@ const setting = useSettingStore();
 const route = useRoute();
 const router = useRouter();
 
-const mapped = routes.map(route => {
+const mapped = routes.filter(r => !!r.meta).map(route => {
     return {
         name: route.meta?.displayName,
         to: route.name

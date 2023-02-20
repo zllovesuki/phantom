@@ -16,16 +16,18 @@ var assets embed.FS
 func main() {
 	// Create an instance of the app structure
 	app := &specter.Application{}
+	helper := &specter.Helper{}
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:         "Phantom",
-		Width:         1024,
-		Height:        768,
-		DisableResize: true,
-		OnStartup:     app.Initialize,
+		Title:     "Phantom",
+		Width:     1024,
+		Height:    768,
+		Frameless: true,
+		OnStartup: app.Initialize,
 		Bind: []interface{}{
 			app,
+			helper,
 		},
 		AssetServer: &assetserver.Options{
 			Assets: assets,

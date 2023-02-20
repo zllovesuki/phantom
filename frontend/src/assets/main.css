@@ -8,4 +8,9 @@ html {
 
 body {
   overscroll-behavior: none;
+  --wails-draggable: drag;
+}
+
+input, button, select {
+  --wails-draggable: no-drag;
 }

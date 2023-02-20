@@ -28,7 +28,7 @@ func ensureConfig() error {
 		if err != nil {
 			return fmt.Errorf("creating config file: %w", err)
 		}
-		fh.WriteString("apex: specter.im:443\n")
+		fh.WriteString("apex: \n")
 		fh.Close()
 	}
 	return nil

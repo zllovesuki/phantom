@@ -29,6 +29,14 @@ export const routes: RouteRecordRaw[] = [
             displayName: "Forward Connections"
         }
     },
+    {
+        path: "/debug",
+        name: "debug",
+        component: () => import("@/views/DebugView.vue"),
+        meta: {
+            displayName: "Debug"
+        }
+    },
 ]
 
 const router = createRouter({

@@ -3,13 +3,15 @@ import TunnelModal from "@/components/TunnelModal.vue"
 import { EllipsisVerticalIcon } from "@heroicons/vue/20/solid";
 
 import type { client } from "@wails/go/models";
-import { ref, defineEmits } from "vue";
+import { ref } from "vue";
 
 defineProps<{
     tunnel?: client.Tunnel,
 }>();
 
-const emit = defineEmits(["update:target"]);
+const emit = defineEmits<{
+    (event: 'update:target', target: string): void
+}>()
 const open = ref(false)
 
 </script>
@@ -34,7 +36,7 @@ const open = ref(false)
                 </button>
             </div>
         </div>
-        <TunnelModal :create="false" :tunnel="tunnel" :show="open" @update:show="open = $event"
+        <TunnelModal :create="false" :target="tunnel.target" :hostname="tunnel.hostname" v-model:show="open"
             @update:target="emit('update:target', $event)" />
     </li>
 </template>

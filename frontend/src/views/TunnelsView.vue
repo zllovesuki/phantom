@@ -10,39 +10,33 @@ import { GetCurrentConfig } from "@wails/go/specter/Application"
 import { client } from "@wails/go/models";
 
 const Config = ref<client.Config>(client.Config.createFrom({ apex: "" }))
+const Tunnels = ref<client.Tunnel[]>([]);
 
-const NewTunnel = ref<client.Tunnel>(client.Tunnel.createFrom({ target: "" }))
-const NewTunnelModalOpen = ref(false)
+interface NewTunnel extends client.Tunnel {
+    modalOpen: boolean
+}
+
+const NewTunnel = ref<NewTunnel>({
+    target: "",
+    modalOpen: false
+})
 
 function appendNewTunnel() {
-    if (!Config.value.tunnels) {
-        return
-    }
-    Config.value.tunnels.push({
+    Tunnels.value.push({
         target: NewTunnel.value.target
     })
     NewTunnel.value.target = ""
+    Config.value.tunnels = Tunnels.value
 }
 
 onMounted(async () => {
     const cfg = await GetCurrentConfig()
     if (cfg !== null) {
         Config.value = cfg
+        if (cfg.tunnels) {
+            Tunnels.value = cfg.tunnels
+        }
     }
-    if (!Config.value.tunnels) {
-        Config.value.tunnels = []
-    }
-    Config.value.clientId = 12345678
-    Config.value.token = "abcd"
-    Config.value.tunnels.push({
-        target: "tcp://127.0.0.1:22"
-    })
-    Config.value.tunnels.push({
-        target: "https://127.0.0.1:8443"
-    })
-    Config.value.tunnels.push({
-        target: "unix:///tmp/nginx.sock"
-    })
 })
 </script>
 
@@ -59,20 +53,19 @@ onMounted(async () => {
                         </div>
                     </div>
                     <div class="mt-5 md:col-span-full md:mt-0">
-                        <ul role="list" class="grid grid-cols-1 gap-6 md:grid-cols-2 mb-10"
-                            v-show="(Config.tunnels ?? []).length > 0">
-                            <TunnelCard v-for="(tunnel, index) in Config.tunnels" :key="index" :tunnel="tunnel"
+                        <ul role="list" class="grid grid-cols-1 gap-6 md:grid-cols-2 mb-10" v-show="Tunnels.length > 0">
+                            <TunnelCard v-for="(tunnel, index) in Tunnels" :key="index" :tunnel="tunnel"
                                 @update:target="tunnel.target = $event" />
                         </ul>
-                        <button type="button" @click="NewTunnelModalOpen = true"
+                        <button type="button" @click="NewTunnel.modalOpen = true"
                             class="relative block w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 p-12 text-center hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none">
                             <ServerIcon class="mx-auto h-8 w-8 text-gray-400" />
                             <span class="mt-2 block text-sm font-medium">
                                 Add a new tunnel
                             </span>
                         </button>
-                        <TunnelModal :create="true" :tunnel="NewTunnel" :show="NewTunnelModalOpen" :action="appendNewTunnel"
-                            @update:show="NewTunnelModalOpen = $event" @update:target="NewTunnel.target = $event" />
+                        <TunnelModal :create="true" v-model:target="NewTunnel.target" v-model:show="NewTunnel.modalOpen"
+                            :action="appendNewTunnel" />
                     </div>
                 </div>
             </div>

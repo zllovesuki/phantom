@@ -3,17 +3,21 @@ import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessu
 import { TrashIcon } from "@heroicons/vue/24/outline";
 
 import { ParseTarget } from "@wails/go/specter/Helper"
-import type { client } from "@wails/go/models";
-import { ref, computed, defineEmits, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 
 const props = defineProps<{
     action?: () => void,
-    tunnel: client.Tunnel,
+    target: string,
+    hostname?: string,
     create: boolean
     show: boolean
 }>();
 
-const emit = defineEmits(["update:target", "update:show"]);
+const emit = defineEmits<{
+    (event: 'update:target', target: string): void
+    (event: 'update:show', open: boolean): void
+}>()
+
 
 function emitTargetUpdate(scheme: string, target: string) {
     if (target.length < 1) {
@@ -30,7 +34,7 @@ function emitTargetUpdate(scheme: string, target: string) {
 const scheme = ref("tcp")
 const target = ref("")
 onMounted(async () => {
-    const parsed = await ParseTarget(props.tunnel.target)
+    const parsed = await ParseTarget(props.target)
     if (parsed.error) {
         return
     }
@@ -38,12 +42,6 @@ onMounted(async () => {
     target.value = parsed.destination
 })
 
-const hostname = computed({
-    get() {
-        return props.tunnel.hostname ?? undefined
-    },
-    set(value) { }
-})
 const open = computed({
     get() {
         return props.show
@@ -125,7 +123,7 @@ function onSubmit() {
                                             class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                             Hostname
                                         </label>
-                                        <input type="text" name="hostname" id="hostname" v-model="hostname"
+                                        <input type="text" name="hostname" id="hostname" :value="hostname"
                                             placeholder="(Assigned on Publish)"
                                             class="bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white disabled:text-gray-400 dark:disabled:text-gray-400"
                                             disabled />

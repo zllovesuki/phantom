@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import InstructionModal from "@/components/InstructionModal.vue"
 import TunnelModal from "@/components/TunnelModal.vue"
 import { EllipsisVerticalIcon } from "@heroicons/vue/20/solid";
 
@@ -12,7 +13,9 @@ defineProps<{
 const emit = defineEmits<{
     (event: 'update:target', target: string): void
 }>()
-const open = ref(false)
+
+const InstructionModalOpen = ref(false)
+const EditModalOpen = ref(false)
 
 </script>
 
@@ -24,19 +27,23 @@ const open = ref(false)
                 <span class="font-medium text-gray-900 dark:text-gray-300">
                     {{ tunnel.target }}
                 </span>
-                <p class="text-gray-600 dark:text-gray-400">
-                    {{ tunnel.hostname ?? "(Pending assignment)" }}
+                <p class="text-gray-600 dark:text-gray-400 text-xs">
+                    <a :class="[tunnel.hostname ? 'dark:hover:text-gray-100 hover:text-gray-400 cursor-pointer' : '']"
+                        @click="InstructionModalOpen = true">
+                        {{ tunnel.hostname ?? "(Pending assignment)" }}
+                    </a>
                 </p>
             </div>
             <div class="flex-shrink-0 pr-2">
-                <button type="button" @click="open = true"
+                <button type="button" @click="EditModalOpen = true"
                     class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400 hover:text-gray-500">
                     <span class="sr-only">Open options</span>
                     <EllipsisVerticalIcon class="h-5 w-5" aria-hidden="true" />
                 </button>
             </div>
         </div>
-        <TunnelModal :create="false" :target="tunnel.target" :hostname="tunnel.hostname" v-model:show="open"
+        <InstructionModal :tunnel="tunnel" v-model:show="InstructionModalOpen" />
+        <TunnelModal :create="false" :target="tunnel.target" :hostname="tunnel.hostname" v-model:show="EditModalOpen"
             @update:target="emit('update:target', $event)" />
     </li>
 </template>

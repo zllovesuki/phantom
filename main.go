@@ -20,17 +20,21 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:     "Phantom",
-		Width:     1024,
-		Height:    768,
-		Frameless: true,
-		OnStartup: app.Initialize,
+		Title:      "Phantom",
+		Width:      1024,
+		Height:     768,
+		OnStartup:  app.OnStartup,
+		OnShutdown: app.OnShutdown,
 		Bind: []interface{}{
 			app,
 			helper,
 		},
 		AssetServer: &assetserver.Options{
-			Assets: assets,
+			Assets:  assets,
+			Handler: specter.NewAssetHandler(),
+		},
+		Debug: options.Debug{
+			OpenInspectorOnStartup: true,
 		},
 	})
 

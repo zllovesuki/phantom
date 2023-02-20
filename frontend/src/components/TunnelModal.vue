@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/vue'
 import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
+import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
 import { TrashIcon } from "@heroicons/vue/24/outline";
 
 import { ParseTarget } from "@wails/go/specter/Helper"
 import { ref, computed, onMounted } from "vue";
 
 const props = defineProps<{
-    action?: () => void,
     target: string,
     hostname?: string,
     create: boolean
@@ -18,6 +19,7 @@ const emit = defineEmits<{
     (event: 'update:show', open: boolean): void
 }>()
 
+let initialFocusRef = ref(null)
 
 function emitTargetUpdate(scheme: string, target: string) {
     if (target.length < 1) {
@@ -59,18 +61,17 @@ const placeholders: Record<string, string> = {
     "winio": "\\\\.\\pipe\\ipc"
 }
 
+const schemes = Object.keys(placeholders)
+
 function onSubmit() {
     emitTargetUpdate(scheme.value, target.value)
     open.value = false
-    if (props.action) {
-        props.action()
-    }
 }
 </script>
 
 <template>
     <TransitionRoot as="template" :show="open">
-        <Dialog as="div" class="relative z-10" @close="open = false">
+        <Dialog as="div" class="relative z-10" @close="open = false" :initial-focus="initialFocusRef">
             <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100"
                 leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0">
                 <div class="fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity" />
@@ -101,22 +102,50 @@ function onSubmit() {
                                             Target
                                         </label>
                                         <div class="flex">
-                                            <span
-                                                class="inline-flex items-center rounded-l-md border border-r-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-700 text-sm dark:text-white text-black">
-                                                <label for="currency" class="sr-only">Currency</label>
-                                                <select id="currency" name="currency" v-model="scheme"
-                                                    class="h-full rounded-lg rounded-r-none border-transparent bg-transparent py-0 pl-2 pr-7 text-sm bg-gray-50 dark:bg-slate-700 px-3 text-sm dark:text-white text-black">
-                                                    <option value="tcp">tcp://</option>
-                                                    <option value="http">http://</option>
-                                                    <option value="https">https://</option>
-                                                    <option value="unix">unix://</option>
-                                                    <option value="winio">npipe</option>
-                                                </select>
-                                            </span>
+                                            <Listbox as="div" v-model="scheme">
+                                                <div class="relative">
+                                                    <ListboxButton
+                                                        class="relative w-20 cursor-default rounded-md rounded-r-none border border-gray-300 dark:border-gray-500 dark:text-white text-black bg-gray-50 dark:bg-slate-700 py-3 pl-3 pr-8 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                                                        <span class="block">{{ scheme }}</span>
+                                                        <span
+                                                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1">
+                                                            <ChevronUpDownIcon class="h-5 w-5 text-gray-400"
+                                                                aria-hidden="true" />
+                                                        </span>
+                                                    </ListboxButton>
+
+                                                    <transition leave-active-class="transition ease-in duration-100"
+                                                        leave-from-class="opacity-100" leave-to-class="opacity-0">
+                                                        <ListboxOptions
+                                                            class="absolute z-10 mt-1 max-h-60 py1 w-full overflow-y-auto bg-gray-50 dark:bg-gray-700 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                                            <ListboxOption as="template" v-for="scheme in schemes"
+                                                                :value="scheme" v-slot="{ active, selected }">
+                                                                <li
+                                                                    :class="[active ? 'bg-gray-300 dark:text-white dark:bg-slate-500' : 'dark:text-white', 'relative cursor-default select-none py-2 pl-3 pr-7']">
+                                                                    <span
+                                                                        :class="[selected ? 'font-semibold' : 'font-light', 'block']">
+                                                                        {{ scheme }}
+                                                                    </span>
+
+                                                                    <span v-if="selected"
+                                                                        :class="[active ? 'dark:text-white' : 'dark:text-white', 'absolute inset-y-0 right-0 flex items-center pr-2']">
+                                                                        <CheckIcon class="h-4 w-4" aria-hidden="true" />
+                                                                    </span>
+                                                                </li>
+                                                            </ListboxOption>
+                                                        </ListboxOptions>
+                                                    </transition>
+                                                </div>
+                                            </Listbox>
                                             <input type="text" name="target" id="target" v-model="target"
-                                                class="block w-full bg-transparent border border-l-0 border-gray-300 text-gray-900 text-sm rounded-lg rounded-l-none focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                ref="initialFocusRef"
+                                                class="block w-full p-2.5 bg-transparent border border-l-0 border-gray-300 text-gray-900 text-sm rounded-lg rounded-l-none focus:ring-1 focus:ring-indigo-500 focus:border-blue-500 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                                                 :placeholder="placeholders[scheme]" required />
                                         </div>
+                                        <p id="helper-text-explanation" v-show="!create"
+                                            class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                            Note that updating HTTP(s) target may not take effect immediately.
+                                        </p>
                                     </div>
                                     <div>
                                         <label for="hostname"
@@ -126,7 +155,7 @@ function onSubmit() {
                                         <input type="text" name="hostname" id="hostname" :value="hostname"
                                             placeholder="(Assigned on Publish)"
                                             class="bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white disabled:text-gray-400 dark:disabled:text-gray-400"
-                                            disabled />
+                                            disabled readonly />
                                     </div>
                                     <button type="submit"
                                         class="w-full text-black dark:text-white hover:bg-gray-100 border border-gray-300 dark:border-gray-600 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-blue-800">

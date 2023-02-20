@@ -1,14 +1,16 @@
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
+import ClientConfiguration from "@/views/ClientConfiguration.vue"
+import TunnelsView from "@/views/TunnelsView.vue"
 
 export const routes: RouteRecordRaw[] = [
     {
         path: "/",
-        redirect: "/tunnel"
+        redirect: "/config"
     },
     {
         path: "/config",
         name: "config",
-        component: () => import("@/views/ClientConfiguration.vue"),
+        component: ClientConfiguration,
         meta: {
             displayName: "Configure Client"
         }
@@ -16,7 +18,7 @@ export const routes: RouteRecordRaw[] = [
     {
         path: "/tunnel",
         name: "tunnel",
-        component: () => import("@/views/TunnelsView.vue"),
+        component: TunnelsView,
         meta: {
             displayName: "Configure Tunnels"
         }
@@ -26,7 +28,7 @@ export const routes: RouteRecordRaw[] = [
         name: "forward",
         component: () => import("@/views/HomeView.vue"),
         meta: {
-            displayName: "Forward Connections"
+            displayName: "Local Forwarding"
         }
     },
     {

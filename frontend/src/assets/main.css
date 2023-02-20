@@ -11,6 +11,6 @@ body {
   --wails-draggable: drag;
 }
 
-input, button, select {
+textarea, input, button, select, ul, li {
   --wails-draggable: no-drag;
 }

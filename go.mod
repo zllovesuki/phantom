@@ -3,8 +3,10 @@ module kon.nect.sh/phantom
 go 1.18
 
 require (
+	github.com/go-chi/chi/v5 v5.0.8
 	github.com/wailsapp/wails/v2 v2.3.1
-	kon.nect.sh/specter v0.0.0-00010101000000-000000000000
+	go.uber.org/zap v1.24.0
+	kon.nect.sh/specter v0.0.0-20230220010739-918b0cbbdec9
 )
 
 require (
@@ -28,6 +30,7 @@ require (
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
+	github.com/montanaflynn/stats v0.7.0 // indirect
 	github.com/onsi/ginkgo/v2 v2.8.0 // indirect
 	github.com/pkg/browser v0.0.0-20210706143420-7d21f8c997e2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -47,7 +50,6 @@ require (
 	github.com/zhangyunhao116/skipmap v0.10.1 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
-	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/exp v0.0.0-20230131160201-f062dba9d201 // indirect
 	golang.org/x/mod v0.8.0 // indirect

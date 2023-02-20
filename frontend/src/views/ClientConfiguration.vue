@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import StatusBadge from "@/components/StatusBadge.vue";
+import AlertSection from "@/components/AlertSection.vue";
+import type { AlertLevel } from "@/components/AlertSection.vue";
 import HorizontalDivider from "@/components/HorizontalDivider.vue";
 import {
     SparklesIcon,
@@ -7,23 +9,76 @@ import {
 } from "@heroicons/vue/24/outline";
 
 import { ref, onMounted } from "vue";
-import { GetCurrentConfig } from "@wails/go/specter/Application"
-import { client } from "@wails/go/models";
+import { Connected, GetCurrentConfig, GetPhantomConfig, StartClient, StopClient, UpdateApex, UpdatePhantomConfig } from "@wails/go/specter/Application"
+import { client, specter } from "@wails/go/models";
 
-const Connected = ref(false)
-const Config = ref<client.Config>(client.Config.createFrom({ apex: "" }))
+interface Alert {
+    message: string
+    level: AlertLevel
+    show: boolean
+}
+
+const ClientConnected = ref(false)
+const SpecterConfig = ref<client.Config>(client.Config.createFrom({ apex: "" }))
+const PhantomConfig = ref<specter.PhantomConfig>({ specterInsecure: false, targetInsecure: false })
+const AlertMessage = ref<Alert>({ message: '', level: 'fail', show: false })
+const ChangingClientState = ref(false)
+const ChangingSettings = ref(false)
 
 onMounted(async () => {
-    const cfg = await GetCurrentConfig()
-    if (cfg !== null) {
-        Config.value = cfg
+    const specterConfig = await GetCurrentConfig()
+    if (specterConfig !== null) {
+        SpecterConfig.value = specterConfig
     }
+    const phantomCfg = await GetPhantomConfig()
+    if (phantomCfg !== null) {
+        PhantomConfig.value = phantomCfg
+    }
+    ClientConnected.value = await Connected()
 })
+
+async function synchronizeSettings() {
+    if (ChangingSettings.value) {
+        return
+    }
+    ChangingSettings.value = true
+    await UpdateApex(SpecterConfig.value.apex)
+    await UpdatePhantomConfig(PhantomConfig.value)
+    setTimeout(() => {
+        ChangingSettings.value = false
+    }, 500)
+}
+
+async function toggleClientState() {
+    if (ChangingClientState.value) {
+        return
+    }
+    try {
+        ChangingClientState.value = true
+        AlertMessage.value.show = false
+        if (ClientConnected.value) {
+            await StopClient()
+            ClientConnected.value = false
+        } else {
+            await StartClient()
+            ClientConnected.value = true
+        }
+    } catch (e) {
+        AlertMessage.value.message = e as string
+        AlertMessage.value.show = true
+    } finally {
+        ChangingClientState.value = false
+    }
+}
+
 </script>
 
 <template>
     <div class="box">
         <div class="box-wrapper text-gray-900 dark:text-gray-300">
+            <AlertSection class="mb-10" :message="AlertMessage.message" :level="AlertMessage.level"
+                :on-dismiss="() => AlertMessage.show = false" v-show="AlertMessage.show" />
+
             <div>
                 <div class="md:grid md:grid-cols-3 md:gap-6">
                     <div class="md:col-span-1">
@@ -32,7 +87,7 @@ onMounted(async () => {
                                 Client Status
                             </h3>
                             <p class="mt-2 text-xs text-gray-600">
-                                <StatusBadge text="Connected" :enabled="Connected">
+                                <StatusBadge text="Connected" :enabled="ClientConnected">
                                     <template #enabled>
                                         <SparklesIcon class="ml-1 w-4 h-4" />
                                     </template>
@@ -48,22 +103,33 @@ onMounted(async () => {
                             <div class="overflow-hidden shadow sm:rounded-md">
                                 <div class="bg-white dark:bg-slate-800 px-4 py-5 sm:p-6">
                                     <div class="grid grid-cols-6 gap-6">
-                                        <div :class="
-                                            Connected
-                                                ? 'col-span-6 sm:col-span-3'
-                                                : 'col-span-12 sm:col-span-6'
-                                        ">
-                                            <div class="mt-1 flex items-center">
-                                                <span class="inline-block text-sm text-gray-700 dark:text-gray-300">
-                                                    Blah blah blah
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="col-span-6 sm:col-span-3" v-show="Connected">
-                                            <button type="button"
-                                                class="relative inline-flex items-center rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 px-4 py-2 text-sm font-medium dark:text-gray-200 dark:hover:bg-gray-600 hover:bg-gray-50 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                                End Livestream
-                                            </button>
+                                        <div class="col-span-12 sm:col-span-6">
+                                            <span class="inline-block text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="mt-6 flex space-x-3 md:mt-0">
+                                                    <button type="button" :disabled="ChangingClientState"
+                                                        @click="toggleClientState" :class="[
+                                                            ChangingClientState ? 'cursor-not-allowed' : 'cursor-pointer',
+                                                            ChangingClientState ? 'bg-gray-100 dark:bg-gray-700 text-black dark:text-white' :
+                                                                (ClientConnected ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'),
+                                                            'inline-flex items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2'
+                                                        ]">
+                                                        {{ ChangingClientState ? 'Working...' : ClientConnected ?
+                                                            'Disconnect' :
+                                                            'Connect' }}
+                                                        <svg aria-hidden="true" role="status" v-show="ChangingClientState"
+                                                            class="inline w-4 h-4 ml-3 text-gray-600 animate-spin"
+                                                            viewBox="0 0 100 101" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                                                                fill="#E5E7EB" />
+                                                            <path
+                                                                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                                                                fill="currentColor" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -88,23 +154,27 @@ onMounted(async () => {
                     </div>
 
                     <div class="mt-5 md:col-span-2 md:mt-0">
-                        <form @submit.prevent>
+                        <form @submit.prevent="synchronizeSettings">
                             <div class="shadow sm:overflow-hidden sm:rounded-md">
                                 <div class="space-y-6 bg-white dark:bg-slate-800 px-4 py-5 sm:p-6">
                                     <div class="grid grid-cols-3 gap-6">
                                         <div class="col-span-3 sm:col-span-2">
                                             <label for="specter-apex"
                                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                Specter Apex
+                                                Specter Gateway
                                             </label>
                                             <div class="mt-1 flex rounded-md shadow-sm">
                                                 <span
                                                     class="inline-flex items-center rounded-l-md border border-r-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-700 px-3 text-sm dark:text-white text-black">https://</span>
                                                 <input type="text" name="specter-apex" id="specter-apex"
-                                                    v-model="Config.apex"
+                                                    v-model="SpecterConfig.apex" :disabled="ClientConnected"
                                                     class="block w-full flex-1 rounded-none rounded-r-md border-gray-200 dark:border-gray-700 bg-transparent outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm dark:text-white text-black placeholder-gray-600 dark:placeholder-gray-400"
                                                     placeholder="specter.im:443" />
                                             </div>
+                                            <p id="helper-text-explanation"
+                                                class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                                Note that changing to a differnt specter gateway may require a reset.
+                                            </p>
                                         </div>
                                     </div>
                                     <fieldset>
@@ -117,6 +187,7 @@ onMounted(async () => {
                                             <div class="flex items-start">
                                                 <div class="flex h-5 items-center">
                                                     <input id="target-tls" name="target-tls" type="checkbox"
+                                                        v-model="PhantomConfig.specterInsecure" :disabled="ClientConnected"
                                                         class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
                                                 </div>
                                                 <div class="ml-3 text-sm">
@@ -133,6 +204,7 @@ onMounted(async () => {
                                             <div class="flex items-start">
                                                 <div class="flex h-5 items-center">
                                                     <input id="target-tls" name="target-tls" type="checkbox"
+                                                        v-model="PhantomConfig.targetInsecure" :disabled="ClientConnected"
                                                         class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
                                                 </div>
                                                 <div class="ml-3 text-sm">
@@ -147,6 +219,24 @@ onMounted(async () => {
                                             </div>
                                         </div>
                                     </fieldset>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-slate-700/[0.3] px-4 py-3 text-right sm:px-6">
+                                    <button type="submit" :disabled="ClientConnected || ChangingSettings" :class="[
+                                        ClientConnected || ChangingSettings ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600',
+                                        'inline-flex items-center rounded-md border bg-white dark:border-gray-600 dark:bg-gray-700 py-2 px-4 text-sm font-medium text-black dark:text-gray-200 shadow-sm focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500'
+                                    ]">
+                                        <svg aria-hidden="true" role="status" v-show="ChangingSettings"
+                                            class="inline w-4 h-4 mr-3 text-gray-600 animate-spin" viewBox="0 0 100 101"
+                                            fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                                                fill="#E5E7EB" />
+                                            <path
+                                                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                                                fill="currentColor" />
+                                        </svg>
+                                        Save
+                                    </button>
                                 </div>
                             </div>
                         </form>

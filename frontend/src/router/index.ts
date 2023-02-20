@@ -13,7 +13,7 @@ export const routes: RouteRecordRaw[] = [
     {
         path: "/tunnel",
         name: "tunnel",
-        component: HomeView,
+        component: () => import("@/views/TunnelsView.vue"),
         meta: {
             displayName: "Create Tunnels"
         }

@@ -3,6 +3,8 @@ package main
 import (
 	"embed"
 
+	"kon.nect.sh/phantom/specter"
+
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -13,7 +15,7 @@ var assets embed.FS
 
 func main() {
 	// Create an instance of the app structure
-	app := NewApp()
+	app := &specter.Application{}
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -21,7 +23,7 @@ func main() {
 		Width:         1024,
 		Height:        768,
 		DisableResize: true,
-		OnStartup:     app.startup,
+		OnStartup:     app.Initialize,
 		Bind: []interface{}{
 			app,
 		},

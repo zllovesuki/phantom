@@ -84,7 +84,7 @@ async function toggleClientState() {
                 :on-dismiss="() => AlertMessage.show = false" v-show="AlertMessage.show" />
 
             <div>
-                <div class="md:grid md:grid-cols-3 md:gap-6">
+                <div class="md:grid md:grid-cols-4 md:gap-6">
                     <div class="md:col-span-1">
                         <div class="px-4 sm:px-0">
                             <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300">
@@ -102,7 +102,7 @@ async function toggleClientState() {
                             </p>
                         </div>
                     </div>
-                    <div class="mt-5 md:col-span-2 md:mt-0">
+                    <div class="mt-5 md:col-span-3 md:mt-0">
                         <form>
                             <div class="overflow-hidden shadow sm:rounded-md">
                                 <div class="bg-white dark:bg-slate-800 px-4 py-5 sm:p-6">
@@ -146,7 +146,7 @@ async function toggleClientState() {
             <HorizontalDivider />
 
             <div class="mt-10 sm:mt-0">
-                <div class="md:grid md:grid-cols-3 md:gap-6">
+                <div class="md:grid md:grid-cols-4 md:gap-6">
                     <div class="md:col-span-1">
                         <div class="px-4 sm:px-0">
                             <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300">
@@ -157,7 +157,7 @@ async function toggleClientState() {
                         </div>
                     </div>
 
-                    <div class="mt-5 md:col-span-2 md:mt-0">
+                    <div class="mt-5 md:col-span-3 md:mt-0">
                         <form @submit.prevent="synchronizeSettings">
                             <div class="shadow sm:overflow-hidden sm:rounded-md">
                                 <div class="space-y-6 bg-white dark:bg-slate-800 px-4 py-5 sm:p-6">

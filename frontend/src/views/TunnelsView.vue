@@ -57,7 +57,7 @@ onMounted(reloadTunnels)
     <div class="box">
         <div class="box-wrapper text-gray-900 dark:text-gray-300">
             <div class="mt-10 sm:mt-0">
-                <div class="md:grid md:grid-cols-3 md:gap-6">
+                <div class="md:grid md:grid-cols-4 md:gap-6">
                     <div class="md:col-span-full">
                         <div class="px-4 sm:px-0">
                             <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300">

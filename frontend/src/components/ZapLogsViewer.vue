@@ -97,7 +97,7 @@ function textColorClasss(level: string): string[] {
                     Message
                 </th>
                 <th scope="col"
-                    class="whitespace-nowrap px-2 pb-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-200">
+                    class="whitespace-nowrap pl-3 pr-6 sm:pr-0 pb-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-200">
                     Error
                 </th>
             </tr>
@@ -105,7 +105,7 @@ function textColorClasss(level: string): string[] {
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             <template v-for="(log, index) in logs" :key="index">
                 <tr @click="modals[log.Index] = !modals[log.Index]">
-                    <td class="whitespace-nowrap px-2 py-2 pr-3 text-xs text-gray-900 dark:text-gray-300 sm:pl-0">
+                    <td class="whitespace-nowrap px-2 pl-6 pr-3 sm:pl-0 text-xs text-gray-900 dark:text-gray-300">
                         {{ log.Timestamp.toLocaleString() }}
                     </td>
                     <td :class="[...textColorClasss(log.Level), 'whitespace-nowrap px-2 py-2 text-xs']">
@@ -114,7 +114,7 @@ function textColorClasss(level: string): string[] {
                     <td class="px-2 py-2 text-xs text-gray-900 dark:text-gray-300">
                         {{ log.Message }}
                     </td>
-                    <td class="px-2 py-2 text-xs text-gray-900 dark:text-gray-300">
+                    <td class="pl-3 pr-6 py-2 sm:pr-0 text-xs text-gray-900 dark:text-gray-300">
                         {{ log.Error ?? '' }}
                     </td>
                 </tr>

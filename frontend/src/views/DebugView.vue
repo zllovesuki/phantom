@@ -87,7 +87,7 @@ onMounted(async () => {
                                                     <thead>
                                                         <tr>
                                                             <th scope="col"
-                                                                class="whitespace-nowrap pb-3.5 pl-6 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-200 sm:pl-0">
+                                                                class="whitespace-nowrap pb-3.5 pl-6 sm:pl-0 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-200">
                                                                 Address
                                                             </th>
                                                             <th scope="col"
@@ -95,7 +95,7 @@ onMounted(async () => {
                                                                 rtt.Min/Average/Max
                                                             </th>
                                                             <th scope="col"
-                                                                class="whitespace-nowrap px-2 pb-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-200">
+                                                                class="whitespace-nowrap pl-3 pr-6 sm:pr-0 pb-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-200">
                                                                 rtt.Sent/Lost
                                                             </th>
                                                         </tr>
@@ -103,7 +103,7 @@ onMounted(async () => {
                                                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                                         <tr v-for="node in ConnectedNodes" :key="node.id">
                                                             <td
-                                                                class="whitespace-nowrap px-2 py-2 pr-3 text-sm text-gray-900 dark:text-gray-300 sm:pl-0">
+                                                                class="whitespace-nowrap py-2 pl-6 sm:pl-0 pr-3 text-sm text-gray-900 dark:text-gray-300">
                                                                 {{ node.address }}
                                                             </td>
                                                             <td
@@ -112,7 +112,7 @@ onMounted(async () => {
                                                                     ns2Ms(node.rtt?.max) }}
                                                             </td>
                                                             <td
-                                                                class="whitespace-nowrap px-2 py-2 text-sm text-gray-900 dark:text-gray-300">
+                                                                class="whitespace-nowrap pl-3 pr-6 sm:pr-0 py-2 text-sm text-gray-900 dark:text-gray-300">
                                                                 {{ node.rtt?.sent }}/{{ node.rtt?.lost }}
                                                             </td>
                                                         </tr>

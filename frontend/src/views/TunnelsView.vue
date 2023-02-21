@@ -5,7 +5,7 @@ import {
     ServerIcon,
 } from "@heroicons/vue/24/outline";
 
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import { GetCurrentConfig, RebuildTunnels, Synchronize } from "@wails/go/specter/Application"
 import type { client } from "@wails/go/models";
 
@@ -15,16 +15,16 @@ interface NewTunnel extends client.Tunnel {
     modalOpen: boolean
 }
 
-const NewTunnel = ref<NewTunnel>({
+const NewTunnel = reactive<NewTunnel>({
     target: "",
     modalOpen: false
 })
 
 async function appendNewTunnel() {
     Tunnels.value.push({
-        target: NewTunnel.value.target
+        target: NewTunnel.target
     })
-    NewTunnel.value.target = ""
+    NewTunnel.target = ""
     await rebuildTunnels()
     await synchornizeTunnels()
 }

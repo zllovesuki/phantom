@@ -5,7 +5,8 @@ import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
 import { TrashIcon } from "@heroicons/vue/24/outline";
 
 import { ParseTarget } from "@wails/go/specter/Helper"
-import { ref, computed, onMounted } from "vue";
+import { Environment } from "@wails/runtime/runtime"
+import { ref, computed, onMounted, reactive } from "vue";
 
 const props = defineProps<{
     target: string,
@@ -33,9 +34,26 @@ function emitTargetUpdate(scheme: string, target: string) {
     emit('update:target', scheme + "://" + target)
 }
 
+const placeholders = reactive<Record<string, string>>({
+    "tcp": "127.0.0.1:22",
+    "http": "127.0.0.1:8080",
+    "https": "127.0.0.1:8443",
+    "unix": "/run/nginx.sock",
+    "winio": "\\\\.\\pipe\\ipc"
+})
+const schemes = ref<string[]>([])
 const scheme = ref("tcp")
 const target = ref("")
+
 onMounted(async () => {
+    const env = await Environment()
+    if (env.platform === "windows") {
+        delete placeholders["unix"]
+    } else {
+        delete placeholders["winio"]
+    }
+    schemes.value = Object.keys(placeholders)
+
     const parsed = await ParseTarget(props.target)
     if (parsed.error) {
         return
@@ -52,16 +70,6 @@ const open = computed({
         emit("update:show", value)
     }
 })
-
-const placeholders: Record<string, string> = {
-    "tcp": "127.0.0.1:22",
-    "http": "127.0.0.1:8080",
-    "https": "127.0.0.1:8443",
-    "unix": "/run/nginx.sock",
-    "winio": "\\\\.\\pipe\\ipc"
-}
-
-const schemes = Object.keys(placeholders)
 
 function onSubmit() {
     emitTargetUpdate(scheme.value, target.value)

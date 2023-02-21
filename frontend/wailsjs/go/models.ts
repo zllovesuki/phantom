@@ -142,6 +142,22 @@ export namespace specter {
 		    return a;
 		}
 	}
+	export class Paths {
+	    phantom: string;
+	    specter: string;
+	    log: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Paths(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.phantom = source["phantom"];
+	        this.specter = source["specter"];
+	        this.log = source["log"];
+	    }
+	}
 	export class PhantomConfig {
 	    specterInsecure: boolean;
 	    targetInsecure: boolean;

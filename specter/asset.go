@@ -12,7 +12,6 @@ func NewAssetHandler() http.Handler {
 
 	r.Use(middleware.NoCache)
 	r.Get("/specter.log", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("X-Filename", specterLogFile)
 		http.ServeFile(w, r, specterLogFile)
 	})
 

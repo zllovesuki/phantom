@@ -8,7 +8,7 @@ import {
     BoltSlashIcon,
 } from "@heroicons/vue/24/outline";
 
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { Connected, GetCurrentConfig, GetPhantomConfig, StartClient, StopClient, UpdateApex, UpdatePhantomConfig } from "@wails/go/specter/Application"
 import { client, specter } from "@wails/go/models";
 
@@ -24,6 +24,10 @@ const PhantomConfig = ref<specter.PhantomConfig>({ specterInsecure: false, targe
 const AlertMessage = ref<Alert>({ message: '', level: 'fail', show: false })
 const ChangingClientState = ref(false)
 const ChangingSettings = ref(false)
+
+const disableSettingsModification = computed(() => {
+    return ClientConnected.value || ChangingClientState.value || ChangingSettings.value
+})
 
 onMounted(async () => {
     const specterConfig = await GetCurrentConfig()
@@ -105,13 +109,13 @@ async function toggleClientState() {
                                     <div class="grid grid-cols-6 gap-6">
                                         <div class="col-span-12 sm:col-span-6">
                                             <span class="inline-block text-sm text-gray-700 dark:text-gray-300">
-                                                <div class="mt-6 flex space-x-3 md:mt-0">
+                                                <div class="flex space-x-3">
                                                     <button type="button" :disabled="ChangingClientState"
                                                         @click="toggleClientState" :class="[
                                                             ChangingClientState ? 'cursor-not-allowed' : 'cursor-pointer',
                                                             ChangingClientState ? 'bg-gray-100 dark:bg-gray-700 text-black dark:text-white' :
                                                                 (ClientConnected ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'),
-                                                            'inline-flex items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2'
+                                                            'inline-flex items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500'
                                                         ]">
                                                         {{ ChangingClientState ? 'Working...' : ClientConnected ?
                                                             'Disconnect' :
@@ -167,13 +171,13 @@ async function toggleClientState() {
                                                 <span
                                                     class="inline-flex items-center rounded-l-md border border-r-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-700 px-3 text-sm dark:text-white text-black">https://</span>
                                                 <input type="text" name="specter-apex" id="specter-apex"
-                                                    v-model="SpecterConfig.apex" :disabled="ClientConnected"
-                                                    class="block w-full flex-1 rounded-none rounded-r-md border-gray-200 dark:border-gray-700 bg-transparent outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm dark:text-white text-black placeholder-gray-600 dark:placeholder-gray-400"
+                                                    v-model="SpecterConfig.apex" :disabled="disableSettingsModification"
+                                                    class="block w-full flex-1 rounded-none rounded-r-md border-gray-200 dark:border-gray-700 bg-transparent outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm dark:text-white text-black disabled:text-gray-400 dark:disabled:text-gray-400 placeholder-gray-600 dark:placeholder-gray-400"
                                                     placeholder="specter.im:443" />
                                             </div>
                                             <p id="helper-text-explanation"
                                                 class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                Note that changing to a differnt specter gateway may require a reset.
+                                                Changing to a differnt specter gateway may require a reset.
                                             </p>
                                         </div>
                                     </div>
@@ -187,8 +191,9 @@ async function toggleClientState() {
                                             <div class="flex items-start">
                                                 <div class="flex h-5 items-center">
                                                     <input id="target-tls" name="target-tls" type="checkbox"
-                                                        v-model="PhantomConfig.specterInsecure" :disabled="ClientConnected"
-                                                        class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                                                        v-model="PhantomConfig.specterInsecure"
+                                                        :disabled="disableSettingsModification"
+                                                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 disabled:bg-gray-300 dark:disabled:bg-gray-600" />
                                                 </div>
                                                 <div class="ml-3 text-sm">
                                                     <label for="target-tls"
@@ -204,8 +209,9 @@ async function toggleClientState() {
                                             <div class="flex items-start">
                                                 <div class="flex h-5 items-center">
                                                     <input id="target-tls" name="target-tls" type="checkbox"
-                                                        v-model="PhantomConfig.targetInsecure" :disabled="ClientConnected"
-                                                        class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                                                        v-model="PhantomConfig.targetInsecure"
+                                                        :disabled="disableSettingsModification"
+                                                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 disabled:bg-gray-300 dark:disabled:bg-gray-600" />
                                                 </div>
                                                 <div class="ml-3 text-sm">
                                                     <label for="target-tls"
@@ -221,9 +227,9 @@ async function toggleClientState() {
                                     </fieldset>
                                 </div>
                                 <div class="bg-gray-50 dark:bg-slate-700/[0.3] px-4 py-3 text-right sm:px-6">
-                                    <button type="submit" :disabled="ClientConnected || ChangingSettings" :class="[
-                                        ClientConnected || ChangingSettings ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600',
-                                        'inline-flex items-center rounded-md border bg-white dark:border-gray-600 dark:bg-gray-700 py-2 px-4 text-sm font-medium text-black dark:text-gray-200 shadow-sm focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500'
+                                    <button type="submit" :disabled="disableSettingsModification" :class="[
+                                        disableSettingsModification ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600',
+                                        'inline-flex items-center rounded-md border bg-white dark:border-gray-600 dark:bg-gray-700 py-2 px-4 text-sm font-medium text-black dark:text-gray-200 shadow-sm focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:text-gray-400 dark:disabled:text-gray-400'
                                     ]">
                                         <svg aria-hidden="true" role="status" v-show="ChangingSettings"
                                             class="inline w-4 h-4 mr-3 text-gray-600 animate-spin" viewBox="0 0 100 101"

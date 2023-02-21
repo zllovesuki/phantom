@@ -41,3 +41,17 @@ func (*Helper) ParseTarget(target string) Target {
 		}
 	}
 }
+
+type Paths struct {
+	Phantom string `json:"phantom"`
+	Specter string `json:"specter"`
+	Log     string `json:"log"`
+}
+
+func (*Helper) GetFilePaths() Paths {
+	return Paths{
+		Phantom: phantomConfigFile,
+		Specter: specterConfigFile,
+		Log:     specterLogFile,
+	}
+}

@@ -10,13 +10,15 @@ import {
 import { ref, onMounted, nextTick } from "vue";
 import { GetCurrentConfig, GetPhantomConfig, GetConnectedNodes, Connected } from "@wails/go/specter/Application"
 import { client, specter } from "@wails/go/models";
+import { GetFilePaths } from "@wails/go/specter/Helper";
 
 const SpecterConfig = ref<client.Config>(client.Config.createFrom({ apex: "" }))
 const PhantomConfig = ref<specter.PhantomConfig>({ specterInsecure: false, targetInsecure: false })
 const ConnectedNodes = ref<specter.Node[]>([])
 const ClientConnected = ref(false)
 
-const LogFile = ref("")
+const FilePaths = ref<specter.Paths>(specter.Paths.createFrom({}))
+
 const LogEntries = ref("")
 const logBox = ref<HTMLTextAreaElement | undefined>()
 
@@ -29,7 +31,6 @@ async function loadLogs() {
         const logResp = await fetch("specter.log")
         if (logResp.status === 200) {
             LogEntries.value = await logResp.text()
-            LogFile.value = logResp.headers.get("x-filename") ?? ''
         }
         nextTick(() => {
             if (logBox.value) {
@@ -52,6 +53,7 @@ onMounted(async () => {
     }
     ConnectedNodes.value = await GetConnectedNodes()
     ClientConnected.value = await Connected()
+    FilePaths.value = await GetFilePaths()
     await loadLogs()
 })
 </script>
@@ -129,8 +131,8 @@ onMounted(async () => {
                             <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300">
                                 Specter Configuration
                             </h3>
-                            <p class="mt-2 text-xs text-gray-600">
-                                <StatusBadge text="Connected" :enabled="ClientConnected">
+                            <p class="mt-2 text-xs text-gray-600 dark:text-gray-500">
+                                <StatusBadge text="Connected" class="mb-2" :enabled="ClientConnected">
                                     <template #enabled>
                                         <SparklesIcon class="ml-1 w-4 h-4" />
                                     </template>
@@ -138,6 +140,9 @@ onMounted(async () => {
                                         <BoltSlashIcon class="ml-1 w-4 h-4" />
                                     </template>
                                 </StatusBadge>
+                                <span class="block break-words">
+                                    {{ FilePaths.specter }}
+                                </span>
                             </p>
                         </div>
                     </div>
@@ -204,6 +209,11 @@ onMounted(async () => {
                             <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300">
                                 Phantom Configuration
                             </h3>
+                            <p class="mt-2 text-xs text-gray-600 dark:text-gray-500">
+                                <span class="break-words">
+                                    {{ FilePaths.phantom }}
+                                </span>
+                            </p>
                         </div>
                     </div>
                     <div class="mt-5 md:col-span-2 md:mt-0">
@@ -221,7 +231,7 @@ onMounted(async () => {
                                                     {{ PhantomConfig.specterInsecure }}
                                                 </dd>
                                             </div>
-                                            <div class="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5">
+                                            <div class="pt-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:pt-5">
                                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-200">
                                                     dialer.InsecureVerify
                                                 </dt>
@@ -249,7 +259,9 @@ onMounted(async () => {
                                 Logs
                             </h3>
                             <p class="mt-2 text-xs text-gray-600 dark:text-gray-500">
-                                {{ LogFile }}
+                                <span class="break-words">
+                                    {{ FilePaths.log }}
+                                </span>
                             </p>
                         </div>
                     </div>

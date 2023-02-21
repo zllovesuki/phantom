@@ -33,7 +33,7 @@ onMounted(async () => {
 <template>
     <button type="submit" @click="synchornizeTunnels" :disabled="Synchronizing || !ClientConnected" :class="[
         Synchronizing || !ClientConnected ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600',
-        'inline-flex items-center rounded-md border bg-white dark:border-gray-600 dark:bg-gray-700 py-2 px-4 text-sm font-medium text-black dark:text-gray-200 shadow-sm focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500'
+        'inline-flex items-center rounded-md border bg-white dark:border-gray-600 dark:bg-gray-700 py-2 px-4 text-sm font-medium text-black dark:text-gray-200 shadow-sm focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:text-gray-400 dark:disabled:text-gray-400'
     ]">
         <svg aria-hidden="true" role="status" v-show="Synchronizing" class="inline w-4 h-4 mr-3 text-gray-600 animate-spin"
             viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">

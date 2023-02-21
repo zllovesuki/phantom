@@ -21,8 +21,8 @@ func main() {
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:      "Phantom",
-		Width:      1024,
-		Height:     768,
+		Width:      1280,
+		Height:     800,
 		OnStartup:  app.OnStartup,
 		OnShutdown: app.OnShutdown,
 		Bind: []interface{}{

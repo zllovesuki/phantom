@@ -6,7 +6,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/wailsapp/wails/v2 v2.3.1
 	go.uber.org/zap v1.24.0
-	kon.nect.sh/specter v0.0.0-20230220010739-918b0cbbdec9
+	kon.nect.sh/specter v0.0.0-20230221040136-2390743b893c
 )
 
 require (
@@ -60,5 +60,3 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace kon.nect.sh/specter => ../specter

@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
 import ClientConfiguration from "@/views/ClientConfiguration.vue"
 import TunnelsView from "@/views/TunnelsView.vue"
+import DebugView from "@/views/DebugView.vue"
 
 export const routes: RouteRecordRaw[] = [
     {
@@ -34,7 +35,7 @@ export const routes: RouteRecordRaw[] = [
     {
         path: "/debug",
         name: "debug",
-        component: () => import("@/views/DebugView.vue"),
+        component: DebugView,
         meta: {
             displayName: "Debug"
         }

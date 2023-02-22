@@ -5,6 +5,13 @@ import vue from "@vitejs/plugin-vue";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  esbuild: {
+    format: 'esm',
+    target: 'es2020',
+  },
+  build: {
+    target: 'es2020'
+  },
   plugins: [vue()],
   resolve: {
     alias: {

@@ -169,7 +169,7 @@ async function toggleClientState() {
                                             </label>
                                             <div class="mt-1 flex rounded-md shadow-sm">
                                                 <span
-                                                    class="inline-flex items-center rounded-l-md border border-r-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-700 px-3 text-sm dark:text-white text-black">https://</span>
+                                                    class="inline-flex items-center rounded-l-md border border-r-0 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-slate-700 px-3 text-sm dark:text-white text-black">https://</span>
                                                 <input type="text" name="specter-apex" id="specter-apex"
                                                     v-model="SpecterConfig.apex" :disabled="disableSettingsModification"
                                                     class="block w-full flex-1 rounded-none rounded-r-md border-gray-200 dark:border-gray-700 bg-transparent outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm dark:text-white text-black disabled:text-gray-400 dark:disabled:text-gray-400 placeholder-gray-600 dark:placeholder-gray-400"

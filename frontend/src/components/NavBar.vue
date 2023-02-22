@@ -1,30 +1,36 @@
 <script setup lang="ts">
-import { routes } from "@/router"
-import { useSettingStore } from "@/store/setting";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
 import { SunIcon, MoonIcon } from "@heroicons/vue/20/solid";
 import { Bars3Icon, XMarkIcon } from "@heroicons/vue/24/outline";
-import { ref } from "vue";
-import { useRoute, useRouter, RouterLink } from "vue-router";
 
-const setting = useSettingStore();
+import { computed } from "vue";
+import { useRoute, useRouter, RouterLink } from "vue-router";
+import { routes } from "@/router"
+import { useRuntimeStore } from "@/store/runtime";
+import { useSettingStore } from "@/store/setting";
 
 const route = useRoute();
 const router = useRouter();
 
-const mapped = routes.filter(r => !!r.meta).map(route => {
+const runtime = useRuntimeStore();
+const setting = useSettingStore();
+const PaddingTop = computed<boolean>(() => {
+    // padding is needed on macOS otherwise the traffic light will
+    // overlap with the logo
+    return runtime.environment?.platform === "darwin"
+})
+
+const navigation = routes.filter(r => !!r.meta).map(route => {
     return {
         name: route.meta?.displayName,
         to: route.name
     }
 })
-
-const navigation = ref(mapped);
 </script>
 
 <template>
     <Disclosure as="nav" class="bg-white dark:bg-slate-800 shadow-sm" v-slot="{ open }">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div :class="[PaddingTop ? 'pt-4' : '', 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8']">
             <div class="flex h-16 items-center justify-between">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">

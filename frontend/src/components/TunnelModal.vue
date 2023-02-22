@@ -5,8 +5,11 @@ import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
 import { TrashIcon } from "@heroicons/vue/24/outline";
 
 import { ParseTarget } from "@wails/go/specter/Helper"
-import { Environment } from "@wails/runtime/runtime"
 import { ref, computed, onMounted, reactive } from "vue";
+
+import { useRuntimeStore } from "@/store/runtime";
+
+const runtime = useRuntimeStore();
 
 const props = defineProps<{
     target: string,
@@ -34,26 +37,24 @@ function emitTargetUpdate(scheme: string, target: string) {
     emit('update:target', scheme + "://" + target)
 }
 
-const placeholders = reactive<Record<string, string>>({
+const placeholders: Record<string, string> = {
     "tcp": "127.0.0.1:22",
     "http": "127.0.0.1:8080",
     "https": "127.0.0.1:8443",
     "unix": "/run/nginx.sock",
     "winio": "\\\\.\\pipe\\ipc"
-})
-const schemes = ref<string[]>([])
+}
+if (runtime.environment?.platform === "windows") {
+    delete placeholders["unix"]
+} else {
+    delete placeholders["winio"]
+}
+const schemes = Object.keys(placeholders)
+
 const scheme = ref("tcp")
 const target = ref("")
 
 onMounted(async () => {
-    const env = await Environment()
-    if (env.platform === "windows") {
-        delete placeholders["unix"]
-    } else {
-        delete placeholders["winio"]
-    }
-    schemes.value = Object.keys(placeholders)
-
     const parsed = await ParseTarget(props.target)
     if (parsed.error) {
         return
@@ -113,7 +114,7 @@ function onSubmit() {
                                             <Listbox as="div" v-model="scheme">
                                                 <div class="relative">
                                                     <ListboxButton
-                                                        class="relative w-20 cursor-default rounded-md rounded-r-none border border-gray-300 dark:border-gray-500 dark:text-white text-black bg-gray-50 dark:bg-slate-700 py-3 pl-3 pr-8 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                                                        class="relative w-20 cursor-default rounded-md rounded-r-none border border-gray-300 dark:border-gray-500 dark:text-white text-black bg-gray-100 dark:bg-slate-700 py-3 pl-3 pr-8 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
                                                         <span class="block">{{ scheme }}</span>
                                                         <span
                                                             class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1">

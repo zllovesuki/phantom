@@ -1,22 +1,29 @@
 package specter
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"kon.nect.sh/phantom/internal/configdir"
 )
 
 var (
-	configPath        = configdir.LocalConfig("phantom")
-	specterConfigFile = filepath.Join(configPath, "specter.yaml")
-	phantomConfigFile = filepath.Join(configPath, "phantom.json")
-	logPath           = filepath.Join(configPath, "logs")
-	specterLogFile    = filepath.Join(logPath, normalizeFilename(fmt.Sprintf("specter-%s.log", time.Now().Format(time.DateTime))))
+	configPath        string
+	specterConfigFile string
+	phantomConfigFile string
+	logPath           string
+	specterLogFile    string
 )
+
+type PhantomConfig struct {
+	SpecterInsecureSkipVerify bool `json:"specterInsecure"`
+	TargetInsecureSkipVerify  bool `json:"targetInsecure"`
+}
 
 func normalizeFilename(name string) string {
 	name = strings.ReplaceAll(name, " ", "_")
@@ -24,9 +31,19 @@ func normalizeFilename(name string) string {
 	return name
 }
 
-type PhantomConfig struct {
-	SpecterInsecureSkipVerify bool `json:"specterInsecure"`
-	TargetInsecureSkipVerify  bool `json:"targetInsecure"`
+func setupPath(ctx context.Context) {
+	env := runtime.Environment(ctx)
+
+	if env.BuildType == "dev" {
+		configPath = configdir.LocalConfig("phantom-dev")
+	} else {
+		configPath = configdir.LocalConfig("phantom")
+	}
+
+	logPath = filepath.Join(configPath, "logs")
+	specterConfigFile = filepath.Join(configPath, "specter.yaml")
+	phantomConfigFile = filepath.Join(configPath, "phantom.json")
+	specterLogFile = filepath.Join(logPath, normalizeFilename(fmt.Sprintf("specter-%s.log", time.Now().Format(time.DateTime))))
 }
 
 func ensureSpecterConfig() error {

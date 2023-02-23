@@ -38,6 +38,8 @@ type Application struct {
 func (app *Application) OnStartup(ctx context.Context) {
 	app.appCtx = ctx
 
+	setupPath(ctx)
+
 	if err := ensureLogDir(); err != nil {
 		runtime.LogFatal(ctx, err.Error())
 		return

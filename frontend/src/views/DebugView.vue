@@ -12,6 +12,9 @@ import { ref, onMounted } from "vue";
 import { GetCurrentConfig, GetPhantomConfig, GetConnectedNodes } from "@wails/go/specter/Application"
 import { client, specter } from "@wails/go/models";
 import { GetFilePaths } from "@wails/go/specter/Helper";
+import { useRuntimeStore } from "@/store/runtime";
+
+const runtime = useRuntimeStore();
 
 const SpecterConfig = ref<client.Config>(client.Config.createFrom({ apex: "" }))
 const PhantomConfig = ref<specter.PhantomConfig>({ specterInsecure: false, targetInsecure: false })
@@ -222,6 +225,15 @@ onMounted(async () => {
                                     <div class="col-span-12 sm:col-span-6">
                                         <dl class="sm:divide-y sm:divide-gray-200 dark:sm:divide-gray-600">
                                             <div class="pb-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:pb-5">
+                                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-200">
+                                                    build.Type
+                                                </dt>
+                                                <dd
+                                                    class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0">
+                                                    {{ runtime.environment?.buildType }}
+                                                </dd>
+                                            </div>
+                                            <div class="py-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-5">
                                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-200">
                                                     client.InsecureVerify
                                                 </dt>

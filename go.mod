@@ -6,7 +6,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/wailsapp/wails/v2 v2.3.1
 	go.uber.org/zap v1.24.0
-	kon.nect.sh/specter v0.0.0-20230221040136-2390743b893c
+	kon.nect.sh/specter v0.0.0-20230224065053-ca6f069dfb14
 )
 
 require (
@@ -34,10 +34,9 @@ require (
 	github.com/onsi/ginkgo/v2 v2.8.0 // indirect
 	github.com/pkg/browser v0.0.0-20210706143420-7d21f8c997e2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/quic-go/qtls-go1-18 v0.2.0 // indirect
 	github.com/quic-go/qtls-go1-19 v0.2.1 // indirect
 	github.com/quic-go/qtls-go1-20 v0.1.1 // indirect
-	github.com/quic-go/quic-go v0.32.0 // indirect
+	github.com/quic-go/quic-go v0.33.0 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/samber/lo v1.27.1 // indirect
 	github.com/tkrajina/go-reflector v0.5.5 // indirect

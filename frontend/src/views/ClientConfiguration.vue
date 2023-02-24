@@ -177,7 +177,7 @@ async function toggleClientState() {
                                             </div>
                                             <p id="helper-text-explanation"
                                                 class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                Changing to a differnt specter gateway may require a reset.
+                                                Changing to a different specter gateway may require a reset.
                                             </p>
                                         </div>
                                     </div>

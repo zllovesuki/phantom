@@ -66,7 +66,7 @@ watch(logs, (n, o) => {
     }
 })
 
-function textColorClasss(level: string): string[] {
+function textColorClass(level: string): string[] {
     switch (level) {
         case "error":
             return ["text-red-500", "dark:text-red-400"];
@@ -108,7 +108,7 @@ function textColorClasss(level: string): string[] {
                     <td class="whitespace-nowrap px-2 pl-6 pr-3 sm:pl-0 text-xs text-gray-900 dark:text-gray-300">
                         {{ log.Timestamp.toLocaleString() }}
                     </td>
-                    <td :class="[...textColorClasss(log.Level), 'whitespace-nowrap px-2 py-2 text-xs']">
+                    <td :class="[...textColorClass(log.Level), 'whitespace-nowrap px-2 py-2 text-xs']">
                         {{ log.Level }}
                     </td>
                     <td class="px-2 py-2 text-xs text-gray-900 dark:text-gray-300">

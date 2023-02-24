@@ -9,5 +9,12 @@
   "author": {
     "name": "Rachel Chen",
     "email": "rachel@chens.email"
+  },
+  "info": {
+    "companyName": "miragespace",
+    "productName": "phantom",
+    "productVersion": "0.0.1",
+    "copyright": "Copyright (c) miragespace.com, licensed under MIT.",
+    "comments": "Ths official GUI client for specter"
   }
 }

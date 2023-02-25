@@ -5,3 +5,11 @@ declare module 'vue-router' {
         displayName: string
     }
 }
+
+declare global {
+    interface Window {
+        loading_screen: {
+            finish: () => void
+        }
+    }
+}

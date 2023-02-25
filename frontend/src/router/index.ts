@@ -1,4 +1,6 @@
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
+import { WindowSetTitle } from "@wails/runtime/runtime"
+
 import ClientConfiguration from "@/views/ClientConfiguration.vue"
 import TunnelsView from "@/views/TunnelsView.vue"
 import DebugView from "@/views/DebugView.vue"
@@ -46,5 +48,11 @@ const router = createRouter({
     history: createWebHashHistory(),
     routes,
 });
+
+router.afterEach((to, from, failure) => {
+    if (failure) return
+    const title = 'Phantom - ' + to.meta.displayName
+    WindowSetTitle(title)
+})
 
 export default router;

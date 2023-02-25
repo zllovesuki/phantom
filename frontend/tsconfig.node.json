@@ -3,14 +3,17 @@
   "compilerOptions": {
     "composite": true,
     "module": "ES2020",
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
-      "@wails/*": [
+      "~/vendor/*": [
+        "./vendor/*"
+      ],
+      "~/wails/*": [
         "./wailsjs/*"
       ],
-      "@/*": [
+      "~/*": [
         "./src/*"
       ]
     },

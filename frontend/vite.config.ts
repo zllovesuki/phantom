@@ -9,14 +9,12 @@ export default defineConfig({
     format: 'esm',
     target: 'es2020',
   },
-  build: {
-    target: 'es2020'
-  },
   plugins: [vue()],
   resolve: {
     alias: {
-      "@wails": fileURLToPath(new URL("./wailsjs", import.meta.url)),
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "~/vendor": fileURLToPath(new URL("./vendor", import.meta.url)),
+      "~/wails": fileURLToPath(new URL("./wailsjs", import.meta.url)),
+      "~": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
 });

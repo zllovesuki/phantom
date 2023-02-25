@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ArrowsPointingOutIcon } from "@heroicons/vue/24/outline";
 
 import { ref, computed, watch } from 'vue';
 

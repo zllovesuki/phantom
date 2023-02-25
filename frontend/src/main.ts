@@ -1,6 +1,6 @@
 import { createApp, watchEffect, h } from 'vue'
 import { createPinia } from 'pinia'
-import { useSettingStore } from "./store/setting";
+import { useSettingStore } from "~/store/setting";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 
 import App from './App.vue'

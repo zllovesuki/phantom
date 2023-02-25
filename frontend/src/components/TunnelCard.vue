@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import InstructionModal from "@/components/InstructionModal.vue"
-import TunnelModal from "@/components/TunnelModal.vue"
 import { EllipsisVerticalIcon } from "@heroicons/vue/20/solid";
 
-import type { client } from "@wails/go/models";
+import InstructionModal from "~/components/InstructionModal.vue"
+import TunnelModal from "~/components/TunnelModal.vue"
+
+import type { client } from "~/wails/go/models";
 import { ref } from "vue";
 
 defineProps<{

@@ -1,9 +1,9 @@
-import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
-import { WindowSetTitle } from "@wails/runtime/runtime"
+import { createRouter, createWebHashHistory, type RouteComponent, type RouteRecordRaw } from "vue-router";
+import { WindowSetTitle } from "~/wails/runtime/runtime"
 
-import ClientConfiguration from "@/views/ClientConfiguration.vue"
-import TunnelsView from "@/views/TunnelsView.vue"
-import DebugView from "@/views/DebugView.vue"
+function lazy(view: string): () => Promise<RouteComponent> {
+    return () => import(`~/views/${view}.vue`)
+}
 
 export const routes: RouteRecordRaw[] = [
     {
@@ -13,7 +13,7 @@ export const routes: RouteRecordRaw[] = [
     {
         path: "/config",
         name: "config",
-        component: ClientConfiguration,
+        component: lazy('ClientConfiguration'),
         meta: {
             displayName: "Configure Client"
         }
@@ -21,7 +21,7 @@ export const routes: RouteRecordRaw[] = [
     {
         path: "/tunnel",
         name: "tunnel",
-        component: TunnelsView,
+        component: lazy('TunnelsView'),
         meta: {
             displayName: "Configure Tunnels"
         }
@@ -29,7 +29,7 @@ export const routes: RouteRecordRaw[] = [
     {
         path: "/forward",
         name: "forward",
-        component: () => import("@/views/HomeView.vue"),
+        component: lazy('HomeView'),
         meta: {
             displayName: "Local Forwarding"
         }
@@ -37,7 +37,7 @@ export const routes: RouteRecordRaw[] = [
     {
         path: "/debug",
         name: "debug",
-        component: DebugView,
+        component: lazy('DebugView'),
         meta: {
             displayName: "Debug"
         }

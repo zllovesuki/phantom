@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import HorizontalDivider from "@/components/HorizontalDivider.vue";
-import SynchronizeButton from "@/components/SynchronizeButton.vue";
-import StatusBadge from "@/components/StatusBadge.vue";
-import ZapLogsViewer from "@/components/ZapLogsViewer.vue";
+import HorizontalDivider from "~/components/HorizontalDivider.vue";
+import SynchronizeButton from "~/components/SynchronizeButton.vue";
+import StatusBadge from "~/components/StatusBadge.vue";
+import ZapLogsViewer from "~/components/ZapLogsViewer.vue";
 import {
     SparklesIcon,
     BoltSlashIcon,
 } from "@heroicons/vue/24/outline";
 
 import { ref, onMounted } from "vue";
-import { GetCurrentConfig, GetPhantomConfig, GetConnectedNodes } from "@wails/go/specter/Application"
-import { client, specter } from "@wails/go/models";
-import { GetFilePaths } from "@wails/go/specter/Helper";
-import { useRuntimeStore } from "@/store/runtime";
+import { GetCurrentConfig, GetPhantomConfig, GetConnectedNodes } from "~/wails/go/specter/Application"
+import { client, specter } from "~/wails/go/models";
+import { GetFilePaths } from "~/wails/go/specter/Helper";
+import { useRuntimeStore } from "~/store/runtime";
 
 const runtime = useRuntimeStore();
 

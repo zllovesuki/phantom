@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "~/vendor/@headlessui-vue";
 import { SunIcon, MoonIcon } from "@heroicons/vue/20/solid";
 import { Bars3Icon, XMarkIcon } from "@heroicons/vue/24/outline";
 
 import { computed } from "vue";
 import { useRoute, useRouter, RouterLink } from "vue-router";
-import { routes } from "@/router"
-import { useRuntimeStore } from "@/store/runtime";
-import { useSettingStore } from "@/store/setting";
+import { routes } from "~/router"
+import { useRuntimeStore } from "~/store/runtime";
+import { useSettingStore } from "~/store/setting";
 
 const route = useRoute();
 const router = useRouter();

@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import StatusBadge from "@/components/StatusBadge.vue";
-import AlertSection from "@/components/AlertSection.vue";
-import type { AlertLevel } from "@/components/AlertSection.vue";
-import HorizontalDivider from "@/components/HorizontalDivider.vue";
+import StatusBadge from "~/components/StatusBadge.vue";
+import AlertSection from "~/components/AlertSection.vue";
+import type { AlertLevel } from "~/components/AlertSection.vue";
+import HorizontalDivider from "~/components/HorizontalDivider.vue";
 import {
     SparklesIcon,
     BoltSlashIcon,
 } from "@heroicons/vue/24/outline";
 
 import { ref, onMounted, computed } from "vue";
-import { Connected, GetCurrentConfig, GetPhantomConfig, StartClient, StopClient, UpdateApex, UpdatePhantomConfig } from "@wails/go/specter/Application"
-import { client, specter } from "@wails/go/models";
+import { Connected, GetCurrentConfig, GetPhantomConfig, StartClient, StopClient, UpdateApex, UpdatePhantomConfig } from "~/wails/go/specter/Application"
+import { client, specter } from "~/wails/go/models";
 
 interface Alert {
     message: string

@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import TunnelCard from "@/components/TunnelCard.vue";
-import TunnelModal from "@/components/TunnelModal.vue";
+import TunnelCard from "~/components/TunnelCard.vue";
+import TunnelModal from "~/components/TunnelModal.vue";
 import {
     ServerIcon,
 } from "@heroicons/vue/24/outline";
 
 import { ref, onMounted, reactive } from "vue";
-import { GetCurrentConfig, RebuildTunnels, Synchronize } from "@wails/go/specter/Application"
-import type { client } from "@wails/go/models";
+import { GetCurrentConfig, RebuildTunnels, Synchronize } from "~/wails/go/specter/Application"
+import type { client } from "~/wails/go/models";
 
 const Tunnels = ref<client.Tunnel[]>([]);
 

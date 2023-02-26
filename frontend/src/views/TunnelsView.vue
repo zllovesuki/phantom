@@ -1,89 +1,115 @@
 <script setup lang="ts">
 import TunnelCard from "~/components/TunnelCard.vue";
 import TunnelModal from "~/components/TunnelModal.vue";
-import {
-    ServerIcon,
-} from "@heroicons/vue/24/outline";
+import { ServerIcon } from "@heroicons/vue/24/outline";
 
 import { ref, onMounted, reactive } from "vue";
-import { GetCurrentConfig, RebuildTunnels, Synchronize } from "~/wails/go/specter/Application"
+import {
+  GetCurrentConfig,
+  RebuildTunnels,
+  Synchronize,
+} from "~/wails/go/specter/Application";
 import type { client } from "~/wails/go/models";
 
 const Tunnels = ref<client.Tunnel[]>([]);
 
 interface NewTunnel extends client.Tunnel {
-    modalOpen: boolean
+  modalOpen: boolean;
 }
 
-const NewTunnel = reactive<NewTunnel>({
-    target: "",
-    modalOpen: false
-})
+const NewTunnelData = reactive<NewTunnel>({
+  target: "",
+  modalOpen: false,
+});
 
 async function appendNewTunnel() {
-    Tunnels.value.push({
-        target: NewTunnel.target
-    })
-    NewTunnel.target = ""
-    await rebuildTunnels()
-    await synchornizeTunnels()
+  Tunnels.value.push({
+    target: NewTunnelData.target,
+  });
+  NewTunnelData.target = "";
+  await rebuildTunnels();
+  await synchornizeTunnels();
 }
 
 async function rebuildTunnels() {
-    await RebuildTunnels(Tunnels.value)
+  await RebuildTunnels(Tunnels.value);
 }
 
 async function synchornizeTunnels() {
-    try {
-        await Synchronize()
-        await reloadTunnels()
-    } catch (e) {
-    }
+  try {
+    await Synchronize();
+    await reloadTunnels();
+  } catch (e) {
+    /* empty */
+  }
 }
 
 async function reloadTunnels() {
-    const cfg = await GetCurrentConfig()
-    if (cfg !== null) {
-        if (cfg.tunnels) {
-            Tunnels.value = cfg.tunnels
-        }
+  const cfg = await GetCurrentConfig();
+  if (cfg !== null) {
+    if (cfg.tunnels) {
+      Tunnels.value = cfg.tunnels;
     }
+  }
 }
 
-onMounted(reloadTunnels)
+onMounted(reloadTunnels);
 </script>
 
 <template>
-    <div class="box">
-        <div class="box-wrapper text-gray-900 dark:text-gray-300">
-            <div class="mt-10 sm:mt-0">
-                <div class="md:grid md:grid-cols-4 md:gap-6">
-                    <div class="md:col-span-full">
-                        <div class="px-4 sm:px-0">
-                            <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300">
-                                Tunnels
-                            </h3>
-                        </div>
-                    </div>
-                    <div class="mt-5 md:col-span-full md:mt-0">
-                        <form @submit.prevent>
-                            <ul role="list" class="grid grid-cols-1 gap-6 md:grid-cols-2 mb-10" v-show="Tunnels.length > 0">
-                                <TunnelCard v-for="(tunnel, index) in Tunnels" :key="index" :tunnel="tunnel"
-                                    @update:target="tunnel.target = $event; rebuildTunnels()" />
-                            </ul>
-                            <button type="button" @click="NewTunnel.modalOpen = true"
-                                class="relative block w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 p-12 text-center hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none">
-                                <ServerIcon class="mx-auto h-8 w-8 text-gray-400" />
-                                <span class="mt-2 block text-sm font-medium">
-                                    Add a new tunnel
-                                </span>
-                            </button>
-                            <TunnelModal :create="true" v-model:target="NewTunnel.target" v-model:show="NewTunnel.modalOpen"
-                                @update:target="NewTunnel.target = $event; appendNewTunnel()" />
-                        </form>
-                    </div>
-                </div>
+  <div class="box">
+    <div class="box-wrapper text-gray-900 dark:text-gray-300">
+      <div>
+        <div class="md:grid md:grid-cols-4 md:gap-6">
+          <div class="md:col-span-full">
+            <div class="px-4 sm:px-0">
+              <h3
+                class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
+              >
+                Tunnels
+              </h3>
             </div>
+          </div>
+          <div class="mt-5 md:col-span-full md:mt-0">
+            <form @submit.prevent>
+              <ul
+                v-show="Tunnels.length > 0"
+                role="list"
+                class="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2"
+              >
+                <TunnelCard
+                  v-for="(tunnel, index) in Tunnels"
+                  :key="index"
+                  :tunnel="tunnel"
+                  @update:target="
+                    tunnel.target = $event;
+                    rebuildTunnels();
+                  "
+                />
+              </ul>
+              <button
+                type="button"
+                class="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center focus:outline-none hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500"
+                @click="NewTunnelData.modalOpen = true"
+              >
+                <ServerIcon class="mx-auto h-8 w-8 text-gray-400" />
+                <span class="mt-2 block text-sm font-medium">
+                  Add a new tunnel
+                </span>
+              </button>
+              <TunnelModal
+                v-model:target="NewTunnelData.target"
+                v-model:show="NewTunnelData.modalOpen"
+                :create="true"
+                @update:target="
+                  NewTunnelData.target = $event;
+                  appendNewTunnel();
+                "
+              />
+            </form>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </template>

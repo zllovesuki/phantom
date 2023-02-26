@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const defaultTheme = require("tailwindcss/defaultTheme");
 module.exports = {
   darkMode: "class",
@@ -10,11 +11,8 @@ module.exports = {
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('tailwind-scrollbar')
-  ],
+  plugins: [require("@tailwindcss/forms"), require("tailwind-scrollbar")],
   variants: {
-    scrollbar: ['dark']
-  }
+    scrollbar: ["dark"],
+  },
 };

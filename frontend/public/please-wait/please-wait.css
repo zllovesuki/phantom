@@ -3,6 +3,10 @@ body.pg-loading {
   overflow: hidden;
 }
 
+.pg-loading-logo {
+    width: 100px;
+}
+
 /* line 21, ../src/please-wait.scss */
 .pg-loading-screen {
   position: fixed;

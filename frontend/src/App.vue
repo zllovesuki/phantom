@@ -1,16 +1,13 @@
 <script lang="ts" setup>
-import "inter-ui/inter.css";
-import "~/assets/main.css";
-
 import Nav from "~/components/NavBar.vue";
 import { RouterView } from "vue-router";
 import { onMounted } from "vue";
 
 onMounted(() => {
   setTimeout(() => {
-    window.loading_screen.finish()
-  }, 750)
-})
+    window.loading_screen.finish();
+  }, 750);
+});
 </script>
 
 <template>
@@ -23,3 +20,8 @@ onMounted(() => {
     </main>
   </div>
 </template>
+
+<style>
+@import "inter-ui/inter.css";
+@import "~/assets/main.css";
+</style>

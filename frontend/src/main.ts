@@ -1,3 +1,6 @@
+import "@fontsource/inter/variable-full.css";
+import "~/assets/main.css";
+
 import { createApp, watchEffect, h } from "vue";
 import { createPinia } from "pinia";
 import { useSettingStore } from "~/store/setting";

@@ -22,8 +22,3 @@ onMounted(() => {
     </main>
   </div>
 </template>
-
-<style>
-@import "inter-ui/inter.css";
-@import "~/assets/main.css";
-</style>

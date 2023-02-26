@@ -6,7 +6,6 @@ require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/wailsapp/wails/v2 v2.3.1
 	go.uber.org/zap v1.24.0
-	golang.design/x/clipboard v0.6.3
 	kon.nect.sh/specter v0.0.0-20230224065053-ca6f069dfb14
 )
 
@@ -52,9 +51,6 @@ require (
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/exp v0.0.0-20230131160201-f062dba9d201 // indirect
-	golang.org/x/exp/shiny v0.0.0-20230224173230-c95f2b4c22f2 // indirect
-	golang.org/x/image v0.5.0 // indirect
-	golang.org/x/mobile v0.0.0-20210716004757-34ab1303b554 // indirect
 	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect

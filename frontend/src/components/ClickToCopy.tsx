@@ -2,7 +2,6 @@ import { ClipboardIcon } from "@heroicons/vue/20/solid";
 
 import { defineComponent, ref, type Ref } from "vue";
 import { createPopper, type Instance } from "@popperjs/core";
-import { SetClipboardText } from "~/wails/go/specter/Helper";
 
 export default defineComponent({
   name: "ClickToCopy",
@@ -17,7 +16,11 @@ export default defineComponent({
     const tooltipShow = ref(false);
 
     async function showTooltip() {
-      await SetClipboardText(props.content);
+      const type = "text/plain";
+      const blob = new Blob([props.content], { type });
+      const data = [new ClipboardItem({ [type]: blob })];
+
+      await navigator.clipboard.write(data);
       popper.value = createPopper(btnRef.value, tooltipRef.value, {
         placement: "top",
         modifiers: [

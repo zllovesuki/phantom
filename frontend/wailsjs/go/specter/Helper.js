@@ -9,7 +9,3 @@ export function GetFilePaths() {
 export function ParseTarget(arg1) {
   return window['go']['specter']['Helper']['ParseTarget'](arg1);
 }
-
-export function SetClipboardText(arg1) {
-  return window['go']['specter']['Helper']['SetClipboardText'](arg1);
-}

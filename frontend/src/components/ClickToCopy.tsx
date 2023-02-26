@@ -1,3 +1,5 @@
+import { ClipboardIcon } from "@heroicons/vue/20/solid";
+
 import { defineComponent, ref, type Ref } from "vue";
 import { createPopper, type Instance } from "@popperjs/core";
 import { SetClipboardText } from "~/wails/go/specter/Helper";
@@ -46,12 +48,12 @@ export default defineComponent({
         <span>
           <as
             ref={btnRef}
-            class={["cursor-pointer", "after:content-['_📋']"].join(" ")}
+            class={["cursor-pointer"].join(" ")}
             onClick={showTooltip}
             onMouseleave={hideTooltip}
             {...otherProps}
           >
-            {content}
+            {content} <ClipboardIcon class="inline-block h-3 w-3" />
           </as>
           <div
             ref={tooltipRef}

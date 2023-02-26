@@ -7,9 +7,6 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
-      "~/vendor/*": [
-        "./vendor/*"
-      ],
       "~/wails/*": [
         "./wailsjs/*"
       ],

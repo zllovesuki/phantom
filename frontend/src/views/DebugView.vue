@@ -349,17 +349,13 @@ onMounted(async () => {
             </div>
           </div>
           <div class="mt-5 md:col-span-full md:mt-0">
-            <div class="overflow-hidden shadow sm:rounded-md">
+            <div
+              class="mr-3 max-h-128 overflow-y-scroll shadow overflow-x-hidden scrollbar-thin scrollbar-track-white scrollbar-thumb-gray-700 dark:scrollbar-track-slate-800 dark:scrollbar-thumb-slate-700 sm:mr-0 sm:rounded-md"
+            >
               <div class="bg-white px-4 py-5 dark:bg-slate-800 sm:p-6">
                 <div class="grid grid-cols-6 gap-6">
-                  <div class="col-span-12 sm:col-span-6">
-                    <div class="-my-2 -mx-6 overflow-x-auto lg:-mx-8">
-                      <div
-                        class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8"
-                      >
-                        <ZapLogsViewer :raw="LogEntries" />
-                      </div>
-                    </div>
+                  <div class="col-span-12 flow-root sm:col-span-6">
+                    <ZapLogsViewer :raw="LogEntries" />
                   </div>
                 </div>
               </div>

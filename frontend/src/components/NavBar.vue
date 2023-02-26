@@ -3,7 +3,7 @@ import {
   Disclosure,
   DisclosureButton,
   DisclosurePanel,
-} from "~/vendor/@headlessui-vue";
+} from "@miragespace/headlessui-vue";
 import { SunIcon, MoonIcon } from "@heroicons/vue/20/solid";
 import { Bars3Icon, XMarkIcon } from "@heroicons/vue/24/outline";
 

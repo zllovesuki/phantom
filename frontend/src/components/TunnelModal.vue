@@ -8,7 +8,7 @@ import {
   DialogPanel,
   TransitionChild,
   TransitionRoot,
-} from "~/vendor/@headlessui-vue";
+} from "@miragespace/headlessui-vue";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/vue/20/solid";
 import { TrashIcon } from "@heroicons/vue/24/outline";
 

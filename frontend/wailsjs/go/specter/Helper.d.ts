@@ -6,4 +6,4 @@ export function GetFilePaths():Promise<specter.Paths>;
 
 export function ParseTarget(arg1:string):Promise<specter.Target>;
 
-export function SetClipboardText(arg1:string):Promise<void>;
+export function SetClipboardText(arg1:string):Promise<boolean>;

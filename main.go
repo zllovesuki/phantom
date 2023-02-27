@@ -2,11 +2,13 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"runtime"
 
 	"kon.nect.sh/phantom/specter"
 
-	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/application"
+	"github.com/wailsapp/wails/v2/pkg/menu"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/linux"
@@ -66,8 +68,29 @@ func main() {
 		}
 	}
 
-	err := wails.Run(cfg)
+	trayMenu := menu.NewMenu()
+	trayMenu.Append(&menu.MenuItem{
+		Label: "Test",
+		Type:  menu.TextType,
+		Click: func(cd *menu.CallbackData) {
+			fmt.Println("hi")
+		},
+	})
 
+	native := application.NewWithOptions(cfg)
+	native.NewSystemTray(&options.SystemTray{
+		LightModeIcon: &options.SystemTrayIcon{
+			Data: icon,
+		},
+		DarkModeIcon: &options.SystemTrayIcon{
+			Data: icon,
+		},
+		Title:   "Phantom",
+		Tooltip: "Phantom",
+		Menu:    trayMenu,
+	})
+
+	err := native.Run()
 	if err != nil {
 		println("Error:", err.Error())
 	}

@@ -22,6 +22,8 @@ import (
 )
 
 type Application struct {
+	Tray *Systray
+
 	appCtx context.Context
 	logger *zap.Logger
 
@@ -88,6 +90,12 @@ func (app *Application) OnStartup(ctx context.Context) {
 
 	app.specterCfg = specterCfg
 	app.phantomCfg = phantomCfg
+	app.Tray.Start()
+}
+
+func (app *Application) OnBeforeClose(ctx context.Context) bool {
+	app.Tray.Stop()
+	return false
 }
 
 func (app *Application) OnShutdown(ctx context.Context) {

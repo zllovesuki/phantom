@@ -22,16 +22,20 @@ var icon []byte
 
 func main() {
 	// Create an instance of the app structure
-	app := &specter.Application{}
+	tray := specter.NewSystray()
+	app := &specter.Application{
+		Tray: tray,
+	}
 	helper := &specter.Helper{}
 
 	// Create application with options
 	cfg := &options.App{
-		Title:      "Phantom",
-		Width:      1280,
-		Height:     800,
-		OnStartup:  app.OnStartup,
-		OnShutdown: app.OnShutdown,
+		Title:         "Phantom",
+		Width:         1280,
+		Height:        800,
+		OnStartup:     app.OnStartup,
+		OnShutdown:    app.OnShutdown,
+		OnBeforeClose: app.OnBeforeClose,
 		Bind: []interface{}{
 			app,
 			helper,

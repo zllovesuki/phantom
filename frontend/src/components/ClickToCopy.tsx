@@ -3,7 +3,6 @@ import { ClipboardIcon } from "@heroicons/vue/20/solid";
 import { defineComponent, ref, type Ref } from "vue";
 import { createPopper, type Instance } from "@popperjs/core";
 import { SetClipboardText } from "~/wails/go/specter/Helper";
-import { LogDebug } from "~/wails/runtime/runtime";
 
 export default defineComponent({
   name: "ClickToCopy",
@@ -19,7 +18,6 @@ export default defineComponent({
 
     async function setClipboard(s: string): Promise<boolean> {
       if (navigator.clipboard) {
-        LogDebug("clipboard vis browser");
         const type = "text/plain";
         const blob = new Blob([s], { type });
         const data = [new ClipboardItem({ [type]: blob })];
@@ -27,11 +25,7 @@ export default defineComponent({
         await navigator.clipboard.write(data);
         return true;
       }
-      const os = await SetClipboardText(s);
-      if (os) {
-        LogDebug("clipboard vis os");
-      }
-      return os;
+      return SetClipboardText(s);
     }
 
     async function showTooltip() {

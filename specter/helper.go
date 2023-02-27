@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+
+	"golang.design/x/clipboard"
 )
 
 type Helper struct{}
@@ -54,4 +56,10 @@ func (*Helper) GetFilePaths() Paths {
 		Specter: specterConfigFile,
 		Log:     specterLogFile,
 	}
+}
+
+// Use the cgo implementation if available as fallback
+func (*Helper) SetClipboardText(t string) bool {
+	clipboard.Write(clipboard.FmtText, []byte(t))
+	return true
 }

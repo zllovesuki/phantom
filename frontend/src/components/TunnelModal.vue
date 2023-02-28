@@ -36,7 +36,7 @@ const emit = defineEmits<{
 const initialFocusRef = ref(null);
 const scheme = ref("tcp");
 const target = ref("");
-const insecure = ref(props.tunnel.insecure);
+const insecure = ref(false);
 
 function emitUpdate() {
   if (target.value.length < 1) {

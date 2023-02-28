@@ -10,12 +10,12 @@ export function GetConnectedNodes() {
   return window['go']['specter']['Application']['GetConnectedNodes']();
 }
 
-export function GetCurrentConfig() {
-  return window['go']['specter']['Application']['GetCurrentConfig']();
-}
-
 export function GetPhantomConfig() {
   return window['go']['specter']['Application']['GetPhantomConfig']();
+}
+
+export function GetSpecterConfig() {
+  return window['go']['specter']['Application']['GetSpecterConfig']();
 }
 
 export function RebuildTunnels(arg1) {

@@ -7,7 +7,7 @@ import { Switch } from "@miragespace/headlessui-vue";
 import { ref, onMounted, computed, watch } from "vue";
 import {
   Connected,
-  GetCurrentConfig,
+  GetSpecterConfig,
   GetPhantomConfig,
   StartClient,
   StopClient,
@@ -23,9 +23,12 @@ const ClientConnected = ref(false);
 const SpecterConfig = ref<client.Config>(
   client.Config.createFrom({ apex: "" })
 );
-const PhantomConfig = ref<specter.PhantomConfig>({
-  specterInsecure: false,
-});
+const PhantomConfig = ref<specter.PhantomConfig>(
+  specter.PhantomConfig.createFrom({
+    specterInsecure: false,
+    listeners: [],
+  })
+);
 const ChangingClientState = ref(false);
 const ChangingSettings = ref(false);
 
@@ -71,7 +74,7 @@ async function toggleClientState() {
 
 const _loaded = ref(false);
 onMounted(async () => {
-  const specterConfig = await GetCurrentConfig();
+  const specterConfig = await GetSpecterConfig();
   if (specterConfig !== null) {
     SpecterConfig.value = specterConfig;
   }

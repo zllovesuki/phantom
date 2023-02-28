@@ -1,25 +1,26 @@
 <script setup lang="ts">
-import { EllipsisVerticalIcon, LockOpenIcon } from "@heroicons/vue/20/solid";
+import {
+  EllipsisVerticalIcon,
+  ArrowsRightLeftIcon,
+} from "@heroicons/vue/20/solid";
 
-import InstructionModal from "~/components/InstructionModal.vue";
-import TunnelModal from "~/components/TunnelModal.vue";
+import ForwarderModal from "~/components/ForwarderModal.vue";
 
 import { ref } from "vue";
 import { storeToRefs } from "pinia";
 
-import type { client } from "~/wails/go/models";
+import type { specter } from "~/wails/go/models";
 import { useLoadingStore } from "~/store/loading";
 
 defineProps<{
-  tunnel: Readonly<client.Tunnel>;
+  listener: Readonly<specter.Listener>;
 }>();
 
 const emit = defineEmits<{
-  (event: "update:tunnel", tunnel: client.Tunnel): void;
+  (event: "update:listener", listener: specter.Listener): void;
   (event: "delete"): void;
 }>();
 
-const InstructionModalOpen = ref(false);
 const EditModalOpen = ref(false);
 const { loading } = storeToRefs(useLoadingStore());
 </script>
@@ -31,23 +32,13 @@ const { loading } = storeToRefs(useLoadingStore());
     >
       <div class="flex-1 truncate px-4 py-2 text-sm">
         <span class="font-medium text-gray-900 dark:text-gray-300">
-          {{ tunnel.target }}
-          <LockOpenIcon
-            v-show="tunnel.insecure"
-            class="ml-1 inline-block h-5 w-4 pb-1"
-          />
+          tcp://{{ listener.listen }}
         </span>
         <p class="text-sm text-gray-600 dark:text-gray-400">
-          <a
-            :class="[
-              tunnel.hostname
-                ? 'cursor-pointer hover:text-gray-400 dark:hover:text-gray-100'
-                : '',
-            ]"
-            @click="InstructionModalOpen = true"
-          >
-            {{ tunnel.hostname ?? "(Pending assignment)" }}
-          </a>
+          <ArrowsRightLeftIcon
+            class="inline-block h-4 w-4 text-gray-900 dark:text-gray-300"
+          />
+          {{ (listener.tcp ? "tcp://" : "quic://") + listener.hostname }}
         </p>
       </div>
       <div class="flex-shrink-0 pr-2">
@@ -62,12 +53,11 @@ const { loading } = storeToRefs(useLoadingStore());
         </button>
       </div>
     </div>
-    <InstructionModal v-model:show="InstructionModalOpen" :tunnel="tunnel" />
-    <TunnelModal
+    <ForwarderModal
       v-model:show="EditModalOpen"
       :create="false"
-      :tunnel="tunnel"
-      @update:tunnel="emit('update:tunnel', $event)"
+      :listener="listener"
+      @update:listener="emit('update:listener', $event)"
       @delete="emit('delete')"
     />
   </li>

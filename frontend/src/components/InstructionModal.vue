@@ -9,7 +9,7 @@ import {
 import ClickToCopy from "./ClickToCopy";
 
 import { client } from "~/wails/go/models";
-import { GetCurrentConfig } from "~/wails/go/specter/Application";
+import { GetSpecterConfig } from "~/wails/go/specter/Application";
 
 import { computed, ref, onMounted } from "vue";
 
@@ -45,7 +45,7 @@ function formatLink(hostname: string) {
 }
 
 onMounted(async () => {
-  const specterConfig = await GetCurrentConfig();
+  const specterConfig = await GetSpecterConfig();
   if (specterConfig !== null) {
     SpecterConfig.value = specterConfig;
   }

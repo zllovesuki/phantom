@@ -7,7 +7,7 @@ import { storeToRefs } from "pinia";
 import { ref, onMounted, computed } from "vue";
 
 import {
-  GetCurrentConfig,
+  GetSpecterConfig,
   RebuildTunnels,
   UnpublishTunnel,
   Synchronize,
@@ -80,7 +80,7 @@ async function synchornizeTunnels() {
 }
 
 async function reloadTunnels() {
-  const cfg = await GetCurrentConfig();
+  const cfg = await GetSpecterConfig();
   if (cfg !== null) {
     if (cfg.tunnels) {
       Tunnels.value = cfg.tunnels;
@@ -132,8 +132,8 @@ onMounted(reloadTunnels);
                 :disabled="loading"
                 @click="NewTunnelModalOpen = true"
               >
-                <ServerIcon class="mx-auto h-8 w-8 text-gray-400" />
-                <span class="mt-2 block text-sm font-medium">
+                <ServerIcon class="mx-auto h-10 w-10 text-gray-400" />
+                <span class="mt-2 block text-base font-medium">
                   Add a new tunnel
                 </span>
               </button>

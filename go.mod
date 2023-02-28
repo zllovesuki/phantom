@@ -7,14 +7,13 @@ require (
 	github.com/wailsapp/wails/v2 v2.3.1
 	go.uber.org/zap v1.24.0
 	golang.design/x/clipboard v0.6.3
-	kon.nect.sh/specter v0.0.0-20230228090739-008315df23d4
+	kon.nect.sh/specter v0.0.0-20230228111545-b5858fbbab24
 )
 
 require (
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/avast/retry-go/v4 v4.3.3 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/golang/mock v1.6.0 // indirect
@@ -41,15 +40,12 @@ require (
 	github.com/quic-go/qtls-go1-20 v0.1.1 // indirect
 	github.com/quic-go/quic-go v0.33.0 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/samber/lo v1.27.1 // indirect
 	github.com/tkrajina/go-reflector v0.5.5 // indirect
 	github.com/twitchtv/twirp v8.1.3+incompatible // indirect
-	github.com/urfave/cli/v2 v2.24.4 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
-	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	github.com/zhangyunhao116/fastrand v0.3.0 // indirect
 	github.com/zhangyunhao116/skipmap v0.10.1 // indirect

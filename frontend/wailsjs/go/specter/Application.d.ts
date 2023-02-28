@@ -7,9 +7,9 @@ export function Connected():Promise<boolean>;
 
 export function GetConnectedNodes():Promise<Array<specter.Node>>;
 
-export function GetCurrentConfig():Promise<client.Config>;
-
 export function GetPhantomConfig():Promise<specter.PhantomConfig>;
+
+export function GetSpecterConfig():Promise<client.Config>;
 
 export function RebuildTunnels(arg1:Array<client.Tunnel>):Promise<void>;
 

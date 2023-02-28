@@ -2,14 +2,16 @@ package specter
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"kon.nect.sh/phantom/internal/configdir"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 var (
@@ -20,8 +22,35 @@ var (
 	specterLogFile    string
 )
 
+type Listener struct {
+	Listen   string `json:"listen"`
+	Hostname string `json:"hostname"`
+	UseTCP   bool   `json:"tcp"`
+}
+
 type PhantomConfig struct {
-	SpecterInsecureSkipVerify bool `json:"specterInsecure"`
+	Listeners                 []Listener `json:"listeners"`
+	SpecterInsecureSkipVerify bool       `json:"specterInsecure"`
+}
+
+func (app *Application) UpdatePhantomConfig(cfg *PhantomConfig) {
+	app.stateMu.Lock()
+	defer app.stateMu.Unlock()
+
+	fn, err := os.OpenFile(phantomConfigFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		runtime.LogError(app.appCtx, err.Error())
+		return
+	}
+	defer fn.Close()
+	defer fn.Sync()
+
+	if err := json.NewEncoder(fn).Encode(cfg); err != nil {
+		runtime.LogError(app.appCtx, err.Error())
+		return
+	}
+
+	app.phantomCfg = cfg
 }
 
 func normalizeFilename(name string) string {

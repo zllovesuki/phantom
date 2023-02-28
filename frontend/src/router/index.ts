@@ -34,7 +34,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: "/forward",
     name: "forward",
-    component: lazy("HomeView"),
+    component: lazy("ForwardView"),
     meta: {
       displayName: "Local Forwarding",
     },

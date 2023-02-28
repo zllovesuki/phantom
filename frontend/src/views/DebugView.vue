@@ -7,7 +7,7 @@ import { SparklesIcon, BoltSlashIcon } from "@heroicons/vue/24/outline";
 
 import { ref, onMounted } from "vue";
 import {
-  GetCurrentConfig,
+  GetSpecterConfig,
   GetPhantomConfig,
   GetConnectedNodes,
 } from "~/wails/go/specter/Application";
@@ -20,9 +20,12 @@ const runtime = useRuntimeStore();
 const SpecterConfig = ref<client.Config>(
   client.Config.createFrom({ apex: "" })
 );
-const PhantomConfig = ref<specter.PhantomConfig>({
-  specterInsecure: false,
-});
+const PhantomConfig = ref<specter.PhantomConfig>(
+  specter.PhantomConfig.createFrom({
+    specterInsecure: false,
+    listeners: [],
+  })
+);
 const ConnectedNodes = ref<specter.Node[]>([]);
 const ShowToken = ref(false);
 
@@ -47,13 +50,16 @@ async function loadLogs() {
 }
 
 onMounted(async () => {
-  const specterConfig = await GetCurrentConfig();
+  const specterConfig = await GetSpecterConfig();
   if (specterConfig !== null) {
     SpecterConfig.value = specterConfig;
   }
   const phantomCfg = await GetPhantomConfig();
   if (phantomCfg !== null) {
-    PhantomConfig.value = phantomCfg;
+    PhantomConfig.value.specterInsecure = phantomCfg.specterInsecure;
+    if (phantomCfg.listeners) {
+      PhantomConfig.value.listeners = phantomCfg.listeners;
+    }
   }
   ConnectedNodes.value = await GetConnectedNodes();
   FilePaths.value = await GetFilePaths();
@@ -296,7 +302,7 @@ onMounted(async () => {
                           {{ runtime.environment?.buildType }}
                         </dd>
                       </div>
-                      <div class="pt-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:pt-5">
+                      <div class="py-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-5">
                         <dt
                           class="text-sm font-medium text-gray-500 dark:text-gray-200"
                         >
@@ -306,6 +312,18 @@ onMounted(async () => {
                           class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
                         >
                           {{ PhantomConfig.specterInsecure }}
+                        </dd>
+                      </div>
+                      <div class="pt-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:pt-5">
+                        <dt
+                          class="text-sm font-medium text-gray-500 dark:text-gray-200"
+                        >
+                          forwarders
+                        </dt>
+                        <dd
+                          class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
+                        >
+                          {{ PhantomConfig.listeners.length }}
                         </dd>
                       </div>
                     </dl>

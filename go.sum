@@ -208,5 +208,5 @@ gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C
 gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
-kon.nect.sh/specter v0.0.0-20230224065053-ca6f069dfb14 h1:dFvednZaEuDGvhwsVNdRwRYDjowzFR3FufLRz87BFEo=
-kon.nect.sh/specter v0.0.0-20230224065053-ca6f069dfb14/go.mod h1:tHbg/Xsvg8+7OvjpjQuv+w8lyOTLScGBU00ce5fAh2g=
+kon.nect.sh/specter v0.0.0-20230228043506-5b74472d0559 h1:g+fwZIInx7WKdeh3XIa7CmIGVx0yMRuco4u8RquTvN4=
+kon.nect.sh/specter v0.0.0-20230228043506-5b74472d0559/go.mod h1:tHbg/Xsvg8+7OvjpjQuv+w8lyOTLScGBU00ce5fAh2g=

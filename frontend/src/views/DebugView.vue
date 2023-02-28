@@ -22,7 +22,6 @@ const SpecterConfig = ref<client.Config>(
 );
 const PhantomConfig = ref<specter.PhantomConfig>({
   specterInsecure: false,
-  targetInsecure: false,
 });
 const ConnectedNodes = ref<specter.Node[]>([]);
 const ShowToken = ref(false);
@@ -297,7 +296,7 @@ onMounted(async () => {
                           {{ runtime.environment?.buildType }}
                         </dd>
                       </div>
-                      <div class="py-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-5">
+                      <div class="pt-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:pt-5">
                         <dt
                           class="text-sm font-medium text-gray-500 dark:text-gray-200"
                         >
@@ -307,18 +306,6 @@ onMounted(async () => {
                           class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
                         >
                           {{ PhantomConfig.specterInsecure }}
-                        </dd>
-                      </div>
-                      <div class="pt-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:pt-5">
-                        <dt
-                          class="text-sm font-medium text-gray-500 dark:text-gray-200"
-                        >
-                          dialer.InsecureVerify
-                        </dt>
-                        <dd
-                          class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
-                        >
-                          {{ PhantomConfig.targetInsecure }}
                         </dd>
                       </div>
                     </dl>

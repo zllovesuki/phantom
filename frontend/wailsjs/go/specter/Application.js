@@ -34,6 +34,10 @@ export function Synchronize() {
   return window['go']['specter']['Application']['Synchronize']();
 }
 
+export function UnpublishTunnel(arg1) {
+  return window['go']['specter']['Application']['UnpublishTunnel'](arg1);
+}
+
 export function UpdateApex(arg1) {
   return window['go']['specter']['Application']['UpdateApex'](arg1);
 }

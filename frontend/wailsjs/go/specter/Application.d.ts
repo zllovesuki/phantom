@@ -19,6 +19,8 @@ export function StopClient():Promise<void>;
 
 export function Synchronize():Promise<void>;
 
+export function UnpublishTunnel(arg1:number):Promise<void>;
+
 export function UpdateApex(arg1:string):Promise<void>;
 
 export function UpdatePhantomConfig(arg1:specter.PhantomConfig):Promise<void>;

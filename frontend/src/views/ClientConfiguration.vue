@@ -25,7 +25,6 @@ const SpecterConfig = ref<client.Config>(
 );
 const PhantomConfig = ref<specter.PhantomConfig>({
   specterInsecure: false,
-  targetInsecure: false,
 });
 const ChangingClientState = ref(false);
 const ChangingSettings = ref(false);
@@ -33,28 +32,6 @@ const ChangingSettings = ref(false);
 const disableSettingsModification = computed(() => {
   return (
     ClientConnected.value || ChangingClientState.value || ChangingSettings.value
-  );
-});
-
-onMounted(async () => {
-  const specterConfig = await GetCurrentConfig();
-  if (specterConfig !== null) {
-    SpecterConfig.value = specterConfig;
-  }
-  const phantomCfg = await GetPhantomConfig();
-  if (phantomCfg !== null) {
-    PhantomConfig.value = phantomCfg;
-  }
-  ClientConnected.value = await Connected();
-
-  watch(
-    [
-      () => PhantomConfig.value.specterInsecure,
-      () => PhantomConfig.value.targetInsecure,
-    ],
-    async () => {
-      await synchronizeSettings();
-    }
   );
 });
 
@@ -75,8 +52,8 @@ async function toggleClientState() {
     return;
   }
   try {
-    ChangingClientState.value = true;
     hideAlert();
+    ChangingClientState.value = true;
     if (ClientConnected.value) {
       await StopClient();
       ClientConnected.value = false;
@@ -91,6 +68,26 @@ async function toggleClientState() {
     ChangingClientState.value = false;
   }
 }
+
+const _loaded = ref(false);
+onMounted(async () => {
+  const specterConfig = await GetCurrentConfig();
+  if (specterConfig !== null) {
+    SpecterConfig.value = specterConfig;
+  }
+  const phantomCfg = await GetPhantomConfig();
+  if (phantomCfg !== null) {
+    PhantomConfig.value = phantomCfg;
+  }
+  ClientConnected.value = await Connected();
+  _loaded.value = true;
+});
+watch([() => PhantomConfig.value.specterInsecure], async () => {
+  if (!_loaded.value) {
+    return;
+  }
+  await synchronizeSettings();
+});
 </script>
 
 <template>
@@ -292,42 +289,6 @@ async function toggleClientState() {
                           <p class="text-xs text-gray-500 dark:text-gray-400">
                             Disable TLS verification when dialing to specter
                             gateway. Should only be used during development.
-                          </p>
-                        </div>
-                      </div>
-                      <div class="flex items-start">
-                        <div class="flex h-5 items-center">
-                          <Switch
-                            v-model="PhantomConfig.targetInsecure"
-                            :disabled="disableSettingsModification"
-                            :class="
-                              PhantomConfig.targetInsecure
-                                ? 'bg-indigo-500'
-                                : 'bg-gray-300 dark:bg-gray-500'
-                            "
-                            class="relative inline-flex h-3 w-6 items-center rounded-full"
-                          >
-                            <span class="sr-only">Disable Target TLS</span>
-                            <span
-                              :class="
-                                PhantomConfig.targetInsecure
-                                  ? 'translate-x-3'
-                                  : 'translate-x-0'
-                              "
-                              class="inline-block h-3 w-3 transform rounded-full border border-gray-300 bg-white transition dark:border-gray-600"
-                            />
-                          </Switch>
-                        </div>
-                        <div class="ml-3 text-sm">
-                          <label
-                            for="target-tls"
-                            class="font-medium text-gray-700 dark:text-gray-300"
-                          >
-                            Disable Target TLS
-                          </label>
-                          <p class="text-xs text-gray-500 dark:text-gray-400">
-                            Disable TLS verification when dialing to https
-                            target.
                           </p>
                         </div>
                       </div>

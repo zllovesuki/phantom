@@ -3,32 +3,67 @@ import TunnelCard from "~/components/TunnelCard.vue";
 import TunnelModal from "~/components/TunnelModal.vue";
 import { ServerIcon } from "@heroicons/vue/24/outline";
 
-import { ref, onMounted, reactive } from "vue";
+import { storeToRefs } from "pinia";
+import { ref, onMounted, computed } from "vue";
+
 import {
   GetCurrentConfig,
   RebuildTunnels,
+  UnpublishTunnel,
   Synchronize,
 } from "~/wails/go/specter/Application";
 import type { client } from "~/wails/go/models";
+import { useAlertStore } from "~/store/alert";
+import { useLoadingStore } from "~/store/loading";
 
+const Loading = useLoadingStore();
+const { setLoading } = Loading;
+const { loading } = storeToRefs(Loading);
+
+const { showAlert } = useAlertStore();
 const Tunnels = ref<client.Tunnel[]>([]);
-
-interface NewTunnel extends client.Tunnel {
-  modalOpen: boolean;
-}
-
-const NewTunnelData = reactive<NewTunnel>({
-  target: "",
-  modalOpen: false,
+const NewTunnelModalOpen = ref(false);
+const Unsaved = computed<boolean>(() => {
+  return Tunnels.value.reduce((p, t) => {
+    if (p) {
+      return p;
+    }
+    return !t.hostname;
+  }, false);
 });
 
-async function appendNewTunnel() {
-  Tunnels.value.push({
-    target: NewTunnelData.target,
-  });
-  NewTunnelData.target = "";
+async function appendNewTunnel(t: client.Tunnel) {
+  try {
+    setLoading(true);
+    Tunnels.value.push({
+      target: t.target,
+      insecure: t.insecure,
+    });
+    await rebuildTunnels();
+    await synchornizeTunnels();
+  } catch (e) {
+    showAlert("fail", e as string);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function unpublishTunnel(i: number) {
+  try {
+    setLoading(true);
+    await UnpublishTunnel(i);
+    Tunnels.value.splice(i, 1);
+  } catch (e) {
+    showAlert("fail", e as string);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function updateTunnel(i: number, t: client.Tunnel) {
+  Tunnels.value[i].target = t.target;
+  Tunnels.value[i].insecure = t.insecure;
   await rebuildTunnels();
-  await synchornizeTunnels();
 }
 
 async function rebuildTunnels() {
@@ -68,6 +103,12 @@ onMounted(reloadTunnels);
               >
                 Tunnels
               </h3>
+              <p
+                v-show="Unsaved"
+                class="mt-2 text-xs text-gray-600 dark:text-gray-500"
+              >
+                New tunnels will be persisted after publishing
+              </p>
             </div>
           </div>
           <div class="mt-5 md:col-span-full md:mt-0">
@@ -78,19 +119,18 @@ onMounted(reloadTunnels);
                 class="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2"
               >
                 <TunnelCard
-                  v-for="(tunnel, index) in Tunnels"
-                  :key="index"
+                  v-for="(tunnel, i) in Tunnels"
+                  :key="i"
                   :tunnel="tunnel"
-                  @update:target="
-                    tunnel.target = $event;
-                    rebuildTunnels();
-                  "
+                  @update:tunnel="updateTunnel(i, $event)"
+                  @delete="unpublishTunnel(i)"
                 />
               </ul>
               <button
                 type="button"
                 class="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center focus:outline-none hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500"
-                @click="NewTunnelData.modalOpen = true"
+                :disabled="loading"
+                @click="NewTunnelModalOpen = true"
               >
                 <ServerIcon class="mx-auto h-8 w-8 text-gray-400" />
                 <span class="mt-2 block text-sm font-medium">
@@ -98,13 +138,10 @@ onMounted(reloadTunnels);
                 </span>
               </button>
               <TunnelModal
-                v-model:target="NewTunnelData.target"
-                v-model:show="NewTunnelData.modalOpen"
+                v-model:show="NewTunnelModalOpen"
+                :tunnel="{ target: '', insecure: false }"
                 :create="true"
-                @update:target="
-                  NewTunnelData.target = $event;
-                  appendNewTunnel();
-                "
+                @update:tunnel="appendNewTunnel($event)"
               />
             </form>
           </div>

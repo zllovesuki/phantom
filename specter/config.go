@@ -22,7 +22,6 @@ var (
 
 type PhantomConfig struct {
 	SpecterInsecureSkipVerify bool `json:"specterInsecure"`
-	TargetInsecureSkipVerify  bool `json:"targetInsecure"`
 }
 
 func normalizeFilename(name string) string {

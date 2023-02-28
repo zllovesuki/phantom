@@ -8,41 +8,58 @@ import {
   DialogPanel,
   TransitionChild,
   TransitionRoot,
+  Switch,
 } from "@miragespace/headlessui-vue";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/vue/20/solid";
 import { TrashIcon } from "@heroicons/vue/24/outline";
 
 import { ParseTarget } from "~/wails/go/specter/Helper";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, watch } from "vue";
 
 import { useRuntimeStore } from "~/store/runtime";
+import type { client } from "~/wails/go/models";
 
 const runtime = useRuntimeStore();
 
 const props = defineProps<{
-  target: string;
-  hostname?: string;
+  tunnel: Readonly<client.Tunnel>;
   create: boolean;
   show: boolean;
 }>();
 
 const emit = defineEmits<{
-  (event: "update:target", target: string): void;
+  (event: "update:tunnel", tunnel: client.Tunnel): void;
   (event: "update:show", open: boolean): void;
+  (event: "delete"): void;
 }>();
 
-let initialFocusRef = ref(null);
+const initialFocusRef = ref(null);
+const scheme = ref("tcp");
+const target = ref("");
+const insecure = ref(props.tunnel.insecure);
 
-function emitTargetUpdate(scheme: string, target: string) {
-  if (target.length < 1) {
-    emit("update:target", "");
+function emitUpdate() {
+  if (target.value.length < 1) {
+    emit("update:tunnel", {
+      ...props.tunnel,
+      target: "",
+      insecure: insecure.value,
+    });
     return;
   }
-  if (scheme === "winio") {
-    emit("update:target", target);
+  if (scheme.value === "winio") {
+    emit("update:tunnel", {
+      ...props.tunnel,
+      target: target.value,
+      insecure: insecure.value,
+    });
     return;
   }
-  emit("update:target", scheme + "://" + target);
+  emit("update:tunnel", {
+    ...props.tunnel,
+    target: scheme.value + "://" + target.value,
+    insecure: scheme.value === "https" ? insecure.value : false,
+  });
 }
 
 const placeholders: Record<string, string> = {
@@ -59,18 +76,6 @@ if (runtime.environment?.platform === "windows") {
 }
 const availableSchemes = Object.keys(placeholders);
 
-const scheme = ref("tcp");
-const target = ref("");
-
-onMounted(async () => {
-  const parsed = await ParseTarget(props.target);
-  if (parsed.error) {
-    return;
-  }
-  scheme.value = parsed.protocol;
-  target.value = parsed.destination;
-});
-
 const open = computed({
   get() {
     return props.show;
@@ -81,9 +86,40 @@ const open = computed({
 });
 
 function onSubmit() {
-  emitTargetUpdate(scheme.value, target.value);
+  emitUpdate();
+  open.value = false;
+  if (props.create) {
+    scheme.value = "tcp";
+    target.value = "";
+    insecure.value = false;
+  }
+}
+
+function onDelete() {
+  emit("delete");
   open.value = false;
 }
+
+async function populateFields() {
+  const parsed = await ParseTarget(props.tunnel.target);
+  if (parsed.error) {
+    return;
+  }
+  scheme.value = parsed.protocol;
+  target.value = parsed.destination;
+  insecure.value = props.tunnel.insecure;
+}
+
+// refresh when we are visible
+watch(
+  () => props.show,
+  (s) => {
+    if (!s) {
+      return;
+    }
+    populateFields();
+  }
+);
 </script>
 
 <template>
@@ -128,6 +164,7 @@ function onSubmit() {
                 v-if="!create"
                 type="button"
                 class="absolute top-10 right-10 ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white"
+                @click.prevent="onDelete"
               >
                 <span class="sr-only">Remove Tunnel</span>
                 <TrashIcon class="h-5 w-5" aria-hidden="true" />
@@ -231,9 +268,40 @@ function onSubmit() {
                       id="helper-text-explanation"
                       class="mt-2 text-xs text-gray-500 dark:text-gray-400"
                     >
-                      Note that updating HTTP(s) target may not take effect
+                      Note that updating HTTP(s) tunnel may not take effect
                       immediately.
                     </p>
+                  </div>
+                  <div v-show="scheme === 'https'" class="flex items-start">
+                    <div class="flex h-5 items-center">
+                      <Switch
+                        v-model="insecure"
+                        :class="
+                          insecure
+                            ? 'bg-indigo-500'
+                            : 'bg-gray-300 dark:bg-gray-500'
+                        "
+                        class="relative inline-flex h-3 w-6 items-center rounded-full"
+                      >
+                        <span class="sr-only">Disable TLS Verification</span>
+                        <span
+                          :class="insecure ? 'translate-x-3' : 'translate-x-0'"
+                          class="inline-block h-3 w-3 transform rounded-full border border-gray-300 bg-white transition dark:border-gray-600"
+                        />
+                      </Switch>
+                    </div>
+                    <div class="ml-3 text-sm">
+                      <label
+                        for="insecure"
+                        class="font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Insecure
+                      </label>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Disable TLS verification when dialing to this https
+                        target.
+                      </p>
+                    </div>
                   </div>
                   <div>
                     <label
@@ -246,7 +314,7 @@ function onSubmit() {
                       id="hostname"
                       type="text"
                       name="hostname"
-                      :value="hostname"
+                      :value="tunnel.hostname"
                       placeholder="(Assigned on Publish)"
                       class="block w-full rounded-lg border border-gray-300 bg-transparent p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 disabled:text-gray-400 dark:border-gray-500 dark:text-white dark:placeholder-gray-400 dark:disabled:text-gray-400"
                       disabled

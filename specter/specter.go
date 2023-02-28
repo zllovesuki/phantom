@@ -6,19 +6,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 
-	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"go.uber.org/zap"
+	cmdClient "kon.nect.sh/specter/cmd/client"
 	"kon.nect.sh/specter/overlay"
 	rttImpl "kon.nect.sh/specter/rtt"
 	"kon.nect.sh/specter/spec/protocol"
 	"kon.nect.sh/specter/spec/rtt"
 	"kon.nect.sh/specter/spec/tun"
 	"kon.nect.sh/specter/tun/client"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"go.uber.org/zap"
 )
 
 type Application struct {
@@ -127,7 +127,23 @@ func (app *Application) RebuildTunnels(tunnels []client.Tunnel) {
 	if app.cli == nil {
 		app.specterCfg.Tunnels = tunnels
 	} else {
+		app.logger.Info("rebuild", zap.Any("tunnels", tunnels))
 		app.cli.RebuildTunnels(tunnels)
+	}
+}
+
+func (app *Application) UnpublishTunnel(index int) error {
+	app.stateMu.Lock()
+	defer app.stateMu.Unlock()
+
+	if app.cli == nil {
+		if index < 0 || index > len(app.specterCfg.Tunnels) {
+			return fmt.Errorf("tunnel index out of bound")
+		}
+		app.specterCfg.Tunnels = append(app.specterCfg.Tunnels[:index], app.specterCfg.Tunnels[index+1:]...)
+		return nil
+	} else {
+		return fmt.Errorf("not implemented")
 	}
 }
 
@@ -173,32 +189,6 @@ func (app *Application) UpdatePhantomConfig(cfg *PhantomConfig) {
 	app.phantomCfg = cfg
 }
 
-type parsedApex struct {
-	host string
-	port int
-}
-
-func (p *parsedApex) String() string {
-	return fmt.Sprintf("%s:%d", p.host, p.port)
-}
-
-func parseApex(apex string) (*parsedApex, error) {
-	port := 443
-	i := strings.Index(apex, ":")
-	if i != -1 {
-		nP, err := strconv.ParseInt(apex[i+1:], 0, 32)
-		if err != nil {
-			return nil, fmt.Errorf("error parsing port number: %w", err)
-		}
-		apex = apex[:i]
-		port = int(nP)
-	}
-	return &parsedApex{
-		host: apex,
-		port: port,
-	}, nil
-}
-
 func (app *Application) StartClient() error {
 	app.stateMu.Lock()
 	defer app.stateMu.Unlock()
@@ -211,14 +201,14 @@ func (app *Application) StartClient() error {
 		return fmt.Errorf("apex cannot be empty")
 	}
 
-	parsed, err := parseApex(app.specterCfg.Apex)
+	parsed, err := cmdClient.ParseApex(app.specterCfg.Apex)
 	if err != nil {
 		runtime.LogError(app.appCtx, err.Error())
 		return err
 	}
 
 	clientTLSConf := &tls.Config{
-		ServerName:         parsed.host,
+		ServerName:         parsed.Host,
 		InsecureSkipVerify: app.phantomCfg.SpecterInsecureSkipVerify,
 		NextProtos: []string{
 			tun.ALPN(protocol.Link_SPECTER_TUN),
@@ -237,12 +227,11 @@ func (app *Application) StartClient() error {
 
 	app.cliCtx, app.cliCtxCancel = context.WithCancel(app.appCtx)
 	c, err := client.NewClient(app.cliCtx, client.ClientConfig{
-		Logger:           app.logger,
-		Configuration:    app.specterCfg,
-		ServerTransport:  app.transport,
-		Recorder:         app.transportRTT,
-		ReloadSignal:     nil,
-		DisableTargetTLS: app.phantomCfg.TargetInsecureSkipVerify,
+		Logger:          app.logger,
+		Configuration:   app.specterCfg,
+		ServerTransport: app.transport,
+		Recorder:        app.transportRTT,
+		ReloadSignal:    nil,
 	})
 	if err != nil {
 		runtime.LogError(app.appCtx, err.Error())

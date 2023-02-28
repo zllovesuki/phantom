@@ -3,6 +3,7 @@ export namespace client {
 	export class Tunnel {
 	    target: string;
 	    hostname?: string;
+	    insecure: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Tunnel(source);
@@ -12,6 +13,7 @@ export namespace client {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.target = source["target"];
 	        this.hostname = source["hostname"];
+	        this.insecure = source["insecure"];
 	    }
 	}
 	export class Config {
@@ -160,7 +162,6 @@ export namespace specter {
 	}
 	export class PhantomConfig {
 	    specterInsecure: boolean;
-	    targetInsecure: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new PhantomConfig(source);
@@ -169,7 +170,6 @@ export namespace specter {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.specterInsecure = source["specterInsecure"];
-	        this.targetInsecure = source["targetInsecure"];
 	    }
 	}
 	export class Target {

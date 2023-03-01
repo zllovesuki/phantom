@@ -4,28 +4,32 @@ import {
   DialogPanel,
   TransitionChild,
   TransitionRoot,
-  Switch,
 } from "@miragespace/headlessui-vue";
-import { TrashIcon } from "@heroicons/vue/24/outline";
+import SwitchToggle from "~/components/utility/SwitchToggle.vue";
 
 import { ref, computed, watch } from "vue";
 import type { specter } from "~/wails/go/models";
 
-const props = defineProps<{
+export interface Props {
   listener: Readonly<specter.Listener>;
-  create: boolean;
   show: boolean;
-}>();
+  create?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  create: false,
+});
 
 const emit = defineEmits<{
   (event: "update:listener", listener: specter.Listener): void;
   (event: "update:show", open: boolean): void;
-  (event: "delete"): void;
 }>();
 
 const initialFocusRef = ref(null);
+const label = ref("");
 const listen = ref("");
 const hostname = ref("");
+const insecure = ref(false);
 const tcp = ref(false);
 
 const open = computed({
@@ -39,26 +43,27 @@ const open = computed({
 
 function onSubmit() {
   emit("update:listener", {
+    label: label.value,
     listen: listen.value,
     hostname: hostname.value,
+    insecure: insecure.value,
     tcp: tcp.value,
   });
   open.value = false;
   if (props.create) {
+    label.value = "";
     listen.value = "";
     hostname.value = "";
+    insecure.value = false;
     tcp.value = false;
   }
 }
 
-function onDelete() {
-  emit("delete");
-  open.value = false;
-}
-
 async function populateFields() {
+  label.value = props.listener.label;
   listen.value = props.listener.listen;
   hostname.value = props.listener.hostname;
+  insecure.value = props.listener.insecure;
   tcp.value = props.listener.tcp;
 }
 
@@ -112,18 +117,9 @@ watch(
             <DialogPanel
               class="relative transform overflow-hidden rounded-lg bg-white bg-gray-100 px-4 py-4 text-left shadow-xl transition-all dark:bg-slate-900 sm:w-full sm:max-w-lg"
             >
-              <button
-                v-if="!create"
-                type="button"
-                class="absolute top-10 right-10 ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white"
-                @click.prevent="onDelete"
-              >
-                <span class="sr-only">Remove Forwarder</span>
-                <TrashIcon class="h-5 w-5" aria-hidden="true" />
-              </button>
               <div class="px-6 py-6">
                 <h3
-                  class="mb-4 text-xl font-medium text-gray-900 dark:text-white"
+                  class="mb-4 text-xl font-semibold text-gray-900 dark:text-white"
                 >
                   {{
                     !create ? "Edit existing forwarder" : "Add new forwarder"
@@ -132,18 +128,37 @@ watch(
                 <form class="space-y-6" @submit.prevent="onSubmit">
                   <div>
                     <label
+                      for="label"
+                      class="mb-2 block text-sm font-semibold text-gray-900 dark:text-white"
+                    >
+                      Label
+                    </label>
+                    <div class="flex">
+                      <input
+                        id="label"
+                        ref="initialFocusRef"
+                        v-model="label"
+                        type="text"
+                        name="label"
+                        class="block w-full rounded-lg border border-gray-300 bg-transparent p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
+                        placeholder="raspberry pi at home"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label
                       for="listen"
-                      class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                      class="mb-2 block text-sm font-semibold text-gray-900 dark:text-white"
                     >
                       Listen
                     </label>
                     <div class="flex">
                       <input
                         id="listen"
-                        ref="initialFocusRef"
                         v-model="listen"
                         type="text"
-                        name="target"
+                        name="listen"
                         class="block w-full rounded-lg border border-gray-300 bg-transparent p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
                         placeholder="127.0.0.1:3389"
                         required
@@ -153,7 +168,7 @@ watch(
                   <div>
                     <label
                       for="hostname"
-                      class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                      class="mb-2 block text-sm font-semibold text-gray-900 dark:text-white"
                     >
                       Hostname
                     </label>
@@ -163,39 +178,20 @@ watch(
                       type="text"
                       name="hostname"
                       class="block w-full rounded-lg border border-gray-300 bg-transparent p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 disabled:text-gray-400 dark:border-gray-500 dark:text-white dark:placeholder-gray-400 dark:disabled:text-gray-400"
-                      placeholder="jinx-jockstrap-gristle-subpanel-violin.fly.specter.im"
+                      placeholder="jinx-jockstrap-gristle-subpanel-violin.specter.im"
                       required
                     />
                   </div>
-                  <div class="flex items-start">
-                    <div class="flex h-5 items-center">
-                      <Switch
-                        v-model="tcp"
-                        :class="
-                          tcp ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-500'
-                        "
-                        class="relative inline-flex h-3 w-6 items-center rounded-full"
-                      >
-                        <span class="sr-only">Use TCP</span>
-                        <span
-                          :class="tcp ? 'translate-x-3' : 'translate-x-0'"
-                          class="inline-block h-3 w-3 transform rounded-full border border-gray-300 bg-white transition dark:border-gray-600"
-                        />
-                      </Switch>
-                    </div>
-                    <div class="ml-3 text-sm">
-                      <label
-                        for="tcp"
-                        class="font-medium text-gray-700 dark:text-gray-300"
-                      >
-                        Use TCP
-                      </label>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">
-                        Connect to specter gateway using TCP/TLS instead of
-                        UDP/QUIC
-                      </p>
-                    </div>
-                  </div>
+                  <SwitchToggle
+                    v-model:value="insecure"
+                    label="Disable TLS Verification"
+                    description="Accepts any certificate presented by the gateway and any host name in that certificate when connecting."
+                  />
+                  <SwitchToggle
+                    v-model:value="tcp"
+                    label="Use TCP"
+                    description="Connect to specter gateway using TCP/TLS instead of UDP/QUIC"
+                  />
                   <button
                     type="submit"
                     class="w-full rounded-lg border border-gray-300 px-5 py-2.5 text-center text-sm text-black focus:outline-none focus:ring-4 focus:ring-blue-300 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-800 dark:hover:bg-gray-600"

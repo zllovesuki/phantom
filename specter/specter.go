@@ -157,23 +157,23 @@ func (app *Application) StartClient() error {
 	return nil
 }
 
-type Node struct {
+type TunnelNode struct {
 	*protocol.Node
 	RTT *rtt.Statistics `json:"rtt"`
 }
 
-func (app *Application) GetConnectedNodes() []Node {
+func (app *Application) GetConnectedTunnelNodes() []TunnelNode {
 	app.stateMu.RLock()
 	defer app.stateMu.RUnlock()
 
 	if app.cli == nil {
-		return []Node{}
+		return []TunnelNode{}
 	}
 
-	nodes := make([]Node, 0)
+	nodes := make([]TunnelNode, 0)
 	connected := app.cli.GetConnectedNodes()
 	for _, node := range connected {
-		nodes = append(nodes, Node{
+		nodes = append(nodes, TunnelNode{
 			Node: node,
 			RTT:  app.transportRTT.Snapshot(rtt.MakeMeasurementKey(node), time.Second*10),
 		})

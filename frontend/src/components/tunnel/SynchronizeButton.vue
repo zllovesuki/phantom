@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { Synchronize, Connected } from "~/wails/go/specter/Application";
 import { onMounted, ref } from "vue";
+
+import { Synchronize, Connected } from "~/wails/go/specter/Application";
 
 const props = defineProps<{
   synchronized?: () => Promise<void> | void;

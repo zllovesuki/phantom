@@ -8,10 +8,11 @@ import {
   DialogPanel,
   TransitionChild,
   TransitionRoot,
-  Switch,
 } from "@miragespace/headlessui-vue";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/vue/20/solid";
 import { TrashIcon } from "@heroicons/vue/24/outline";
+import SwitchToggle from "~/components/utility/SwitchToggle.vue";
+import ConfirmModal from "~/components/utility/ConfirmModal.vue";
 
 import { ParseTarget } from "~/wails/go/specter/Helper";
 import { ref, computed, watch } from "vue";
@@ -19,13 +20,15 @@ import { ref, computed, watch } from "vue";
 import { useRuntimeStore } from "~/store/runtime";
 import type { client } from "~/wails/go/models";
 
-const runtime = useRuntimeStore();
-
-const props = defineProps<{
+export interface Props {
   tunnel: Readonly<client.Tunnel>;
-  create: boolean;
   show: boolean;
-}>();
+  create?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  create: false,
+});
 
 const emit = defineEmits<{
   (event: "update:tunnel", tunnel: client.Tunnel): void;
@@ -37,6 +40,9 @@ const initialFocusRef = ref(null);
 const scheme = ref("tcp");
 const target = ref("");
 const insecure = ref(false);
+const xd = ref(false);
+
+const runtime = useRuntimeStore();
 
 function emitUpdate() {
   if (target.value.length < 1) {
@@ -161,17 +167,17 @@ watch(
               class="relative transform overflow-hidden rounded-lg bg-white bg-gray-100 px-4 py-4 text-left shadow-xl transition-all dark:bg-slate-900 sm:w-full sm:max-w-lg"
             >
               <button
-                v-if="!create"
+                v-show="!create && !tunnel.hostname"
                 type="button"
                 class="absolute top-10 right-10 ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white"
-                @click.prevent="onDelete"
+                @click.prevent="xd = true"
               >
                 <span class="sr-only">Remove Tunnel</span>
                 <TrashIcon class="h-5 w-5" aria-hidden="true" />
               </button>
               <div class="px-6 py-6">
                 <h3
-                  class="mb-4 text-xl font-medium text-gray-900 dark:text-white"
+                  class="mb-4 text-xl font-semibold text-gray-900 dark:text-white"
                 >
                   {{ !create ? "Edit existing tunnel" : "Add new tunnel" }}
                 </h3>
@@ -179,7 +185,7 @@ watch(
                   <div>
                     <label
                       for="target"
-                      class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                      class="mb-2 block text-sm font-semibold text-gray-900 dark:text-white"
                     >
                       Target
                     </label>
@@ -272,41 +278,16 @@ watch(
                       immediately.
                     </p>
                   </div>
-                  <div v-show="scheme === 'https'" class="flex items-start">
-                    <div class="flex h-5 items-center">
-                      <Switch
-                        v-model="insecure"
-                        :class="
-                          insecure
-                            ? 'bg-indigo-500'
-                            : 'bg-gray-300 dark:bg-gray-500'
-                        "
-                        class="relative inline-flex h-3 w-6 items-center rounded-full"
-                      >
-                        <span class="sr-only">Disable TLS Verification</span>
-                        <span
-                          :class="insecure ? 'translate-x-3' : 'translate-x-0'"
-                          class="inline-block h-3 w-3 transform rounded-full border border-gray-300 bg-white transition dark:border-gray-600"
-                        />
-                      </Switch>
-                    </div>
-                    <div class="ml-3 text-sm">
-                      <label
-                        for="insecure"
-                        class="font-medium text-gray-700 dark:text-gray-300"
-                      >
-                        Insecure
-                      </label>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">
-                        Disable TLS verification when dialing to this https
-                        target.
-                      </p>
-                    </div>
-                  </div>
+                  <SwitchToggle
+                    v-show="scheme === 'https'"
+                    v-model:value="insecure"
+                    label="Disable TLS Verification"
+                    description="Accepts any certificate presented by the https target and any host name in that certificate when connecting."
+                  />
                   <div>
                     <label
                       for="hostname"
-                      class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                      class="mb-2 block text-sm font-semibold text-gray-900 dark:text-white"
                     >
                       Hostname
                     </label>
@@ -329,6 +310,12 @@ watch(
                   </button>
                 </form>
               </div>
+              <ConfirmModal
+                v-model:show="xd"
+                title="Remove tunnel"
+                description="Are you sure you want to remove this tunnel? This tunnel will be unregistered from the specter network."
+                @confirmed="onDelete"
+              />
             </DialogPanel>
           </TransitionChild>
         </div>

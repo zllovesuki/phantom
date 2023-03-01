@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import HorizontalDivider from "~/components/HorizontalDivider.vue";
-import SynchronizeButton from "~/components/SynchronizeButton.vue";
-import StatusBadge from "~/components/StatusBadge.vue";
-import ZapLogsViewer from "~/components/ZapLogsViewer.vue";
+import HorizontalDivider from "~/components/utility/HorizontalDivider.vue";
+import SynchronizeButton from "~/components/tunnel/SynchronizeButton.vue";
+import StatusBadge from "~/components/utility/StatusBadge.vue";
+import ZapLogsViewer from "~/components/viewport/ZapLogsViewer.vue";
 import { SparklesIcon, BoltSlashIcon } from "@heroicons/vue/24/outline";
 
 import { ref, onMounted } from "vue";
 import {
   GetSpecterConfig,
   GetPhantomConfig,
-  GetConnectedNodes,
+  GetConnectedTunnelNodes,
+  GetConnectedForwarderNodes,
 } from "~/wails/go/specter/Application";
 import { client, specter } from "~/wails/go/models";
 import { GetFilePaths } from "~/wails/go/specter/Helper";
@@ -22,11 +23,14 @@ const SpecterConfig = ref<client.Config>(
 );
 const PhantomConfig = ref<specter.PhantomConfig>(
   specter.PhantomConfig.createFrom({
-    specterInsecure: false,
     listeners: [],
+    listenOnStart: false,
+    specterInsecure: false,
+    connectOnStart: false,
   })
 );
-const ConnectedNodes = ref<specter.Node[]>([]);
+const ConnectedTunnelNodes = ref<specter.TunnelNode[]>([]);
+const ConnectedForwarderNodes = ref<specter.ForwarderNode[]>([]);
 const ShowToken = ref(false);
 
 const FilePaths = ref<specter.Paths>(specter.Paths.createFrom({}));
@@ -56,12 +60,13 @@ onMounted(async () => {
   }
   const phantomCfg = await GetPhantomConfig();
   if (phantomCfg !== null) {
-    PhantomConfig.value.specterInsecure = phantomCfg.specterInsecure;
-    if (phantomCfg.listeners) {
-      PhantomConfig.value.listeners = phantomCfg.listeners;
+    if (!phantomCfg.listeners) {
+      phantomCfg.listeners = [];
     }
+    PhantomConfig.value = phantomCfg;
   }
-  ConnectedNodes.value = await GetConnectedNodes();
+  ConnectedTunnelNodes.value = await GetConnectedTunnelNodes();
+  ConnectedForwarderNodes.value = await GetConnectedForwarderNodes();
   FilePaths.value = await GetFilePaths();
   await loadLogs();
 });
@@ -77,18 +82,18 @@ onMounted(async () => {
               <h3
                 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
               >
-                Connected Nodes
+                Tunnel Nodes
               </h3>
               <p class="mt-2 text-xs text-gray-600 dark:text-gray-500">
                 <StatusBadge
                   :text="
                     [
-                      ConnectedNodes.length > 0 ? 'Has' : 'No',
+                      ConnectedTunnelNodes.length > 0 ? 'Has' : 'No',
                       'Alive Nodes',
                     ].join(' ')
                   "
                   class="mb-2"
-                  :enabled="ConnectedNodes.length > 0"
+                  :enabled="ConnectedTunnelNodes.length > 0"
                 >
                   <template #enabled>
                     <SparklesIcon class="ml-1 h-4 w-4" />
@@ -138,7 +143,10 @@ onMounted(async () => {
                           <tbody
                             class="divide-y divide-gray-200 dark:divide-gray-700"
                           >
-                            <tr v-for="node in ConnectedNodes" :key="node.id">
+                            <tr
+                              v-for="node in ConnectedTunnelNodes"
+                              :key="node.id"
+                            >
                               <td
                                 class="whitespace-nowrap py-2 pl-6 pr-3 text-sm text-gray-900 dark:text-gray-300 sm:pl-0"
                               >
@@ -273,6 +281,78 @@ onMounted(async () => {
               <h3
                 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
               >
+                Forwarder Nodes
+              </h3>
+            </div>
+          </div>
+
+          <div class="mt-5 md:col-span-3 md:mt-0">
+            <div class="overflow-hidden shadow sm:rounded-md">
+              <div class="bg-white px-4 py-5 dark:bg-slate-800 sm:p-6">
+                <div class="grid grid-cols-6 gap-6">
+                  <div class="col-span-12 sm:col-span-6">
+                    <div class="-my-2 -mx-6 overflow-x-auto lg:-mx-8">
+                      <div
+                        class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8"
+                      >
+                        <table
+                          class="min-w-full divide-y divide-gray-300 dark:divide-gray-600"
+                        >
+                          <thead>
+                            <tr>
+                              <th
+                                scope="col"
+                                class="whitespace-nowrap pb-3.5 pl-6 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-200 sm:pl-0"
+                              >
+                                Label
+                              </th>
+                              <th
+                                scope="col"
+                                class="whitespace-nowrap pl-3 pr-6 pb-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-200 sm:pr-0"
+                              >
+                                Via
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody
+                            class="divide-y divide-gray-200 dark:divide-gray-700"
+                          >
+                            <tr
+                              v-for="node in ConnectedForwarderNodes"
+                              :key="node.label"
+                            >
+                              <td
+                                class="whitespace-nowrap py-2 pl-6 pr-3 text-sm text-gray-900 dark:text-gray-300 sm:pl-0"
+                              >
+                                {{ node.label }}
+                              </td>
+                              <td
+                                class="whitespace-nowrap py-2 pl-3 pr-6 text-sm text-gray-900 dark:text-gray-300 sm:pr-0"
+                              >
+                                {{ node.via }}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <HorizontalDivider />
+
+      <div class="mt-10 sm:mt-0">
+        <div class="md:grid md:grid-cols-4 md:gap-6">
+          <div class="md:col-span-1">
+            <div class="px-4 sm:px-0">
+              <h3
+                class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
+              >
                 Phantom Configuration
               </h3>
               <p class="mt-2 text-xs text-gray-600 dark:text-gray-500">
@@ -294,7 +374,7 @@ onMounted(async () => {
                         <dt
                           class="text-sm font-medium text-gray-500 dark:text-gray-200"
                         >
-                          build.Type
+                          Build Type
                         </dt>
                         <dd
                           class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
@@ -306,7 +386,7 @@ onMounted(async () => {
                         <dt
                           class="text-sm font-medium text-gray-500 dark:text-gray-200"
                         >
-                          client.InsecureVerify
+                          Disable Specter TLS
                         </dt>
                         <dd
                           class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
@@ -314,11 +394,35 @@ onMounted(async () => {
                           {{ PhantomConfig.specterInsecure }}
                         </dd>
                       </div>
+                      <div class="py-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-5">
+                        <dt
+                          class="text-sm font-medium text-gray-500 dark:text-gray-200"
+                        >
+                          Specter Autostart
+                        </dt>
+                        <dd
+                          class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
+                        >
+                          {{ PhantomConfig.connectOnStart }}
+                        </dd>
+                      </div>
+                      <div class="py-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-5">
+                        <dt
+                          class="text-sm font-medium text-gray-500 dark:text-gray-200"
+                        >
+                          Forwarders Autostart
+                        </dt>
+                        <dd
+                          class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
+                        >
+                          {{ PhantomConfig.listenOnStart }}
+                        </dd>
+                      </div>
                       <div class="pt-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:pt-5">
                         <dt
                           class="text-sm font-medium text-gray-500 dark:text-gray-200"
                         >
-                          forwarders
+                          Number of Forwarders
                         </dt>
                         <dd
                           class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"

@@ -2,6 +2,7 @@ import { ClipboardIcon } from "@heroicons/vue/20/solid";
 
 import { defineComponent, ref, type Ref } from "vue";
 import { createPopper, type Instance } from "@popperjs/core";
+
 import { SetClipboardText } from "~/wails/go/specter/Helper";
 
 export default defineComponent({

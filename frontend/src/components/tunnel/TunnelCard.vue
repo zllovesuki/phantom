@@ -1,26 +1,24 @@
 <script setup lang="ts">
-import {
-  EllipsisVerticalIcon,
-  ArrowsRightLeftIcon,
-} from "@heroicons/vue/20/solid";
-
-import ForwarderModal from "~/components/ForwarderModal.vue";
+import { EllipsisVerticalIcon, LockOpenIcon } from "@heroicons/vue/20/solid";
+import InstructionModal from "~/components/tunnel/InstructionModal.vue";
+import TunnelModal from "~/components/tunnel/TunnelModal.vue";
 
 import { ref } from "vue";
 import { storeToRefs } from "pinia";
 
-import type { specter } from "~/wails/go/models";
+import type { client } from "~/wails/go/models";
 import { useLoadingStore } from "~/store/loading";
 
 defineProps<{
-  listener: Readonly<specter.Listener>;
+  tunnel: Readonly<client.Tunnel>;
 }>();
 
 const emit = defineEmits<{
-  (event: "update:listener", listener: specter.Listener): void;
+  (event: "update:tunnel", tunnel: client.Tunnel): void;
   (event: "delete"): void;
 }>();
 
+const InstructionModalOpen = ref(false);
 const EditModalOpen = ref(false);
 const { loading } = storeToRefs(useLoadingStore());
 </script>
@@ -32,13 +30,23 @@ const { loading } = storeToRefs(useLoadingStore());
     >
       <div class="flex-1 truncate px-4 py-2 text-sm">
         <span class="font-medium text-gray-900 dark:text-gray-300">
-          tcp://{{ listener.listen }}
-        </span>
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-          <ArrowsRightLeftIcon
-            class="inline-block h-4 w-4 text-gray-900 dark:text-gray-300"
+          {{ tunnel.target }}
+          <LockOpenIcon
+            v-show="tunnel.insecure"
+            class="ml-0.5 inline-block h-4 w-4 pb-0.5"
           />
-          {{ (listener.tcp ? "tcp://" : "quic://") + listener.hostname }}
+        </span>
+        <p class="text-xs text-gray-600 dark:text-gray-400">
+          <a
+            :class="[
+              tunnel.hostname
+                ? 'cursor-pointer hover:text-gray-400 dark:hover:text-gray-100'
+                : '',
+            ]"
+            @click="InstructionModalOpen = true"
+          >
+            {{ tunnel.hostname ?? "(Pending assignment)" }}
+          </a>
         </p>
       </div>
       <div class="flex-shrink-0 pr-2">
@@ -53,11 +61,11 @@ const { loading } = storeToRefs(useLoadingStore());
         </button>
       </div>
     </div>
-    <ForwarderModal
+    <InstructionModal v-model:show="InstructionModalOpen" :tunnel="tunnel" />
+    <TunnelModal
       v-model:show="EditModalOpen"
-      :create="false"
-      :listener="listener"
-      @update:listener="emit('update:listener', $event)"
+      :tunnel="tunnel"
+      @update:tunnel="emit('update:tunnel', $event)"
       @delete="emit('delete')"
     />
   </li>

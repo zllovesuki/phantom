@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { TransitionRoot } from "@miragespace/headlessui-vue";
-import { computed } from "vue";
 import {
   XCircleIcon,
   CheckCircleIcon,
   InformationCircleIcon,
   XMarkIcon,
 } from "@heroicons/vue/20/solid";
+import { TransitionRoot } from "@miragespace/headlessui-vue";
+
+import { computed } from "vue";
+
 import { useAlertStore } from "~/store/alert";
 
 export type AlertLevel = "fail" | "success" | "info";

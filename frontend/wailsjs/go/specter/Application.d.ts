@@ -3,9 +3,15 @@
 import {specter} from '../models';
 import {client} from '../models';
 
+export function AddForwarder(arg1:specter.Listener):Promise<void>;
+
 export function Connected():Promise<boolean>;
 
-export function GetConnectedNodes():Promise<Array<specter.Node>>;
+export function ForwarderStarted(arg1:string):Promise<boolean>;
+
+export function GetConnectedForwarderNodes():Promise<Array<specter.ForwarderNode>>;
+
+export function GetConnectedTunnelNodes():Promise<Array<specter.TunnelNode>>;
 
 export function GetPhantomConfig():Promise<specter.PhantomConfig>;
 
@@ -13,9 +19,15 @@ export function GetSpecterConfig():Promise<client.Config>;
 
 export function RebuildTunnels(arg1:Array<client.Tunnel>):Promise<void>;
 
+export function RemoveForwarder(arg1:number):Promise<void>;
+
 export function StartClient():Promise<void>;
 
+export function StartForwarder(arg1:number):Promise<void>;
+
 export function StopClient():Promise<void>;
+
+export function StopForwarder(arg1:number):Promise<void>;
 
 export function Synchronize():Promise<void>;
 

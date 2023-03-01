@@ -22,35 +22,38 @@ var (
 	specterLogFile    string
 )
 
-type Listener struct {
-	Listen   string `json:"listen"`
-	Hostname string `json:"hostname"`
-	UseTCP   bool   `json:"tcp"`
-}
-
 type PhantomConfig struct {
 	Listeners                 []Listener `json:"listeners"`
+	ListenOnStart             bool       `json:"listenOnStart"`
 	SpecterInsecureSkipVerify bool       `json:"specterInsecure"`
+	ConnectOnStart            bool       `json:"connectOnStart"`
 }
 
-func (app *Application) UpdatePhantomConfig(cfg *PhantomConfig) {
+func (app *Application) UpdatePhantomConfig(cfg *PhantomConfig) error {
 	app.stateMu.Lock()
 	defer app.stateMu.Unlock()
 
+	if err := app.persistPhantomConfig(cfg); err != nil {
+		return err
+	}
+
+	app.phantomCfg = cfg
+	return nil
+}
+
+func (app *Application) persistPhantomConfig(cfg *PhantomConfig) error {
 	fn, err := os.OpenFile(phantomConfigFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
-		runtime.LogError(app.appCtx, err.Error())
-		return
+		return err
 	}
 	defer fn.Close()
 	defer fn.Sync()
 
 	if err := json.NewEncoder(fn).Encode(cfg); err != nil {
-		runtime.LogError(app.appCtx, err.Error())
-		return
+		return err
 	}
 
-	app.phantomCfg = cfg
+	return nil
 }
 
 func normalizeFilename(name string) string {

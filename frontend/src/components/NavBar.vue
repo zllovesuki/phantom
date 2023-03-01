@@ -9,9 +9,10 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/vue/24/outline";
 
 import { computed } from "vue";
 import { useRoute, useRouter, RouterLink } from "vue-router";
-import { routes } from "~/router";
+
 import { useRuntimeStore } from "~/store/runtime";
 import { useSettingStore } from "~/store/setting";
+import { routes } from "~/router";
 
 const route = useRoute();
 const router = useRouter();

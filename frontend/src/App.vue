@@ -1,16 +1,36 @@
 <script lang="ts" setup>
-import ProgressBar from "~/components/ProgressBar.vue";
 import Nav from "~/components/NavBar.vue";
 import AlertSection from "~/components/AlertSection.vue";
+import ProgressBar from "~/components/utility/ProgressBar.vue";
 import { RouterView } from "vue-router";
-import { onMounted } from "vue";
+import { onMounted, onUnmounted } from "vue";
 import { storeToRefs } from "pinia";
 
 import { useLoadingStore } from "~/store/loading";
+import { EventsOn } from "~/runtime/patched";
+import broker from "~/runtime/event";
 
 const { loading } = storeToRefs(useLoadingStore());
 
 onMounted(() => {
+  const eventUnsubscriptions: (() => void)[] = [];
+  eventUnsubscriptions.push(
+    EventsOn("forwarder:Started", (l) => {
+      broker.emit("forwarder:Started", l);
+    })
+  );
+  eventUnsubscriptions.push(
+    EventsOn("forwarder:Stopped", (l) => {
+      broker.emit("forwarder:Stopped", l);
+    })
+  );
+
+  onUnmounted(() => {
+    for (const f of eventUnsubscriptions) {
+      f();
+    }
+  });
+
   setTimeout(() => {
     window.loading_screen.finish();
   }, 750);

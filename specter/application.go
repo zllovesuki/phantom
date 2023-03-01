@@ -26,9 +26,11 @@ type Application struct {
 	transportRTT rtt.Recorder
 	cliCtx       context.Context
 	cliCtxCancel context.CancelFunc
+	forwarders   map[string]*forwarder
 }
 
 func (app *Application) OnStartup(ctx context.Context) {
+	app.forwarders = make(map[string]*forwarder)
 	app.appCtx = ctx
 
 	setupPath(ctx)
@@ -39,6 +41,12 @@ func (app *Application) OnStartup(ctx context.Context) {
 	}
 
 	config := zap.NewProductionConfig()
+	env := runtime.Environment(app.appCtx)
+	if env.BuildType != "production" {
+		// override config if build type is dev or debug
+		config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+		config.Sampling = nil
+	}
 	config.OutputPaths = append(config.OutputPaths, specterLogFile)
 
 	logger, err := config.Build()
@@ -81,9 +89,20 @@ func (app *Application) OnStartup(ctx context.Context) {
 
 	app.specterCfg = specterCfg
 	app.phantomCfg = phantomCfg
+	if app.phantomCfg.ConnectOnStart {
+		go func() {
+			if err := app.StartClient(); err != nil {
+				app.logger.Error("Fail to start specter client on start", zap.Error(err))
+			}
+		}()
+	}
+	if app.phantomCfg.ListenOnStart {
+		go app.startAllForwarders()
+	}
 }
 
 func (app *Application) OnShutdown(ctx context.Context) {
+	app.stopAllForwarders()
 	app.StopClient()
 	app.logger.Sync()
 }

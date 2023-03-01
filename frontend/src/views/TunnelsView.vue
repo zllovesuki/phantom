@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import TunnelCard from "~/components/TunnelCard.vue";
-import TunnelModal from "~/components/TunnelModal.vue";
-import { ServerIcon } from "@heroicons/vue/24/outline";
+import TunnelCard from "~/components/tunnel/TunnelCard.vue";
+import TunnelModal from "~/components/tunnel/TunnelModal.vue";
+import FullWidthCTA from "~/components/utility/FullWidthCTA";
 
 import { storeToRefs } from "pinia";
 import { ref, onMounted, computed } from "vue";
@@ -42,7 +42,7 @@ async function appendNewTunnel(t: client.Tunnel) {
     await rebuildTunnels();
     await synchornizeTunnels();
   } catch (e) {
-    showAlert("fail", e as string);
+    showAlert("fail", `Error adding tunnel: ${e as string}`);
   } finally {
     setLoading(false);
   }
@@ -54,7 +54,7 @@ async function unpublishTunnel(i: number) {
     await UnpublishTunnel(i);
     Tunnels.value.splice(i, 1);
   } catch (e) {
-    showAlert("fail", e as string);
+    showAlert("fail", `Error removing tunnel: ${e as string}`);
   } finally {
     setLoading(false);
   }
@@ -113,10 +113,16 @@ onMounted(reloadTunnels);
           </div>
           <div class="mt-5 md:col-span-full md:mt-0">
             <form @submit.prevent>
+              <FullWidthCTA
+                icon="ServerIcon"
+                :disabled="loading"
+                description="Add a new tunnel"
+                @triggered="NewTunnelModalOpen = true"
+              />
               <ul
                 v-show="Tunnels.length > 0"
                 role="list"
-                class="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2"
+                class="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2"
               >
                 <TunnelCard
                   v-for="(tunnel, i) in Tunnels"
@@ -126,21 +132,10 @@ onMounted(reloadTunnels);
                   @delete="unpublishTunnel(i)"
                 />
               </ul>
-              <button
-                type="button"
-                class="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center focus:outline-none hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500"
-                :disabled="loading"
-                @click="NewTunnelModalOpen = true"
-              >
-                <ServerIcon class="mx-auto h-10 w-10 text-gray-400" />
-                <span class="mt-2 block text-base font-medium">
-                  Add a new tunnel
-                </span>
-              </button>
               <TunnelModal
                 v-model:show="NewTunnelModalOpen"
-                :tunnel="{ target: '', insecure: false }"
                 :create="true"
+                :tunnel="{ target: '', insecure: false }"
                 @update:tunnel="appendNewTunnel($event)"
               />
             </form>

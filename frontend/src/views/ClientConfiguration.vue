@@ -1,76 +1,78 @@
 <script setup lang="ts">
-import StatusBadge from "~/components/StatusBadge.vue";
-import HorizontalDivider from "~/components/HorizontalDivider.vue";
 import { SparklesIcon, BoltSlashIcon } from "@heroicons/vue/24/outline";
-import { Switch } from "@miragespace/headlessui-vue";
+import StatusBadge from "~/components/utility/StatusBadge.vue";
+import SwitchToggle from "~/components/utility/SwitchToggle.vue";
+import HorizontalDivider from "~/components/utility/HorizontalDivider.vue";
+import ToggleConnectButton from "~/components/tunnel/ToggleConnectButton.vue";
 
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, nextTick, onUnmounted } from "vue";
 import {
-  Connected,
   GetSpecterConfig,
   GetPhantomConfig,
-  StartClient,
-  StopClient,
   UpdateApex,
   UpdatePhantomConfig,
 } from "~/wails/go/specter/Application";
 import { client, specter } from "~/wails/go/models";
 import { useAlertStore } from "~/store/alert";
+import bus from "~/runtime/event";
 
-const { showAlert, hideAlert } = useAlertStore();
+const { showAlert } = useAlertStore();
 
+const SynchronizingSettings = ref(false);
+const SpecterConnecting = ref(false);
 const ClientConnected = ref(false);
 const SpecterConfig = ref<client.Config>(
   client.Config.createFrom({ apex: "" })
 );
 const PhantomConfig = ref<specter.PhantomConfig>(
   specter.PhantomConfig.createFrom({
-    specterInsecure: false,
     listeners: [],
+    listenOnStart: false,
+    specterInsecure: false,
+    connectOnStart: false,
   })
 );
-const ChangingClientState = ref(false);
-const ChangingSettings = ref(false);
 
-const disableSettingsModification = computed(() => {
+const DisableSettingsModification = computed(() => {
   return (
-    ClientConnected.value || ChangingClientState.value || ChangingSettings.value
+    ClientConnected.value ||
+    SynchronizingSettings.value ||
+    SpecterConnecting.value
   );
 });
 
 async function synchronizeSettings() {
-  if (ChangingSettings.value) {
-    return;
-  }
-  ChangingSettings.value = true;
-  await UpdateApex(SpecterConfig.value.apex);
-  await UpdatePhantomConfig(PhantomConfig.value);
-  setTimeout(() => {
-    ChangingSettings.value = false;
-  }, 500);
-}
-
-async function toggleClientState() {
-  if (ChangingClientState.value) {
+  if (SynchronizingSettings.value) {
     return;
   }
   try {
-    hideAlert();
-    ChangingClientState.value = true;
-    if (ClientConnected.value) {
-      await StopClient();
-      ClientConnected.value = false;
-    } else {
-      await synchronizeSettings();
-      await StartClient();
-      ClientConnected.value = true;
-    }
+    SynchronizingSettings.value = true;
+    await UpdateApex(SpecterConfig.value.apex);
+    await UpdatePhantomConfig(PhantomConfig.value);
   } catch (e) {
-    showAlert("fail", e as string);
+    showAlert("fail", `Error saving settings: ${e as string}`);
   } finally {
-    ChangingClientState.value = false;
+    setTimeout(() => {
+      SynchronizingSettings.value = false;
+    }, 500);
   }
 }
+function getConnectedStateEventHandler(setConnected: boolean): () => void {
+  return () => {
+    ClientConnected.value = setConnected;
+    SpecterConnecting.value = false;
+  };
+}
+
+const onConnectedHandler = getConnectedStateEventHandler(true);
+const onDisconnectedHandler = getConnectedStateEventHandler(false);
+const onConnectingHandler = () => {
+  SpecterConnecting.value = true;
+};
+
+bus.on("specter:Connected", onConnectedHandler);
+bus.on("specter:Connecting", onConnectingHandler);
+bus.on("specter:Disconnected", onDisconnectedHandler);
 
 const _loaded = ref(false);
 onMounted(async () => {
@@ -82,15 +84,27 @@ onMounted(async () => {
   if (phantomCfg !== null) {
     PhantomConfig.value = phantomCfg;
   }
-  ClientConnected.value = await Connected();
-  _loaded.value = true;
+  nextTick(() => {
+    _loaded.value = true;
+  });
 });
-watch([() => PhantomConfig.value.specterInsecure], async () => {
-  if (!_loaded.value) {
-    return;
+onUnmounted(() => {
+  bus.off("specter:Connected", onConnectedHandler);
+  bus.off("specter:Connecting", onConnectingHandler);
+  bus.off("specter:Disconnected", onDisconnectedHandler);
+});
+watch(
+  [
+    () => PhantomConfig.value.specterInsecure,
+    () => PhantomConfig.value.connectOnStart,
+  ],
+  async () => {
+    if (!_loaded.value) {
+      return;
+    }
+    await synchronizeSettings();
   }
-  await synchronizeSettings();
-});
+);
 </script>
 
 <template>
@@ -127,48 +141,9 @@ watch([() => PhantomConfig.value.specterInsecure], async () => {
                         class="inline-block text-sm text-gray-700 dark:text-gray-300"
                       >
                         <div class="flex space-x-3">
-                          <button
-                            type="button"
-                            :disabled="ChangingClientState"
-                            :class="[
-                              ChangingClientState
-                                ? 'cursor-not-allowed'
-                                : 'cursor-pointer',
-                              ChangingClientState
-                                ? 'bg-gray-100 text-black dark:bg-gray-700 dark:text-white'
-                                : ClientConnected
-                                ? 'bg-red-600 text-white hover:bg-red-700'
-                                : 'bg-indigo-600 text-white hover:bg-indigo-700',
-                              'inline-flex items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500',
-                            ]"
-                            @click="toggleClientState"
-                          >
-                            {{
-                              ChangingClientState
-                                ? "Working..."
-                                : ClientConnected
-                                ? "Disconnect"
-                                : "Connect"
-                            }}
-                            <svg
-                              v-show="ChangingClientState"
-                              aria-hidden="true"
-                              role="status"
-                              class="ml-3 inline h-4 w-4 animate-spin text-gray-600"
-                              viewBox="0 0 100 101"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                                fill="#E5E7EB"
-                              />
-                              <path
-                                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </button>
+                          <ToggleConnectButton
+                            :on-before-connect="synchronizeSettings"
+                          />
                         </div>
                       </span>
                     </div>
@@ -191,7 +166,7 @@ watch([() => PhantomConfig.value.specterInsecure], async () => {
               >
                 Client Configuration
                 <svg
-                  v-show="ChangingSettings"
+                  v-show="SynchronizingSettings"
                   aria-hidden="true"
                   role="status"
                   class="ml-2 inline h-4 w-4 animate-spin text-gray-700 dark:text-gray-300"
@@ -236,7 +211,7 @@ watch([() => PhantomConfig.value.specterInsecure], async () => {
                           v-model="SpecterConfig.apex"
                           type="text"
                           name="specter-apex"
-                          :disabled="disableSettingsModification"
+                          :disabled="DisableSettingsModification"
                           class="block w-full flex-1 rounded-none rounded-r-md border-gray-200 bg-transparent text-black placeholder-gray-600 outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 disabled:text-gray-400 dark:border-gray-700 dark:text-white dark:placeholder-gray-400 dark:disabled:text-gray-400 sm:text-sm"
                           placeholder="specter.im:443"
                         />
@@ -259,42 +234,18 @@ watch([() => PhantomConfig.value.specterInsecure], async () => {
                       Options
                     </label>
                     <div class="mt-4 space-y-4">
-                      <div class="flex items-start">
-                        <div class="flex h-5 items-center">
-                          <Switch
-                            v-model="PhantomConfig.specterInsecure"
-                            :disabled="disableSettingsModification"
-                            :class="
-                              PhantomConfig.specterInsecure
-                                ? 'bg-indigo-500'
-                                : 'bg-gray-300 dark:bg-gray-500'
-                            "
-                            class="relative inline-flex h-3 w-6 items-center rounded-full"
-                          >
-                            <span class="sr-only">Disable Client TLS</span>
-                            <span
-                              :class="
-                                PhantomConfig.specterInsecure
-                                  ? 'translate-x-3'
-                                  : 'translate-x-0'
-                              "
-                              class="inline-block h-3 w-3 transform rounded-full border border-gray-300 bg-white transition dark:border-gray-600"
-                            />
-                          </Switch>
-                        </div>
-                        <div class="ml-3 text-sm">
-                          <label
-                            for="target-tls"
-                            class="font-medium text-gray-700 dark:text-gray-300"
-                          >
-                            Disable Client TLS
-                          </label>
-                          <p class="text-xs text-gray-500 dark:text-gray-400">
-                            Disable TLS verification when dialing to specter
-                            gateway. Should only be used during development.
-                          </p>
-                        </div>
-                      </div>
+                      <SwitchToggle
+                        v-model:value="PhantomConfig.specterInsecure"
+                        :disabled="DisableSettingsModification"
+                        label="Disable TLS Verification"
+                        description="Accepts any certificate presented by the gateway and any host name in that certificate when connecting. Should only be used during development."
+                      />
+                      <SwitchToggle
+                        v-model:value="PhantomConfig.connectOnStart"
+                        :disabled="SynchronizingSettings"
+                        label="Client Autostart"
+                        description="Start specter client when Phantom starts"
+                      />
                     </div>
                   </fieldset>
                 </div>

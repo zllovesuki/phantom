@@ -1,0 +1,10 @@
+ARG GO_VERSION=1.20.1
+ARG WAILS_VERSION=v2.3.1
+
+FROM golang:${GO_VERSION}-bullseye AS tools
+ARG WAILS_VERSION
+
+RUN go install -ldflags="-w -s" -v "github.com/wailsapp/wails/v2/cmd/wails@${WAILS_VERSION}"
+
+FROM golang:${GO_VERSION}-bullseye AS base
+COPY --from=tools /go/bin/wails /usr/local/bin

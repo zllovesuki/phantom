@@ -1,4 +1,5 @@
 import { PlayIcon, StopIcon } from "@heroicons/vue/20/solid";
+import ConfirmModal from "~/components/utility/ConfirmModal.vue";
 
 import { defineComponent, onUnmounted, ref } from "vue";
 import { storeToRefs } from "pinia";
@@ -20,6 +21,7 @@ export default defineComponent({
     const loadingStore = useLoadingStore();
     const { loading } = storeToRefs(loadingStore);
     const { setLoading } = loadingStore;
+    const confirmStopModalOpen = ref(false);
     const started = ref(false);
 
     async function getForwarderIndex(): Promise<number> {
@@ -35,6 +37,7 @@ export default defineComponent({
     async function toggleForwarderState() {
       try {
         setLoading(true);
+        await new Promise((resolve) => setTimeout(resolve, 500));
         const i = await getForwarderIndex();
         if (started.value) {
           await StopForwarder(i);
@@ -71,16 +74,34 @@ export default defineComponent({
       const Icon = started.value ? StopIcon : PlayIcon;
       const { ...otherProps } = props;
       return (
-        <button
-          type="button"
-          class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400 hover:text-gray-500"
-          disabled={loading.value}
-          onClick={toggleForwarderState}
-          {...otherProps}
-        >
-          <span class="sr-only">Restart forwarder</span>
-          <Icon class="h-5 w-5" aria-hidden="true" />
-        </button>
+        <span>
+          <button
+            type="button"
+            class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400 hover:text-gray-500"
+            disabled={loading.value}
+            onClick={() => {
+              started.value
+                ? (confirmStopModalOpen.value = true)
+                : toggleForwarderState();
+            }}
+            {...otherProps}
+          >
+            <span class="sr-only">Restart forwarder</span>
+            <Icon class="h-5 w-5" aria-hidden="true" />
+          </button>
+          <ConfirmModal
+            show={confirmStopModalOpen.value}
+            title="Stopping Forwarder"
+            descriptions={[
+              "Are you sure you want to stop this forwarder?",
+              "All established connections will be disconnected.",
+            ]}
+            onConfirmed={toggleForwarderState}
+            onUpdate:show={(v: boolean) => {
+              confirmStopModalOpen.value = v;
+            }}
+          />
+        </span>
       );
     };
   },

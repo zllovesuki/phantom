@@ -9,18 +9,20 @@ import { ref, onMounted, computed } from "vue";
 import {
   GetSpecterConfig,
   RebuildTunnels,
+  ReleaseTunnel,
   UnpublishTunnel,
   Synchronize,
 } from "~/wails/go/specter/Application";
+import { ValidateTarget } from "~/wails/go/specter/Helper";
 import type { client } from "~/wails/go/models";
 import { useAlertStore } from "~/store/alert";
 import { useLoadingStore } from "~/store/loading";
 
-const Loading = useLoadingStore();
-const { setLoading } = Loading;
-const { loading } = storeToRefs(Loading);
-
 const { showAlert } = useAlertStore();
+const loadingStore = useLoadingStore();
+const { setLoading } = loadingStore;
+const { loading: Loading } = storeToRefs(loadingStore);
+
 const Tunnels = ref<client.Tunnel[]>([]);
 const NewTunnelModalOpen = ref(false);
 const Unsaved = computed<boolean>(() => {
@@ -35,10 +37,8 @@ const Unsaved = computed<boolean>(() => {
 async function appendNewTunnel(t: client.Tunnel) {
   try {
     setLoading(true);
-    Tunnels.value.push({
-      target: t.target,
-      insecure: t.insecure,
-    });
+    await ValidateTarget(t.target);
+    Tunnels.value.push(t);
     await rebuildTunnels();
     await synchornizeTunnels();
   } catch (e) {
@@ -52,9 +52,23 @@ async function unpublishTunnel(i: number) {
   try {
     setLoading(true);
     await UnpublishTunnel(i);
+    await new Promise((resolve) => setTimeout(resolve, 500));
     Tunnels.value.splice(i, 1);
   } catch (e) {
-    showAlert("fail", `Error removing tunnel: ${e as string}`);
+    showAlert("fail", `Error unpublishing tunnel: ${e as string}`);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function releaseTunnel(i: number) {
+  try {
+    setLoading(true);
+    await ReleaseTunnel(i);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    Tunnels.value.splice(i, 1);
+  } catch (e) {
+    showAlert("fail", `Error releasing tunnel: ${e as string}`);
   } finally {
     setLoading(false);
   }
@@ -115,7 +129,7 @@ onMounted(reloadTunnels);
             <form @submit.prevent>
               <FullWidthCTA
                 icon="ServerIcon"
-                :disabled="loading"
+                :disabled="Loading"
                 description="Add a new tunnel"
                 @triggered="NewTunnelModalOpen = true"
               />
@@ -129,7 +143,8 @@ onMounted(reloadTunnels);
                   :key="i"
                   :tunnel="tunnel"
                   @update:tunnel="updateTunnel(i, $event)"
-                  @delete="unpublishTunnel(i)"
+                  @unpublish="unpublishTunnel(i)"
+                  @release="releaseTunnel(i)"
                 />
               </ul>
               <TunnelModal

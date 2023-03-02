@@ -15,9 +15,13 @@ export function GetConnectedTunnelNodes():Promise<Array<specter.TunnelNode>>;
 
 export function GetPhantomConfig():Promise<specter.PhantomConfig>;
 
+export function GetRegisteredHostnames():Promise<Array<string>>;
+
 export function GetSpecterConfig():Promise<client.Config>;
 
 export function RebuildTunnels(arg1:Array<client.Tunnel>):Promise<void>;
+
+export function ReleaseTunnel(arg1:number):Promise<void>;
 
 export function RemoveForwarder(arg1:number):Promise<void>;
 

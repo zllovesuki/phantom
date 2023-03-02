@@ -50,6 +50,7 @@ async function removeForwarder(i: number) {
   try {
     setLoading(true);
     await RemoveForwarder(i);
+    await new Promise((resolve) => setTimeout(resolve, 500));
     await reloadForwarders();
   } catch (e) {
     showAlert("fail", `Error removing forwarder: ${e as string}`);

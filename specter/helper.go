@@ -3,6 +3,7 @@ package specter
 import (
 	"fmt"
 	"net/url"
+	"runtime"
 	"strings"
 
 	"golang.design/x/clipboard"
@@ -14,6 +15,43 @@ type Target struct {
 	Protocol    string `json:"protocol"`
 	Destination string `json:"destination"`
 	Error       string `json:"error,omitempty"`
+}
+
+func (*Helper) ValidateTarget(target string) error {
+	target = strings.ToLower(target)
+
+	if strings.HasPrefix(target, "\\\\.\\pipe") {
+		if runtime.GOOS != "windows" {
+			return fmt.Errorf("named pipe is only supported on Windows")
+		}
+		return nil
+	}
+
+	u, err := url.Parse(target)
+	if err != nil {
+		return fmt.Errorf("unable to parse target: %w", err)
+	}
+
+	switch u.Scheme {
+	case "http", "https", "tcp", "unix":
+	default:
+		return fmt.Errorf("unsupported scheme. valid schemes: http, https, tcp, unix; got %s", u.Scheme)
+	}
+
+	if strings.HasPrefix(target, "unix") {
+		if runtime.GOOS == "windows" {
+			return fmt.Errorf("unix pipe is not supported on Windows")
+		}
+		if u.Host != "" {
+			return fmt.Errorf("not a valid unix pipe target")
+		}
+	}
+
+	if u.Hostname() == "" {
+		return fmt.Errorf("missing host in target")
+	}
+
+	return nil
 }
 
 func (*Helper) ParseTarget(target string) Target {
@@ -28,7 +66,7 @@ func (*Helper) ParseTarget(target string) Target {
 			u.Scheme = "winio"
 			break
 		}
-		return Target{Error: fmt.Errorf("unsupported scheme. valid schemes: http, https, tcp; got %s", u.Scheme).Error()}
+		return Target{Error: fmt.Errorf("unsupported scheme. valid schemes: http, https, tcp, unix; got %s", u.Scheme).Error()}
 	}
 	switch u.Scheme {
 	case "unix", "winio":

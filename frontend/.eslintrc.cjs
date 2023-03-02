@@ -21,5 +21,5 @@ module.exports = {
     // override/add rules settings here, such as:
     // 'vue/no-unused-vars': 'error'
   },
-  ignorePatterns: ["wailsjs/*", "vendor/*"],
+  ignorePatterns: ["wailsjs/*", "vendor/*", "dist/", "node_modules/"],
 };

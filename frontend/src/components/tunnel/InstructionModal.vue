@@ -90,7 +90,7 @@ onMounted(async () => {
             <DialogPanel
               class="relative transform overflow-hidden rounded-lg bg-white bg-gray-100 px-4 py-4 text-left shadow-xl transition-all dark:bg-slate-900 sm:w-full sm:max-w-lg"
             >
-              <div class="text-gray-900 dark:text-white">
+              <div class="px-2 py-2 text-gray-900 dark:text-white sm:px-4">
                 <div class="text-center">
                   <DialogTitle as="h3" class="text-lg font-medium leading-6">
                     Connecting to your tunnel

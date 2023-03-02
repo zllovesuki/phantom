@@ -60,13 +60,32 @@ func (app *Application) UnpublishTunnel(index int) error {
 	defer app.stateMu.Unlock()
 
 	if app.cli == nil {
+		return fmt.Errorf("specter client is not connected")
+	} else {
+		cfg := app.cli.GetCurrentConfig()
+		if index < 0 || index > len(cfg.Tunnels) {
+			return fmt.Errorf("tunnel index out of bound")
+		}
+		return app.cli.UnpublishTunnel(app.appCtx, cfg.Tunnels[index])
+	}
+}
+
+func (app *Application) ReleaseTunnel(index int) error {
+	app.stateMu.Lock()
+	defer app.stateMu.Unlock()
+
+	if app.cli == nil {
 		if index < 0 || index > len(app.specterCfg.Tunnels) {
 			return fmt.Errorf("tunnel index out of bound")
 		}
 		app.specterCfg.Tunnels = append(app.specterCfg.Tunnels[:index], app.specterCfg.Tunnels[index+1:]...)
 		return nil
 	} else {
-		return fmt.Errorf("not implemented")
+		cfg := app.cli.GetCurrentConfig()
+		if index < 0 || index > len(cfg.Tunnels) {
+			return fmt.Errorf("tunnel index out of bound")
+		}
+		return app.cli.ReleaseTunnel(app.appCtx, cfg.Tunnels[index])
 	}
 }
 
@@ -160,6 +179,22 @@ func (app *Application) StartClient() error {
 type TunnelNode struct {
 	*protocol.Node
 	RTT *rtt.Statistics `json:"rtt"`
+}
+
+func (app *Application) GetRegisteredHostnames() ([]string, error) {
+	app.stateMu.RLock()
+	defer app.stateMu.RUnlock()
+
+	if app.cli == nil {
+		return []string{}, nil
+	}
+
+	hostnames, err := app.cli.GetRegisteredHostnames(app.cliCtx)
+	if err != nil {
+		return nil, err
+	}
+
+	return hostnames, nil
 }
 
 func (app *Application) GetConnectedTunnelNodes() []TunnelNode {

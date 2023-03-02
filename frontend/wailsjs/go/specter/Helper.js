@@ -13,3 +13,7 @@ export function ParseTarget(arg1) {
 export function SetClipboardText(arg1) {
   return window['go']['specter']['Helper']['SetClipboardText'](arg1);
 }
+
+export function ValidateTarget(arg1) {
+  return window['go']['specter']['Helper']['ValidateTarget'](arg1);
+}

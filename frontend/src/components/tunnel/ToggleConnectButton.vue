@@ -25,6 +25,7 @@ async function toggleClientState() {
     ChangingClientState.value = true;
     if (ClientConnected.value) {
       await StopClient();
+      await new Promise((resolve) => setTimeout(resolve, 500));
       ClientConnected.value = false;
       broker.emit("specter:Disconnected");
     } else {
@@ -67,8 +68,8 @@ onMounted(async () => {
       ChangingClientState
         ? 'bg-gray-100 text-black dark:bg-gray-700 dark:text-white'
         : ClientConnected
-        ? 'bg-red-600 text-white hover:bg-red-700'
-        : 'bg-indigo-600 text-white hover:bg-indigo-700',
+        ? 'bg-red-500 text-white hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-800'
+        : 'bg-indigo-500 text-white hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700',
       'inline-flex items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500',
     ]"
     @click="toggleClientState"

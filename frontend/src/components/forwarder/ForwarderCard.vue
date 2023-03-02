@@ -68,8 +68,11 @@ const { loading } = storeToRefs(useLoadingStore());
     </div>
     <ConfirmModal
       v-model:show="ConfirmModalOpen"
-      title="Remove forwarder"
-      description="Are you sure you want to remove this forwarder? All established connections will be disconnected."
+      title="Removing Forwarder"
+      :descriptions="[
+        'Are you sure you want to remove this forwarder?',
+        'All established connections will be disconnected.',
+      ]"
       @confirmed="emit('delete')"
     />
     <ForwarderModal v-model:show="EditModalOpen" :listener="listener" />

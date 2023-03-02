@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { EllipsisVerticalIcon, LockOpenIcon } from "@heroicons/vue/20/solid";
+import {
+  EllipsisVerticalIcon,
+  LockOpenIcon,
+  StopIcon,
+} from "@heroicons/vue/20/solid";
 import InstructionModal from "~/components/tunnel/InstructionModal.vue";
+import ConfirmModal from "~/components/utility/ConfirmModal.vue";
 import TunnelModal from "~/components/tunnel/TunnelModal.vue";
 
 import { ref } from "vue";
@@ -8,6 +13,7 @@ import { storeToRefs } from "pinia";
 
 import type { client } from "~/wails/go/models";
 import { useLoadingStore } from "~/store/loading";
+import { useRuntimeStore } from "~/store/runtime";
 
 defineProps<{
   tunnel: Readonly<client.Tunnel>;
@@ -15,12 +21,15 @@ defineProps<{
 
 const emit = defineEmits<{
   (event: "update:tunnel", tunnel: client.Tunnel): void;
-  (event: "delete"): void;
+  (event: "unpublish"): void;
+  (event: "release"): void;
 }>();
 
 const InstructionModalOpen = ref(false);
+const UnpublishModalOpen = ref(false);
 const EditModalOpen = ref(false);
-const { loading } = storeToRefs(useLoadingStore());
+const { loading: Loading } = storeToRefs(useLoadingStore());
+const { ClientConnected } = storeToRefs(useRuntimeStore());
 </script>
 
 <template>
@@ -45,18 +54,28 @@ const { loading } = storeToRefs(useLoadingStore());
             ]"
             @click="InstructionModalOpen = true"
           >
-            {{ tunnel.hostname ?? "(Pending assignment)" }}
+            {{ tunnel.hostname ?? "(Pending hostname assignment)" }}
           </a>
         </p>
       </div>
       <div class="flex-shrink-0 pr-2">
         <button
+          v-show="!!tunnel.hostname && ClientConnected"
           type="button"
           class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400 hover:text-gray-500"
-          :disabled="loading"
+          :disabled="Loading"
+          @click="UnpublishModalOpen = true"
+        >
+          <span class="sr-only">Unpublish tunnel</span>
+          <StopIcon class="h-5 w-5" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400 hover:text-gray-500"
+          :disabled="Loading"
           @click="EditModalOpen = true"
         >
-          <span class="sr-only">Open options</span>
+          <span class="sr-only">Edit tunnel</span>
           <EllipsisVerticalIcon class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
@@ -66,7 +85,15 @@ const { loading } = storeToRefs(useLoadingStore());
       v-model:show="EditModalOpen"
       :tunnel="tunnel"
       @update:tunnel="emit('update:tunnel', $event)"
-      @delete="emit('delete')"
+      @delete="emit('release')"
+    />
+    <ConfirmModal
+      v-model:show="UnpublishModalOpen"
+      title="Unpublishing Tunnel"
+      :descriptions="[
+        'This will remove tunnel advertisement from the network, but the hostname is kept for use later.',
+      ]"
+      @confirmed="emit('unpublish')"
     />
   </li>
 </template>

@@ -14,7 +14,7 @@ import {
 } from "~/wails/go/specter/Application";
 import { client, specter } from "~/wails/go/models";
 import { useAlertStore } from "~/store/alert";
-import bus from "~/runtime/event";
+import broker from "~/runtime/event";
 
 const { showAlert } = useAlertStore();
 
@@ -70,9 +70,9 @@ const onConnectingHandler = () => {
   SpecterConnecting.value = true;
 };
 
-bus.on("specter:Connected", onConnectedHandler);
-bus.on("specter:Connecting", onConnectingHandler);
-bus.on("specter:Disconnected", onDisconnectedHandler);
+broker.on("specter:Connected", onConnectedHandler);
+broker.on("specter:Connecting", onConnectingHandler);
+broker.on("specter:Disconnected", onDisconnectedHandler);
 
 const _loaded = ref(false);
 onMounted(async () => {
@@ -89,9 +89,9 @@ onMounted(async () => {
   });
 });
 onUnmounted(() => {
-  bus.off("specter:Connected", onConnectedHandler);
-  bus.off("specter:Connecting", onConnectingHandler);
-  bus.off("specter:Disconnected", onDisconnectedHandler);
+  broker.off("specter:Connected", onConnectedHandler);
+  broker.off("specter:Connecting", onConnectingHandler);
+  broker.off("specter:Disconnected", onDisconnectedHandler);
 });
 watch(
   [

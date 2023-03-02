@@ -26,12 +26,20 @@ export function GetPhantomConfig() {
   return window['go']['specter']['Application']['GetPhantomConfig']();
 }
 
+export function GetRegisteredHostnames() {
+  return window['go']['specter']['Application']['GetRegisteredHostnames']();
+}
+
 export function GetSpecterConfig() {
   return window['go']['specter']['Application']['GetSpecterConfig']();
 }
 
 export function RebuildTunnels(arg1) {
   return window['go']['specter']['Application']['RebuildTunnels'](arg1);
+}
+
+export function ReleaseTunnel(arg1) {
+  return window['go']['specter']['Application']['ReleaseTunnel'](arg1);
 }
 
 export function RemoveForwarder(arg1) {

@@ -1,24 +1,27 @@
 <script setup lang="ts">
 import {
-  Listbox,
-  ListboxButton,
-  ListboxOption,
-  ListboxOptions,
   Dialog,
   DialogPanel,
   TransitionChild,
   TransitionRoot,
 } from "@miragespace/headlessui-vue";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/vue/20/solid";
 import { TrashIcon } from "@heroicons/vue/24/outline";
 import SwitchToggle from "~/components/utility/SwitchToggle.vue";
 import ConfirmModal from "~/components/utility/ConfirmModal.vue";
+import DropdownList, {
+  type DropdownOption,
+} from "~/components/utility/DropdownList.vue";
 
-import { ParseTarget } from "~/wails/go/specter/Helper";
 import { ref, computed, watch } from "vue";
+import { storeToRefs } from "pinia";
 
-import { useRuntimeStore } from "~/store/runtime";
+import {
+  GetSpecterConfig,
+  GetRegisteredHostnames,
+} from "~/wails/go/specter/Application";
+import { ParseTarget } from "~/wails/go/specter/Helper";
 import type { client } from "~/wails/go/models";
+import { useRuntimeStore } from "~/store/runtime";
 
 export interface Props {
   tunnel: Readonly<client.Tunnel>;
@@ -36,37 +39,8 @@ const emit = defineEmits<{
   (event: "delete"): void;
 }>();
 
-const initialFocusRef = ref(null);
-const scheme = ref("tcp");
-const target = ref("");
-const insecure = ref(false);
-const xd = ref(false);
-
 const runtime = useRuntimeStore();
-
-function emitUpdate() {
-  if (target.value.length < 1) {
-    emit("update:tunnel", {
-      ...props.tunnel,
-      target: "",
-      insecure: insecure.value,
-    });
-    return;
-  }
-  if (scheme.value === "winio") {
-    emit("update:tunnel", {
-      ...props.tunnel,
-      target: target.value,
-      insecure: insecure.value,
-    });
-    return;
-  }
-  emit("update:tunnel", {
-    ...props.tunnel,
-    target: scheme.value + "://" + target.value,
-    insecure: scheme.value === "https" ? insecure.value : false,
-  });
-}
+const { ClientConnected } = storeToRefs(useRuntimeStore());
 
 const placeholders: Record<string, string> = {
   tcp: "127.0.0.1:22",
@@ -80,8 +54,56 @@ if (runtime.environment?.platform === "windows") {
 } else {
   delete placeholders["winio"];
 }
-const availableSchemes = Object.keys(placeholders);
 
+const availableSchemes: DropdownOption[] = Object.keys(placeholders).map(
+  (s) => ({
+    Value: s,
+    Text: s,
+  })
+);
+const availableMap: Record<string, DropdownOption> = availableSchemes.reduce(
+  (m, o) => {
+    m[o.Value] = o;
+    return m;
+  },
+  {} as Record<string, DropdownOption>
+);
+const optionNew: DropdownOption = {
+  Value: "",
+  Text: "(Assign new hostname)",
+};
+
+const initialFocusRef = ref(null);
+const scheme = ref(availableSchemes[0]);
+const freeHostnames = ref<DropdownOption[]>([]);
+const hostname = ref<DropdownOption>(
+  props.tunnel.hostname ? { Value: props.tunnel.hostname } : optionNew
+);
+const insecure = ref(false);
+const target = ref("");
+
+const ConfirmDeleteModalOpen = ref(false);
+const options = computed<DropdownOption[]>(() => {
+  return [optionNew, ...freeHostnames.value];
+});
+
+const canDelete = computed<boolean>(() => {
+  // obviously can't delete a tunnel when we are creating one
+  if (props.create) {
+    return false;
+  }
+  // otherwise, if a tunnel is unpublished, it is all local state, we can delete
+  // if the tunnel is already published, we can only delete it if we are connected
+  return hostname.value.Value === "" ? true : ClientConnected.value;
+});
+const deleteModalDescription = computed<string[]>(() => {
+  return [
+    "Are you sure you want to remove this tunnel?",
+    hostname.value.Value === ""
+      ? "This tunnel will not be published when the client is connected."
+      : "This hostname will be released from the network. You won't be able to use the hostname again.",
+  ];
+});
 const open = computed({
   get() {
     return props.show;
@@ -91,29 +113,74 @@ const open = computed({
   },
 });
 
+function emitUpdate() {
+  if (target.value.length < 1) {
+    emit("update:tunnel", {
+      target: "",
+      hostname: hostname.value.Value,
+      insecure: insecure.value,
+    });
+    return;
+  }
+  if (scheme.value.Value === "winio") {
+    emit("update:tunnel", {
+      target: target.value,
+      hostname: hostname.value.Value,
+      insecure: insecure.value,
+    });
+    return;
+  }
+  emit("update:tunnel", {
+    target: scheme.value.Value + "://" + target.value,
+    hostname: hostname.value.Value,
+    insecure: scheme.value.Value === "https" ? insecure.value : false,
+  });
+}
+
+function resetFields() {
+  scheme.value = availableSchemes[0];
+  hostname.value = optionNew;
+  insecure.value = false;
+  target.value = "";
+}
+
 function onSubmit() {
-  emitUpdate();
   open.value = false;
+  emitUpdate();
   if (props.create) {
-    scheme.value = "tcp";
-    target.value = "";
-    insecure.value = false;
+    resetFields();
   }
 }
 
 function onDelete() {
-  emit("delete");
   open.value = false;
+  emit("delete");
 }
 
 async function populateFields() {
-  const parsed = await ParseTarget(props.tunnel.target);
-  if (parsed.error) {
-    return;
+  if (props.create) {
+    resetFields();
+    if (ClientConnected.value) {
+      const free = await GetRegisteredHostnames();
+      const specterCfg = await GetSpecterConfig();
+      const registered = (specterCfg.tunnels || [])
+        .map((t) => t.hostname ?? "")
+        .filter((h) => h != "");
+      freeHostnames.value = free
+        .filter((h) => !registered.includes(h))
+        .map((h) => ({
+          Value: h,
+        }));
+    }
+  } else {
+    const parsed = await ParseTarget(props.tunnel.target);
+    if (parsed.error) {
+      return;
+    }
+    scheme.value = availableMap[parsed.protocol];
+    insecure.value = props.tunnel.insecure;
+    target.value = parsed.destination;
   }
-  scheme.value = parsed.protocol;
-  target.value = parsed.destination;
-  insecure.value = props.tunnel.insecure;
 }
 
 // refresh when we are visible
@@ -167,10 +234,10 @@ watch(
               class="relative transform overflow-hidden rounded-lg bg-white bg-gray-100 px-4 py-4 text-left shadow-xl transition-all dark:bg-slate-900 sm:w-full sm:max-w-lg"
             >
               <button
-                v-show="!create && !tunnel.hostname"
+                v-show="canDelete"
                 type="button"
                 class="absolute top-10 right-10 ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white"
-                @click.prevent="xd = true"
+                @click.prevent="ConfirmDeleteModalOpen = true"
               >
                 <span class="sr-only">Remove Tunnel</span>
                 <TrashIcon class="h-5 w-5" aria-hidden="true" />
@@ -190,74 +257,12 @@ watch(
                       Target
                     </label>
                     <div class="flex">
-                      <Listbox v-model="scheme" as="div">
-                        <div class="relative">
-                          <ListboxButton
-                            class="relative w-20 cursor-default rounded-md rounded-r-none border border-gray-300 bg-gray-100 py-3 pl-3 pr-8 text-left text-black shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-500 dark:bg-slate-700 dark:text-white sm:text-sm"
-                          >
-                            <span class="block">{{ scheme }}</span>
-                            <span
-                              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1"
-                            >
-                              <ChevronUpDownIcon
-                                class="h-5 w-5 text-gray-400"
-                                aria-hidden="true"
-                              />
-                            </span>
-                          </ListboxButton>
-
-                          <transition
-                            leave-active-class="transition ease-in duration-100"
-                            leave-from-class="opacity-100"
-                            leave-to-class="opacity-0"
-                          >
-                            <ListboxOptions
-                              class="py1 absolute z-10 mt-1 max-h-60 w-full overflow-y-auto bg-gray-50 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-700 sm:text-sm"
-                            >
-                              <ListboxOption
-                                v-for="usableScheme in availableSchemes"
-                                :key="usableScheme"
-                                v-slot="{ active, selected }"
-                                as="template"
-                                :value="usableScheme"
-                              >
-                                <li
-                                  :class="[
-                                    active
-                                      ? 'bg-gray-300 dark:bg-slate-500 dark:text-white'
-                                      : 'dark:text-white',
-                                    'relative cursor-default select-none py-2 pl-3 pr-7',
-                                  ]"
-                                >
-                                  <span
-                                    :class="[
-                                      selected ? 'font-semibold' : 'font-light',
-                                      'block',
-                                    ]"
-                                  >
-                                    {{ usableScheme }}
-                                  </span>
-
-                                  <span
-                                    v-if="selected"
-                                    :class="[
-                                      active
-                                        ? 'dark:text-white'
-                                        : 'dark:text-white',
-                                      'absolute inset-y-0 right-0 flex items-center pr-2',
-                                    ]"
-                                  >
-                                    <CheckIcon
-                                      class="h-4 w-4"
-                                      aria-hidden="true"
-                                    />
-                                  </span>
-                                </li>
-                              </ListboxOption>
-                            </ListboxOptions>
-                          </transition>
-                        </div>
-                      </Listbox>
+                      <DropdownList
+                        v-model:value="scheme"
+                        :options="availableSchemes"
+                        styles="w-20 rounded-r-none"
+                        class="z-20"
+                      />
                       <input
                         id="target"
                         ref="initialFocusRef"
@@ -265,21 +270,21 @@ watch(
                         type="text"
                         name="target"
                         class="block w-full rounded-lg rounded-l-none border border-l-0 border-gray-300 bg-transparent p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-500 dark:text-white dark:placeholder-gray-400"
-                        :placeholder="placeholders[scheme]"
+                        :placeholder="placeholders[scheme.Value]"
                         required
                       />
                     </div>
                     <p
                       v-show="!create"
                       id="helper-text-explanation"
-                      class="mt-2 text-xs text-gray-500 dark:text-gray-400"
+                      class="mt-2 text-xs text-gray-600 dark:text-gray-400"
                     >
                       Note that updating HTTP(s) tunnel may not take effect
                       immediately.
                     </p>
                   </div>
                   <SwitchToggle
-                    v-show="scheme === 'https'"
+                    v-show="scheme.Value === 'https'"
                     v-model:value="insecure"
                     label="Disable TLS Verification"
                     description="Accepts any certificate presented by the https target and any host name in that certificate when connecting."
@@ -291,16 +296,29 @@ watch(
                     >
                       Hostname
                     </label>
-                    <input
-                      id="hostname"
-                      type="text"
-                      name="hostname"
-                      :value="tunnel.hostname"
-                      placeholder="(Assigned on Publish)"
-                      class="block w-full rounded-lg border border-gray-300 bg-transparent p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 disabled:text-gray-400 dark:border-gray-500 dark:text-white dark:placeholder-gray-400 dark:disabled:text-gray-400"
-                      disabled
-                      readonly
+                    <DropdownList
+                      v-model:value="hostname"
+                      styles="w-full"
+                      :options="options"
+                      :limit-height="true"
+                      :disabled="create ? !ClientConnected : true"
                     />
+                    <p
+                      v-show="create && !ClientConnected"
+                      id="helper-text-explanation"
+                      class="mt-2 text-xs text-gray-600 dark:text-gray-400"
+                    >
+                      You can select previously used hostnames if the client is
+                      connected.
+                    </p>
+                    <p
+                      v-show="!create && !ClientConnected"
+                      id="helper-text-explanation"
+                      class="mt-2 text-xs text-gray-600 dark:text-gray-400"
+                    >
+                      Removing the tunnel requires the specter client to be
+                      connected.
+                    </p>
                   </div>
                   <button
                     type="submit"
@@ -311,9 +329,9 @@ watch(
                 </form>
               </div>
               <ConfirmModal
-                v-model:show="xd"
-                title="Remove tunnel"
-                description="Are you sure you want to remove this tunnel? This tunnel will be unregistered from the specter network."
+                v-model:show="ConfirmDeleteModalOpen"
+                :descriptions="deleteModalDescription"
+                title="Removing Tunnel"
                 @confirmed="onDelete"
               />
             </DialogPanel>

@@ -7,7 +7,7 @@ require (
 	github.com/wailsapp/wails/v2 v2.3.1
 	go.uber.org/zap v1.24.0
 	golang.design/x/clipboard v0.6.3
-	kon.nect.sh/specter v0.0.0-20230301104706-09deb726c918
+	kon.nect.sh/specter v0.0.0-20230302091036-42688c138be2
 )
 
 require (

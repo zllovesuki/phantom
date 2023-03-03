@@ -13,6 +13,7 @@ import {
   AddForwarder,
   RemoveForwarder,
   UpdatePhantomConfig,
+  UpdateForwaderLabel,
 } from "~/wails/go/specter/Application";
 import { useAlertStore } from "~/store/alert";
 import { useLoadingStore } from "~/store/loading";
@@ -54,6 +55,19 @@ async function removeForwarder(i: number) {
     await reloadForwarders();
   } catch (e) {
     showAlert("fail", `Error removing forwarder: ${e as string}`);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function updateLabel(i: number, label: string) {
+  try {
+    setLoading(true);
+    await UpdateForwaderLabel(i, label);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await reloadForwarders();
+  } catch (e) {
+    showAlert("fail", `Error updating label: ${e as string}`);
   } finally {
     setLoading(false);
   }
@@ -129,6 +143,7 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
                   :key="i"
                   :listener="listener"
                   @delete="removeForwarder(i)"
+                  @update:label="updateLabel(i, $event)"
                 />
               </ul>
               <FullWidthCTA

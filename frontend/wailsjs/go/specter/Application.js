@@ -74,6 +74,10 @@ export function UpdateApex(arg1) {
   return window['go']['specter']['Application']['UpdateApex'](arg1);
 }
 
+export function UpdateForwaderLabel(arg1, arg2) {
+  return window['go']['specter']['Application']['UpdateForwaderLabel'](arg1, arg2);
+}
+
 export function UpdatePhantomConfig(arg1) {
   return window['go']['specter']['Application']['UpdatePhantomConfig'](arg1);
 }

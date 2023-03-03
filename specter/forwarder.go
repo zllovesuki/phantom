@@ -197,6 +197,29 @@ func (app *Application) findForwarder(index int) (l Listener, f *forwarder, ok b
 	return
 }
 
+func (app *Application) UpdateForwaderLabel(index int, label string) error {
+	app.stateMu.Lock()
+	defer app.stateMu.Unlock()
+
+	_, f, ok, err := app.findForwarder(index)
+	if err != nil {
+		return err
+	}
+
+	if !ok {
+		return fmt.Errorf("forwarder with index %d does not exist", index)
+	}
+
+	app.phantomCfg.Listeners[index].Label = label
+	f.cfg = app.phantomCfg.Listeners[index]
+
+	if err := app.persistPhantomConfig(app.phantomCfg); err != nil {
+		return fmt.Errorf("failed to persist forwarder config: %w", err)
+	}
+
+	return nil
+}
+
 func (app *Application) RemoveForwarder(index int) error {
 	app.stateMu.Lock()
 	defer app.stateMu.Unlock()

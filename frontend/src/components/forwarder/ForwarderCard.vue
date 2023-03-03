@@ -15,17 +15,32 @@ import { storeToRefs } from "pinia";
 import type { specter } from "~/wails/go/models";
 import { useLoadingStore } from "~/store/loading";
 
-defineProps<{
+const props = defineProps<{
   listener: specter.Listener;
 }>();
 
 const emit = defineEmits<{
+  (event: "update:label", l: string): void;
   (event: "delete"): void;
 }>();
 
 const EditModalOpen = ref(false);
 const ConfirmModalOpen = ref(false);
-const { loading } = storeToRefs(useLoadingStore());
+
+const { loading: Loading } = storeToRefs(useLoadingStore());
+
+function updateLabel(ev: Event) {
+  const el = ev.target as HTMLInputElement;
+  const val = el.innerText.trim();
+  if (val.length < 1) {
+    el.innerHTML = props.listener.label;
+  } else {
+    if (val === props.listener.label) {
+      return;
+    }
+    emit("update:label", val);
+  }
+}
 </script>
 
 <template>
@@ -44,7 +59,14 @@ const { loading } = storeToRefs(useLoadingStore());
             v-show="listener.insecure"
             class="ml-0.5 inline-block h-4 w-4 pb-0.5"
           />
-          / {{ listener.label }}
+          [<span
+            spellcheck="false"
+            :contenteditable="!Loading"
+            class="focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            @keydown.enter="(ev) => {(ev.target as HTMLInputElement).blur()}"
+            @blur="updateLabel"
+            >{{ listener.label }}</span
+          >]
         </span>
         <p class="text-xs text-gray-600 dark:text-gray-400">
           <ArrowsRightLeftIcon
@@ -58,7 +80,7 @@ const { loading } = storeToRefs(useLoadingStore());
         <button
           type="button"
           class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400 hover:text-gray-500"
-          :disabled="loading"
+          :disabled="Loading"
           @click.prevent="ConfirmModalOpen = true"
         >
           <span class="sr-only">Remove forwarder</span>

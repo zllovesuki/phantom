@@ -36,7 +36,7 @@ export default defineComponent({
       return (
         <button
           type="button"
-          class="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-4 text-center focus:outline-none hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500"
+          class="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-4 text-center focus:outline-none hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-500"
           disabled={props.disabled}
           onClick={(ev) => {
             ev.preventDefault();

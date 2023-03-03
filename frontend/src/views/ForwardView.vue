@@ -128,7 +128,7 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
               <ul
                 v-show="Forwarders.length > 0"
                 role="list"
-                class="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2"
+                class="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2"
               >
                 <ForwarderCard
                   v-for="(listener, i) in Forwarders"

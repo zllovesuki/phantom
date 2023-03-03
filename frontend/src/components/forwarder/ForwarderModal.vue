@@ -117,7 +117,7 @@ watch(
             <DialogPanel
               class="relative transform overflow-hidden rounded-lg bg-white bg-gray-100 px-4 py-4 text-left shadow-xl transition-all dark:bg-slate-900 sm:w-full sm:max-w-lg"
             >
-              <div class="px-6 py-6">
+              <div class="px-4 py-4">
                 <h3
                   class="mb-4 text-xl font-semibold text-gray-900 dark:text-white"
                 >

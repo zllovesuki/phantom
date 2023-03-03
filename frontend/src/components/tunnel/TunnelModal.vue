@@ -242,7 +242,7 @@ watch(
                 <span class="sr-only">Remove Tunnel</span>
                 <TrashIcon class="h-5 w-5" aria-hidden="true" />
               </button>
-              <div class="px-6 py-6">
+              <div class="px-4 py-4">
                 <h3
                   class="mb-4 text-xl font-semibold text-gray-900 dark:text-white"
                 >

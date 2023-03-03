@@ -136,7 +136,7 @@ onMounted(reloadTunnels);
               <ul
                 v-show="Tunnels.length > 0"
                 role="list"
-                class="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2"
+                class="my-5 grid grid-cols-1 gap-6 md:grid-cols-2"
               >
                 <TunnelCard
                   v-for="(tunnel, i) in Tunnels"

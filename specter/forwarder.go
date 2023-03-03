@@ -206,12 +206,10 @@ func (app *Application) UpdateForwaderLabel(index int, label string) error {
 		return err
 	}
 
-	if !ok {
-		return fmt.Errorf("forwarder with index %d does not exist", index)
-	}
-
 	app.phantomCfg.Listeners[index].Label = label
-	f.cfg = app.phantomCfg.Listeners[index]
+	if ok {
+		f.cfg = app.phantomCfg.Listeners[index]
+	}
 
 	if err := app.persistPhantomConfig(app.phantomCfg); err != nil {
 		return fmt.Errorf("failed to persist forwarder config: %w", err)

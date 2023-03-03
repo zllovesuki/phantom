@@ -47,12 +47,13 @@ const { ClientConnected } = storeToRefs(useRuntimeStore());
         </span>
         <p class="text-xs text-gray-600 dark:text-gray-400">
           <a
+            href="#"
             :class="[
               tunnel.hostname
                 ? 'cursor-pointer hover:text-gray-400 dark:hover:text-gray-100'
                 : '',
             ]"
-            @click="InstructionModalOpen = true"
+            @click.prevent="InstructionModalOpen = true"
           >
             {{ tunnel.hostname ?? "(Pending hostname assignment)" }}
           </a>

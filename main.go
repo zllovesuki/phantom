@@ -44,7 +44,7 @@ func main() {
 		Windows: &windows.Options{
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,
-			DisableWindowIcon:    false,
+			DisableWindowIcon:    true,
 		},
 		Mac: &mac.Options{
 			TitleBar:             mac.TitleBarHidden(),

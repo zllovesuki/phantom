@@ -44,7 +44,7 @@ const navigation = routes
     <div
       :class="[
         PaddingTop ? 'pt-4' : '',
-        'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8',
+        'mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8',
       ]"
     >
       <div class="flex h-16 items-center justify-between">
@@ -52,6 +52,7 @@ const navigation = routes
           <div class="flex-shrink-0">
             <!-- icon from https://www.svgrepo.com/svg/395450/ghost -->
             <svg
+              tabindex="-1"
               width="32px"
               height="32px"
               viewBox="0 0 1024 1024"
@@ -86,7 +87,7 @@ const navigation = routes
           <div class="ml-4 flex items-center md:ml-6">
             <button
               type="button"
-              class="rounded-full p-1 text-gray-400 focus:outline-none focus:ring-0 focus:ring-offset-0 hover:text-gray-500 dark:hover:text-gray-200"
+              class="rounded-full p-1 text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 hover:text-gray-500 dark:hover:text-gray-200"
               @click="setting.darkMode = !setting.darkMode"
             >
               <span class="sr-only">Dark mode</span>
@@ -138,7 +139,7 @@ const navigation = routes
         <div class="flex items-center px-5">
           <button
             type="button"
-            class="ml-auto flex-shrink-0 rounded-full p-1 text-gray-400 focus:outline-none focus:ring-0 focus:ring-offset-0 hover:text-gray-500 dark:hover:text-gray-200"
+            class="ml-auto flex-shrink-0 rounded-full p-1 text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 hover:text-gray-500 dark:hover:text-gray-200"
             @click="setting.darkMode = !setting.darkMode"
           >
             <span class="sr-only">Dark mode</span>

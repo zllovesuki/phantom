@@ -127,16 +127,10 @@ onMounted(reloadTunnels);
           </div>
           <div class="mt-5 md:col-span-full md:mt-0">
             <form @submit.prevent>
-              <FullWidthCTA
-                icon="ServerIcon"
-                :disabled="Loading"
-                description="Add a new tunnel"
-                @triggered="NewTunnelModalOpen = true"
-              />
               <ul
                 v-show="Tunnels.length > 0"
                 role="list"
-                class="my-5 grid grid-cols-1 gap-6 md:grid-cols-2"
+                class="mb-5 grid grid-cols-1 gap-6 md:grid-cols-2"
               >
                 <TunnelCard
                   v-for="(tunnel, i) in Tunnels"
@@ -147,6 +141,12 @@ onMounted(reloadTunnels);
                   @release="releaseTunnel(i)"
                 />
               </ul>
+              <FullWidthCTA
+                icon="ServerIcon"
+                :disabled="Loading"
+                description="Add a new tunnel"
+                @triggered="NewTunnelModalOpen = true"
+              />
               <TunnelModal
                 v-model:show="NewTunnelModalOpen"
                 :create="true"

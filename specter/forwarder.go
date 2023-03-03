@@ -8,6 +8,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"kon.nect.sh/specter/tun/client/connector"
 	"kon.nect.sh/specter/tun/client/dialer"
+	"kon.nect.sh/specter/util/promise"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -48,21 +49,39 @@ func (app *Application) startAllForwarders() {
 	app.stateMu.Lock()
 	defer app.stateMu.Unlock()
 
+	toStart := make([]Listener, 0)
 	for _, l := range app.phantomCfg.Listeners {
-		app.logger.Info("Starting forwarder on start", zap.Object("listener", &l))
-		err := app.startForwarder(l)
-		if err != nil {
-			app.logger.Error("Failed to start forwarder on start", zap.Object("listener", &l), zap.Error(err))
+		if _, ok := app.forwarders.Load(l.Listen); ok {
 			continue
 		}
+		toStart = append(toStart, l)
 	}
+
+	if len(toStart) == 0 {
+		return
+	}
+
+	startJobs := make([]func(context.Context) (int, error), len(toStart))
+	for i, l := range toStart {
+		l := l
+		startJobs[i] = func(ctx context.Context) (int, error) {
+			app.logger.Info("Starting forwarder on startup", zap.Object("listener", &l))
+			err := app.startForwarder(l)
+			if err != nil {
+				app.logger.Error("Failed to start forwarder on startup", zap.Object("listener", &l), zap.Error(err))
+			}
+			return 0, err
+		}
+	}
+	promise.All(app.appCtx, startJobs...)
 }
 
 func (app *Application) stopAllForwarders() {
-	for _, f := range app.forwarders {
+	app.forwarders.Range(func(listen string, f *forwarder) bool {
 		app.logger.Info("Stopping forwarder on exit", zap.String("listen", f.listener.Addr().String()))
 		f.stop()
-	}
+		return true
+	})
 }
 
 func (app *Application) getNewForwarder(l Listener) (*forwarder, error) {
@@ -84,7 +103,7 @@ func (app *Application) ForwarderStarted(listen string) bool {
 	app.stateMu.RLock()
 	defer app.stateMu.RUnlock()
 
-	_, ok := app.forwarders[listen]
+	_, ok := app.forwarders.Load(listen)
 	return ok
 }
 
@@ -92,7 +111,7 @@ func (app *Application) AddForwarder(l Listener) error {
 	app.stateMu.Lock()
 	defer app.stateMu.Unlock()
 
-	if _, ok := app.forwarders[l.Listen]; ok {
+	if _, ok := app.forwarders.Load(l.Listen); ok {
 		return fmt.Errorf("listener with address %s already exists", l.Listen)
 	}
 
@@ -152,7 +171,7 @@ func (app *Application) startForwarder(l Listener) error {
 	go connector.HandleConnections(logger, f.listener, dial)
 
 	f.dialer = dial
-	app.forwarders[l.Listen] = f
+	app.forwarders.Store(l.Listen, f)
 	runtime.EventsEmit(app.appCtx, "forwarder:Started", l.Listen)
 
 	return nil
@@ -161,7 +180,7 @@ func (app *Application) startForwarder(l Listener) error {
 func (app *Application) stopForwarder(l Listener, f *forwarder) {
 	f.stop()
 
-	delete(app.forwarders, l.Listen)
+	app.forwarders.Delete(l.Listen)
 	runtime.EventsEmit(app.appCtx, "forwarder:Stopped", l.Listen)
 }
 
@@ -173,7 +192,7 @@ func (app *Application) findForwarder(index int) (l Listener, f *forwarder, ok b
 
 	l = app.phantomCfg.Listeners[index]
 
-	f, ok = app.forwarders[l.Listen]
+	f, ok = app.forwarders.Load(l.Listen)
 
 	return
 }
@@ -247,12 +266,13 @@ func (app *Application) GetConnectedForwarderNodes() []ForwarderNode {
 	defer app.stateMu.RUnlock()
 
 	nodes := make([]ForwarderNode, 0)
-	for _, f := range app.forwarders {
+	app.forwarders.Range(func(listen string, f *forwarder) bool {
 		nodes = append(nodes, ForwarderNode{
 			Label: f.cfg.Label,
 			Via:   f.dialer.Remote().String(),
 		})
-	}
+		return true
+	})
 
 	return nodes
 }

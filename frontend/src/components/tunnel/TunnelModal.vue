@@ -161,8 +161,10 @@ async function populateFields() {
   if (props.create) {
     resetFields();
     if (ClientConnected.value) {
-      const free = await GetRegisteredHostnames();
-      const specterCfg = await GetSpecterConfig();
+      const [free, specterCfg] = await Promise.all([
+        GetRegisteredHostnames(),
+        GetSpecterConfig(),
+      ]);
       const registered = (specterCfg.tunnels || [])
         .map((t) => t.hostname ?? "")
         .filter((h) => h != "");

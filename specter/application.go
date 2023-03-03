@@ -11,6 +11,7 @@ import (
 	"kon.nect.sh/specter/tun/client"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/zhangyunhao116/skipmap"
 	"go.uber.org/zap"
 )
 
@@ -26,11 +27,11 @@ type Application struct {
 	transportRTT rtt.Recorder
 	cliCtx       context.Context
 	cliCtxCancel context.CancelFunc
-	forwarders   map[string]*forwarder
+	forwarders   *skipmap.StringMap[*forwarder] // needed to start forwarders concurrently
 }
 
 func (app *Application) OnStartup(ctx context.Context) {
-	app.forwarders = make(map[string]*forwarder)
+	app.forwarders = skipmap.NewString[*forwarder]()
 	app.appCtx = ctx
 
 	setupPath(ctx)

@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import HorizontalDivider from "~/components/utility/HorizontalDivider.vue";
 import SynchronizeButton from "~/components/tunnel/SynchronizeButton.vue";
+import HorizontalDivider from "~/components/utility/HorizontalDivider.vue";
+import DescriptionList, {
+  type Item,
+} from "~/components/utility/DescriptionList.vue";
 import StatusBadge from "~/components/utility/StatusBadge.vue";
 import ZapLogsViewer from "~/components/viewport/ZapLogsViewer.vue";
 import { SparklesIcon, BoltSlashIcon } from "@heroicons/vue/24/outline";
 
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import {
   GetSpecterConfig,
   GetPhantomConfig,
@@ -31,11 +34,55 @@ const PhantomConfig = ref<specter.PhantomConfig>(
 );
 const ConnectedTunnelNodes = ref<specter.TunnelNode[]>([]);
 const ConnectedForwarderNodes = ref<specter.ForwarderNode[]>([]);
-const ShowToken = ref(false);
-
 const FilePaths = ref<specter.Paths>(specter.Paths.createFrom({}));
-
 const LogEntries = ref<string[]>([]);
+
+const specterConfigEntries = computed<Item[]>(() => {
+  return [
+    {
+      Key: "Gateway Apex",
+      Value: SpecterConfig.value.apex,
+    },
+    {
+      Key: "Client ID",
+      Value: (SpecterConfig.value.clientId ?? "").toString(),
+    },
+    {
+      Key: "Client Token",
+      Value: SpecterConfig.value.token,
+      ClickToShow: true,
+    },
+    {
+      Key: "Number of Tunnels",
+      Value: (SpecterConfig.value.tunnels ?? []).length.toString(),
+    },
+  ];
+});
+
+const phantomConfigEntries = computed<Item[]>(() => {
+  return [
+    {
+      Key: "Build Type",
+      Value: runtime.environment?.buildType,
+    },
+    {
+      Key: "Disable Specter TLS",
+      Value: PhantomConfig.value.specterInsecure.toString(),
+    },
+    {
+      Key: "Specter Autostart",
+      Value: PhantomConfig.value.connectOnStart.toString(),
+    },
+    {
+      Key: "Forwarders Autostart",
+      Value: PhantomConfig.value.listenOnStart.toString(),
+    },
+    {
+      Key: "Number of Forwarders",
+      Value: PhantomConfig.value.listeners.length.toString(),
+    },
+  ];
+});
 
 function ns2Ms(ns?: number): string {
   return ((ns ?? 0) / 1000000).toFixed(2) + "ms";
@@ -197,68 +244,10 @@ onMounted(async () => {
           </div>
           <div class="mt-5 md:col-span-3 md:mt-0">
             <div class="overflow-hidden shadow sm:rounded-md sm:rounded-b-none">
-              <div class="bg-white px-4 py-5 dark:bg-slate-800 sm:p-6">
+              <div class="bg-white px-4 py-2 dark:bg-slate-800 sm:px-6">
                 <div class="grid grid-cols-6 gap-6">
                   <div class="col-span-12 sm:col-span-6">
-                    <dl
-                      class="sm:divide-y sm:divide-gray-200 dark:sm:divide-gray-600"
-                    >
-                      <div class="pb-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:pb-5">
-                        <dt
-                          class="text-sm font-medium text-gray-500 dark:text-gray-200"
-                        >
-                          Gateway Apex
-                        </dt>
-                        <dd
-                          class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
-                        >
-                          {{ SpecterConfig.apex }}
-                        </dd>
-                      </div>
-                      <div class="py-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-5">
-                        <dt
-                          class="text-sm font-medium text-gray-500 dark:text-gray-200"
-                        >
-                          Client ID
-                        </dt>
-                        <dd
-                          class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
-                        >
-                          {{ SpecterConfig.clientId }}
-                        </dd>
-                      </div>
-                      <div class="py-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-5">
-                        <dt
-                          class="text-sm font-medium text-gray-500 dark:text-gray-200"
-                        >
-                          Client Token
-                        </dt>
-                        <dd
-                          class="mt-1 cursor-pointer text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
-                          @click="ShowToken = !ShowToken"
-                        >
-                          {{
-                            ShowToken
-                              ? SpecterConfig.token
-                              : Array((SpecterConfig.token ?? "").length)
-                                  .fill("*")
-                                  .join("")
-                          }}
-                        </dd>
-                      </div>
-                      <div class="pt-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:pt-5">
-                        <dt
-                          class="text-sm font-medium text-gray-500 dark:text-gray-200"
-                        >
-                          Number of Tunnels
-                        </dt>
-                        <dd
-                          class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
-                        >
-                          {{ (SpecterConfig.tunnels ?? []).length }}
-                        </dd>
-                      </div>
-                    </dl>
+                    <DescriptionList :items="specterConfigEntries" />
                   </div>
                 </div>
               </div>
@@ -266,7 +255,7 @@ onMounted(async () => {
             <div
               class="bg-gray-50 px-4 py-3 text-right dark:bg-slate-700/[0.3] sm:px-6"
             >
-              <SynchronizeButton :synchronized="loadLogs" />
+              <SynchronizeButton @synchronized="loadLogs" />
             </div>
           </div>
         </div>
@@ -364,73 +353,10 @@ onMounted(async () => {
           </div>
           <div class="mt-5 md:col-span-3 md:mt-0">
             <div class="overflow-hidden shadow sm:rounded-md">
-              <div class="bg-white px-4 py-5 dark:bg-slate-800 sm:p-6">
+              <div class="bg-white px-4 py-2 dark:bg-slate-800 sm:px-6">
                 <div class="grid grid-cols-6 gap-6">
                   <div class="col-span-12 sm:col-span-6">
-                    <dl
-                      class="sm:divide-y sm:divide-gray-200 dark:sm:divide-gray-600"
-                    >
-                      <div class="pb-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:pb-5">
-                        <dt
-                          class="text-sm font-medium text-gray-500 dark:text-gray-200"
-                        >
-                          Build Type
-                        </dt>
-                        <dd
-                          class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
-                        >
-                          {{ runtime.environment?.buildType }}
-                        </dd>
-                      </div>
-                      <div class="py-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-5">
-                        <dt
-                          class="text-sm font-medium text-gray-500 dark:text-gray-200"
-                        >
-                          Disable Specter TLS
-                        </dt>
-                        <dd
-                          class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
-                        >
-                          {{ PhantomConfig.specterInsecure }}
-                        </dd>
-                      </div>
-                      <div class="py-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-5">
-                        <dt
-                          class="text-sm font-medium text-gray-500 dark:text-gray-200"
-                        >
-                          Specter Autostart
-                        </dt>
-                        <dd
-                          class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
-                        >
-                          {{ PhantomConfig.connectOnStart }}
-                        </dd>
-                      </div>
-                      <div class="py-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-5">
-                        <dt
-                          class="text-sm font-medium text-gray-500 dark:text-gray-200"
-                        >
-                          Forwarders Autostart
-                        </dt>
-                        <dd
-                          class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
-                        >
-                          {{ PhantomConfig.listenOnStart }}
-                        </dd>
-                      </div>
-                      <div class="pt-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:pt-5">
-                        <dt
-                          class="text-sm font-medium text-gray-500 dark:text-gray-200"
-                        >
-                          Number of Forwarders
-                        </dt>
-                        <dd
-                          class="mt-1 text-sm text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
-                        >
-                          {{ PhantomConfig.listeners.length }}
-                        </dd>
-                      </div>
-                    </dl>
+                    <DescriptionList :items="phantomConfigEntries" />
                   </div>
                 </div>
               </div>

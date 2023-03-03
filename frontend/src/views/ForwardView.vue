@@ -119,16 +119,10 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
           </div>
           <div class="mt-5 md:col-span-full md:mt-0">
             <form @submit.prevent>
-              <FullWidthCTA
-                icon="ArrowRightOnRectangleIcon"
-                :disabled="loading"
-                description="Add a new forwarder"
-                @triggered="NewForwarderModalOpen = true"
-              />
               <ul
                 v-show="Forwarders.length > 0"
                 role="list"
-                class="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2"
+                class="mb-5 grid grid-cols-1 gap-6 md:grid-cols-2"
               >
                 <ForwarderCard
                   v-for="(listener, i) in Forwarders"
@@ -137,6 +131,12 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
                   @delete="removeForwarder(i)"
                 />
               </ul>
+              <FullWidthCTA
+                icon="ArrowRightOnRectangleIcon"
+                :disabled="loading"
+                description="Add a new forwarder"
+                @triggered="NewForwarderModalOpen = true"
+              />
               <ForwarderModal
                 v-model:show="NewForwarderModalOpen"
                 :create="true"

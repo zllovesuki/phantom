@@ -17,11 +17,6 @@ body {
   --wails-draggable: drag;
 }
 
-body,
-button {
-  transition: background-color 0.1s ease, color 0.1s ease;
-}
-
 textarea,
 input,
 button,

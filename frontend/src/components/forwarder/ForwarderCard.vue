@@ -48,7 +48,7 @@ const { loading } = storeToRefs(useLoadingStore());
         </span>
         <p class="text-xs text-gray-600 dark:text-gray-400">
           <ArrowsRightLeftIcon
-            class="mr-0.5 inline-block h-5 w-5 text-gray-900 dark:text-gray-300"
+            class="mr-0.5 inline-block h-5 w-5 text-indigo-500 dark:text-indigo-400"
           />
           {{ (listener.tcp ? "tcp://" : "quic://") + listener.hostname }}
         </p>

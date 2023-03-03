@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/wailsapp/wails/v2 v2.3.1
+	github.com/zhangyunhao116/skipmap v0.10.1
 	go.uber.org/zap v1.24.0
 	golang.design/x/clipboard v0.6.3
 	kon.nect.sh/specter v0.0.0-20230302091036-42688c138be2
@@ -48,7 +49,6 @@ require (
 	github.com/wailsapp/mimetype v1.4.1 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	github.com/zhangyunhao116/fastrand v0.3.0 // indirect
-	github.com/zhangyunhao116/skipmap v0.10.1 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/crypto v0.6.0 // indirect

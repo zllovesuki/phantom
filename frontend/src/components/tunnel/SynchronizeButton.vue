@@ -5,23 +5,18 @@ import { ref } from "vue";
 import { Synchronize } from "~/wails/go/specter/Application";
 import { useRuntimeStore } from "~/store/runtime";
 
-const props = defineProps<{
-  synchronized?: () => Promise<void> | void;
+const emit = defineEmits<{
+  (event: "synchronized"): void;
 }>();
 
-const Synchronizing = ref(false);
 const { ClientConnected } = storeToRefs(useRuntimeStore());
+const Synchronizing = ref(false);
 
 async function synchornizeTunnels() {
-  if (Synchronizing.value) {
-    return;
-  }
   try {
     Synchronizing.value = true;
     await Synchronize();
-    if (props.synchronized) {
-      await props.synchronized();
-    }
+    emit("synchronized");
   } catch (e) {
     /* empty */
   } finally {

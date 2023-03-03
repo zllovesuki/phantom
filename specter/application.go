@@ -89,6 +89,17 @@ func (app *Application) OnStartup(ctx context.Context) {
 
 	app.specterCfg = specterCfg
 	app.phantomCfg = phantomCfg
+}
+
+func (app *Application) OnShutdown(ctx context.Context) {
+	app.StopClient()
+	app.stopAllForwarders()
+	app.logger.Sync()
+}
+
+func (app *Application) OnDomReady(ctx context.Context) {
+	app.stateMu.RLock()
+	defer app.stateMu.RUnlock()
 
 	if app.phantomCfg.ConnectOnStart {
 		go func() {
@@ -100,10 +111,4 @@ func (app *Application) OnStartup(ctx context.Context) {
 	if app.phantomCfg.ListenOnStart {
 		go app.startAllForwarders()
 	}
-}
-
-func (app *Application) OnShutdown(ctx context.Context) {
-	app.StopClient()
-	app.stopAllForwarders()
-	app.logger.Sync()
 }

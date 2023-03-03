@@ -10,7 +10,7 @@ import {
   StartForwarder,
   StopForwarder,
 } from "~/wails/go/specter/Application";
-import broker from "~/runtime/event";
+import broker from "~/events";
 
 export default defineComponent({
   Name: "ForwarderLifecycleButton",

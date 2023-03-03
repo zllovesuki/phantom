@@ -43,7 +43,7 @@ export default defineComponent({
             emit("triggered");
           }}
         >
-          <Icon class="mx-auto h-10 w-10 text-gray-400" />
+          <Icon class="mx-auto h-10 w-10 text-gray-500 dark:text-gray-400" />
           <span class="mt-2 block text-base font-medium">
             {props.description}
           </span>

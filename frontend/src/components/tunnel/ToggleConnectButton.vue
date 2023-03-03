@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { storeToRefs } from "pinia";
 
-import {
-  Connected,
-  StartClient,
-  StopClient,
-} from "~/wails/go/specter/Application";
-
+import { StartClient, StopClient } from "~/wails/go/specter/Application";
 import { useAlertStore } from "~/store/alert";
-import broker from "~/runtime/event";
+import { useRuntimeStore } from "~/store/runtime";
 
 const props = defineProps<{
   onBeforeConnect?: () => Promise<void>;
@@ -16,26 +11,19 @@ const props = defineProps<{
 
 const { showAlert, hideAlert } = useAlertStore();
 
-const ClientConnected = ref(false);
-const ChangingClientState = ref(false);
+const { ClientConnected, ClientConnecting } = storeToRefs(useRuntimeStore());
 
 async function toggleClientState() {
   try {
     hideAlert();
-    ChangingClientState.value = true;
     if (ClientConnected.value) {
       await StopClient();
       await new Promise((resolve) => setTimeout(resolve, 500));
-      ClientConnected.value = false;
-      broker.emit("specter:Disconnected");
     } else {
-      broker.emit("specter:Connecting");
       if (props.onBeforeConnect) {
         await props.onBeforeConnect();
       }
       await StartClient();
-      ClientConnected.value = true;
-      broker.emit("specter:Connected");
     }
   } catch (e) {
     showAlert(
@@ -44,28 +32,17 @@ async function toggleClientState() {
         e as string
       }`
     );
-  } finally {
-    ChangingClientState.value = false;
   }
 }
-
-onMounted(async () => {
-  ClientConnected.value = await Connected();
-  if (ClientConnected.value) {
-    broker.emit("specter:Connected");
-  } else {
-    broker.emit("specter:Disconnected");
-  }
-});
 </script>
 
 <template>
   <button
     type="button"
-    :disabled="ChangingClientState"
+    :disabled="ClientConnecting"
     :class="[
-      ChangingClientState ? 'cursor-not-allowed' : 'cursor-pointer',
-      ChangingClientState
+      ClientConnecting ? 'cursor-not-allowed' : 'cursor-pointer',
+      ClientConnecting
         ? 'bg-gray-100 text-black dark:bg-gray-700 dark:text-white'
         : ClientConnected
         ? 'bg-red-500 text-white hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-800'
@@ -75,14 +52,14 @@ onMounted(async () => {
     @click="toggleClientState"
   >
     {{
-      ChangingClientState
+      ClientConnecting
         ? "Working..."
         : ClientConnected
         ? "Disconnect"
         : "Connect"
     }}
     <svg
-      v-show="ChangingClientState"
+      v-show="ClientConnecting"
       aria-hidden="true"
       role="status"
       class="ml-3 inline h-4 w-4 animate-spin text-gray-600"

@@ -89,6 +89,7 @@ func (app *Application) OnStartup(ctx context.Context) {
 
 	app.specterCfg = specterCfg
 	app.phantomCfg = phantomCfg
+
 	if app.phantomCfg.ConnectOnStart {
 		go func() {
 			if err := app.StartClient(); err != nil {
@@ -102,7 +103,7 @@ func (app *Application) OnStartup(ctx context.Context) {
 }
 
 func (app *Application) OnShutdown(ctx context.Context) {
-	app.stopAllForwarders()
 	app.StopClient()
+	app.stopAllForwarders()
 	app.logger.Sync()
 }

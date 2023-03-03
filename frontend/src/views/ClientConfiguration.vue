@@ -5,7 +5,9 @@ import SwitchToggle from "~/components/utility/SwitchToggle.vue";
 import HorizontalDivider from "~/components/utility/HorizontalDivider.vue";
 import ToggleConnectButton from "~/components/tunnel/ToggleConnectButton.vue";
 
-import { ref, onMounted, computed, watch, nextTick, onUnmounted } from "vue";
+import { ref, onMounted, computed, watch, nextTick } from "vue";
+import { storeToRefs } from "pinia";
+
 import {
   GetSpecterConfig,
   GetPhantomConfig,
@@ -14,13 +16,12 @@ import {
 } from "~/wails/go/specter/Application";
 import { client, specter } from "~/wails/go/models";
 import { useAlertStore } from "~/store/alert";
-import broker from "~/runtime/event";
+import { useRuntimeStore } from "~/store/runtime";
 
 const { showAlert } = useAlertStore();
 
+const { ClientConnected, ClientConnecting } = storeToRefs(useRuntimeStore());
 const SynchronizingSettings = ref(false);
-const SpecterConnecting = ref(false);
-const ClientConnected = ref(false);
 const SpecterConfig = ref<client.Config>(
   client.Config.createFrom({ apex: "" })
 );
@@ -36,15 +37,12 @@ const PhantomConfig = ref<specter.PhantomConfig>(
 const DisableSettingsModification = computed(() => {
   return (
     ClientConnected.value ||
-    SynchronizingSettings.value ||
-    SpecterConnecting.value
+    ClientConnecting.value ||
+    SynchronizingSettings.value
   );
 });
 
 async function synchronizeSettings() {
-  if (SynchronizingSettings.value) {
-    return;
-  }
   try {
     SynchronizingSettings.value = true;
     await UpdateApex(SpecterConfig.value.apex);
@@ -57,22 +55,6 @@ async function synchronizeSettings() {
     }, 500);
   }
 }
-function getConnectedStateEventHandler(setConnected: boolean): () => void {
-  return () => {
-    ClientConnected.value = setConnected;
-    SpecterConnecting.value = false;
-  };
-}
-
-const onConnectedHandler = getConnectedStateEventHandler(true);
-const onDisconnectedHandler = getConnectedStateEventHandler(false);
-const onConnectingHandler = () => {
-  SpecterConnecting.value = true;
-};
-
-broker.on("specter:Connected", onConnectedHandler);
-broker.on("specter:Connecting", onConnectingHandler);
-broker.on("specter:Disconnected", onDisconnectedHandler);
 
 const _loaded = ref(false);
 onMounted(async () => {
@@ -88,11 +70,7 @@ onMounted(async () => {
     _loaded.value = true;
   });
 });
-onUnmounted(() => {
-  broker.off("specter:Connected", onConnectedHandler);
-  broker.off("specter:Connecting", onConnectingHandler);
-  broker.off("specter:Disconnected", onDisconnectedHandler);
-});
+
 watch(
   [
     () => PhantomConfig.value.specterInsecure,

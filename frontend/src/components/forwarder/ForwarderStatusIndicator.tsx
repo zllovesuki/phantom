@@ -3,7 +3,7 @@ import { SignalIcon, SignalSlashIcon } from "@heroicons/vue/20/solid";
 import { defineComponent, ref, onMounted, onUnmounted } from "vue";
 
 import { ForwarderStarted } from "~/wails/go/specter/Application";
-import broker from "~/runtime/event";
+import broker from "~/events";
 
 export default defineComponent({
   Name: "ForwarderStatusIndicator",
@@ -27,6 +27,11 @@ export default defineComponent({
     broker.on("forwarder:Started", startedHandler);
     broker.on("forwarder:Stopped", stoppedHandler);
 
+    onUnmounted(() => {
+      broker.off("forwarder:Started", startedHandler);
+      broker.off("forwarder:Stopped", stoppedHandler);
+    });
+
     onMounted(() => {
       ForwarderStarted(props.listen).then((s) => {
         if (s) {
@@ -35,11 +40,6 @@ export default defineComponent({
           broker.emit("forwarder:Stopped", props.listen);
         }
       });
-    });
-
-    onUnmounted(() => {
-      broker.off("forwarder:Started", startedHandler);
-      broker.off("forwarder:Stopped", stoppedHandler);
     });
 
     return () => {

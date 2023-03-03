@@ -119,6 +119,8 @@ func (app *Application) StartClient() error {
 		return nil
 	}
 
+	runtime.EventsEmit(app.appCtx, "specter:Connecting")
+
 	if app.specterCfg.Apex == "" {
 		return fmt.Errorf("apex cannot be empty")
 	}
@@ -173,7 +175,27 @@ func (app *Application) StartClient() error {
 	c.Start(app.cliCtx)
 
 	app.cli = c
+	runtime.EventsEmit(app.appCtx, "specter:Connected")
+
 	return nil
+}
+
+func (app *Application) StopClient() {
+	app.stateMu.Lock()
+	defer app.stateMu.Unlock()
+
+	if app.cli == nil {
+		return
+	}
+
+	app.logger.Info("Shutting down specter client")
+
+	app.cli.Close()
+	app.cliCtxCancel()
+	app.transport.Stop()
+
+	app.cli = nil
+	runtime.EventsEmit(app.appCtx, "specter:Disconnected")
 }
 
 type TunnelNode struct {
@@ -215,21 +237,4 @@ func (app *Application) GetConnectedTunnelNodes() []TunnelNode {
 	}
 
 	return nodes
-}
-
-func (app *Application) StopClient() {
-	app.stateMu.Lock()
-	defer app.stateMu.Unlock()
-
-	if app.cli == nil {
-		return
-	}
-
-	app.logger.Info("Shutting down specter client")
-
-	app.cli.Close()
-	app.transport.Stop()
-	app.cliCtxCancel()
-
-	app.cli = nil
 }

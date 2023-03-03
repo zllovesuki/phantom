@@ -21,8 +21,8 @@ const props = defineProps<{
 const modals = ref<boolean[]>([]);
 const desc = ref(true);
 
-const logs = computed<LogMessage[]>(() => {
-  const parsed = props.raw
+const parsedLogs = computed<LogMessage[]>(() => {
+  return props.raw
     .map((l) => JSON.parse(l))
     .map((p, i) => {
       const log: LogMessage = {
@@ -59,10 +59,13 @@ const logs = computed<LogMessage[]>(() => {
       }
       return log;
     });
+});
+
+const logs = computed<LogMessage[]>(() => {
   if (desc.value) {
-    return parsed.reverse();
+    return parsedLogs.value.slice().reverse();
   } else {
-    return parsed;
+    return parsedLogs.value;
   }
 });
 

@@ -47,7 +47,7 @@ const compositeClasses = computed<string[]>(() => {
         v-model="Value"
         :disabled="disabled"
         :class="compositeClasses"
-        class="relative inline-flex h-3 w-6 items-center rounded-full"
+        class="relative inline-flex h-3 w-6 items-center rounded-full focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
       >
         <span class="sr-only">{{ label }}</span>
         <span

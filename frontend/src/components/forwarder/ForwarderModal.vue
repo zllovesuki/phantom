@@ -192,12 +192,14 @@ watch(
                     label="Use TCP"
                     description="Connect to specter gateway using TCP/TLS instead of UDP/QUIC"
                   />
-                  <button
-                    type="submit"
-                    class="w-full rounded-lg border border-gray-300 px-5 py-2.5 text-center text-sm text-black focus:outline-none focus:ring-4 focus:ring-blue-300 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-800 dark:hover:bg-gray-600"
-                  >
-                    {{ !create ? "Update" : "Add" }}
-                  </button>
+                  <div class="mt-5 flex flex-row-reverse sm:mt-4">
+                    <button
+                      type="submit"
+                      class="w-30 rounded-lg border border-gray-300 bg-gray-50 px-5 py-2.5 text-center text-sm text-black focus:outline-none focus:outline-none focus:ring-2 focus:ring-indigo-500 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-800 dark:hover:bg-gray-600"
+                    >
+                      {{ !create ? "Update" : "Add" }}
+                    </button>
+                  </div>
                 </form>
               </div>
             </DialogPanel>

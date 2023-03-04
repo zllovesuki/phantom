@@ -97,13 +97,13 @@ function textColorClass(level: string): string[] {
 
 <template>
   <div class="-my-6 -mx-6 lg:-mx-8">
-    <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+    <div class="inline-block min-w-full py-2 align-middle sm:px-4 lg:px-6">
       <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-600">
         <thead>
           <tr>
             <th
               scope="col"
-              class="sticky top-0 z-10 whitespace-nowrap bg-white/75 py-3.5 pl-6 pr-3 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/75 dark:text-gray-200 sm:pl-0"
+              class="sticky top-0 z-10 whitespace-nowrap bg-white/75 py-3.5 pl-6 pr-3 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/50 dark:text-gray-200 sm:pl-0"
             >
               <a
                 class="group inline-flex cursor-pointer"
@@ -119,19 +119,19 @@ function textColorClass(level: string): string[] {
             </th>
             <th
               scope="col"
-              class="sticky top-0 z-10 hidden whitespace-nowrap bg-white/75 px-2 py-3.5 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/75 dark:text-gray-200 md:table-cell"
+              class="sticky top-0 z-10 hidden whitespace-nowrap bg-white/75 px-2 py-3.5 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/50 dark:text-gray-200 md:table-cell"
             >
               Level
             </th>
             <th
               scope="col"
-              class="sticky top-0 z-10 whitespace-nowrap bg-white/75 px-2 py-3.5 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/75 dark:text-gray-200"
+              class="sticky top-0 z-10 whitespace-nowrap bg-white/75 px-2 py-3.5 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/50 dark:text-gray-200"
             >
               Message
             </th>
             <th
               scope="col"
-              class="sticky top-0 z-10 whitespace-nowrap bg-white/75 py-3.5 pl-3 pr-6 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/75 dark:text-gray-200 sm:pr-0"
+              class="sticky top-0 z-10 whitespace-nowrap bg-white/75 py-3.5 pl-3 pr-6 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/50 dark:text-gray-200 sm:pr-0"
             >
               Error
             </th>

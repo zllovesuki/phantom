@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  ArrowsRightLeftIcon,
+  ArrowRightIcon,
   LockOpenIcon,
   TrashIcon,
 } from "@heroicons/vue/20/solid";
@@ -44,11 +44,11 @@ function updateLabel(ev: Event) {
 </script>
 
 <template>
-  <li class="col-span-1 flex rounded-md shadow-sm">
+  <li class="col-span-1 flex rounded-md shadow">
     <div
-      class="flex flex-1 items-center justify-between truncate rounded-md border-t border-r border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-slate-800"
+      class="flex flex-1 items-center justify-between truncate rounded-md bg-white dark:border-gray-800 dark:bg-slate-800"
     >
-      <div class="flex-1 truncate px-4 py-2 text-sm">
+      <div class="flex-1 truncate px-3 py-2 text-sm">
         <span class="font-medium text-gray-900 dark:text-gray-300">
           <ForwarderStatusIndicator
             :listen="listener.listen"
@@ -69,7 +69,7 @@ function updateLabel(ev: Event) {
           >]
         </span>
         <p class="text-xs text-gray-600 dark:text-gray-400">
-          <ArrowsRightLeftIcon
+          <ArrowRightIcon
             class="mr-0.5 inline-block h-4 w-4 text-indigo-500 dark:text-indigo-400"
           />
           {{ (listener.tcp ? "tcp://" : "quic://") + listener.hostname }}

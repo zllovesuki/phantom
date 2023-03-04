@@ -156,10 +156,12 @@ onMounted(async () => {
         </template>
         <template #content>
           <div class="overflow-hidden shadow sm:rounded-md">
-            <div class="bg-white px-4 py-5 dark:bg-slate-800 sm:p-6">
+            <div class="bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6">
               <div class="grid grid-cols-6 gap-6">
                 <div class="col-span-12 sm:col-span-6">
-                  <div class="-my-2 -mx-6 overflow-x-auto lg:-mx-8">
+                  <div
+                    class="-my-2 -mx-6 overflow-x-auto scrollbar-thin scrollbar-track-white scrollbar-thumb-gray-700 dark:scrollbar-track-slate-800 dark:scrollbar-thumb-slate-700 lg:-mx-8"
+                  >
                     <div
                       class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8"
                     >
@@ -239,7 +241,7 @@ onMounted(async () => {
         </template>
         <template #content>
           <div class="overflow-hidden shadow sm:rounded-md sm:rounded-b-none">
-            <div class="bg-white px-4 py-2 dark:bg-slate-800 sm:px-6">
+            <div class="bg-gray-50 px-5 py-2 dark:bg-slate-800/50 sm:px-6">
               <div class="grid grid-cols-6 gap-6">
                 <div class="col-span-12 sm:col-span-6">
                   <DescriptionList :items="specterConfigEntries" />
@@ -248,7 +250,7 @@ onMounted(async () => {
             </div>
           </div>
           <div
-            class="bg-gray-50 px-4 py-3 text-right dark:bg-slate-700/[0.3] sm:px-6"
+            class="bg-gray-100 px-4 py-3 text-right shadow dark:bg-slate-800/[0.7] sm:rounded-md sm:rounded-t-none sm:px-6"
           >
             <SynchronizeButton @synchronized="loadLogs" />
           </div>
@@ -284,7 +286,7 @@ onMounted(async () => {
         </template>
         <template #content>
           <div class="overflow-hidden shadow sm:rounded-md">
-            <div class="bg-white px-4 py-5 dark:bg-slate-800 sm:p-6">
+            <div class="bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6">
               <div class="grid grid-cols-6 gap-6">
                 <div class="col-span-12 sm:col-span-6">
                   <div class="-my-2 -mx-6 overflow-x-auto lg:-mx-8">
@@ -354,7 +356,7 @@ onMounted(async () => {
         </template>
         <template #content>
           <div class="overflow-hidden shadow sm:rounded-md">
-            <div class="bg-white px-4 py-2 dark:bg-slate-800 sm:px-6">
+            <div class="bg-gray-50 px-5 py-2 dark:bg-slate-800/50 sm:px-6">
               <div class="grid grid-cols-6 gap-6">
                 <div class="col-span-12 sm:col-span-6">
                   <DescriptionList :items="phantomConfigEntries" />
@@ -379,7 +381,7 @@ onMounted(async () => {
           </p>
         </template>
         <template #content>
-          <div class="md:grid md:grid-cols-4 md:gap-6">
+          <div class="md:grid md:grid-cols-4">
             <div class="md:col-span-full">
               <div class="px-4 sm:px-0"></div>
             </div>
@@ -387,7 +389,7 @@ onMounted(async () => {
               <div
                 class="mr-3 max-h-128 overflow-y-scroll shadow overflow-x-hidden scrollbar-thin scrollbar-track-white scrollbar-thumb-gray-700 dark:scrollbar-track-slate-800 dark:scrollbar-thumb-slate-700 sm:mr-0 sm:rounded-md"
               >
-                <div class="bg-white px-4 py-5 dark:bg-slate-800 sm:p-6">
+                <div class="bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6">
                   <div class="grid grid-cols-6 gap-6">
                     <div class="col-span-12 flow-root sm:col-span-6">
                       <ZapLogsViewer :raw="LogEntries" />

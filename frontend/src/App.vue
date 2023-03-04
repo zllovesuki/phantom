@@ -30,7 +30,7 @@ onMounted(() => {
       indeterminate
     />
     <main class="py-10 dark:bg-slate-900">
-      <div class="mx-auto max-w-screen-2xl sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-screen-2xl sm:px-8 lg:px-10">
         <AlertSection class="mb-10" />
         <RouterView />
       </div>

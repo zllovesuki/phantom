@@ -37,15 +37,16 @@ import { useAlertStore } from "~/store/alert";
 import { useLoadingStore } from "~/store/loading";
 import { useRuntimeStore } from "~/store/runtime";
 
-const { showAlert } = useAlertStore();
 const loadingStore = useLoadingStore();
+const runtimeStore = useRuntimeStore();
+const { showAlert } = useAlertStore();
 const { setLoading } = loadingStore;
 const { loading: Loading } = storeToRefs(loadingStore);
-const { ClientConnected, ClientConnecting } = storeToRefs(useRuntimeStore());
-const SynchronizingSettings = ref(false);
+const { ClientConnected, ClientConnecting } = storeToRefs(runtimeStore);
 
-const Tunnels = ref<client.Tunnel[]>([]);
+const SynchronizingSettings = ref(false);
 const NewTunnelModalOpen = ref(false);
+const Tunnels = ref<client.Tunnel[]>([]);
 const SpecterConfig = ref<client.Config>(
   client.Config.createFrom({ apex: "" })
 );
@@ -185,7 +186,7 @@ watch(
       <ResponsiveRow first full>
         <template #heading>
           <h3
-            class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
+            class="text-left text-sm font-medium leading-6 text-gray-700 dark:text-gray-400"
           >
             Tunnels
           </h3>
@@ -221,7 +222,7 @@ watch(
       <ResponsiveRow>
         <template #heading>
           <h3
-            class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
+            class="text-left text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
           >
             Client Status
           </h3>
@@ -242,7 +243,7 @@ watch(
         <template #content>
           <form>
             <div class="overflow-hidden shadow sm:rounded-md">
-              <div class="bg-white px-4 py-5 dark:bg-slate-800 sm:p-6">
+              <div class="bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6">
                 <div class="grid grid-cols-6 gap-6">
                   <div class="col-span-12 sm:col-span-6">
                     <span
@@ -275,7 +276,7 @@ watch(
                   open
                     ? 'text-gray-900 dark:text-gray-300'
                     : 'text-gray-400 dark:text-gray-600',
-                  'text-lg font-medium leading-6',
+                  'text-left text-lg font-medium leading-6',
                 ]"
               >
                 Client Config
@@ -314,19 +315,19 @@ watch(
               <form>
                 <div class="shadow sm:overflow-hidden sm:rounded-md">
                   <div
-                    class="space-y-6 bg-white px-4 py-5 dark:bg-slate-800 sm:p-6"
+                    class="space-y-6 bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6"
                   >
                     <div class="grid grid-cols-3 gap-6">
                       <div class="col-span-3 sm:col-span-2">
                         <label
                           for="specter-apex"
-                          class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                          class="block text-sm font-medium text-gray-800 dark:text-gray-300"
                         >
                           Specter Gateway
                         </label>
                         <div class="mt-1 flex rounded-md shadow-sm">
                           <span
-                            class="inline-flex items-center rounded-l-md border border-r-0 border-gray-200 bg-gray-100 px-3 text-sm text-black dark:border-gray-700 dark:bg-slate-700 dark:text-white"
+                            class="inline-flex items-center rounded-l-md border border-r-0 border-gray-200 bg-gray-200/60 px-2.5 text-sm text-black dark:border-gray-700 dark:bg-slate-700/50 dark:text-white"
                             >https://</span
                           >
                           <input
@@ -352,7 +353,7 @@ watch(
                       <legend class="sr-only">Options</legend>
                       <label
                         for="specter-apex"
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                        class="block text-sm font-medium text-gray-800 dark:text-gray-300"
                       >
                         Options
                       </label>
@@ -361,7 +362,7 @@ watch(
                           v-model:value="PhantomConfig.specterInsecure"
                           :disabled="DisableSettingsModification"
                           label="Disable TLS Verification"
-                          description="Accepts any certificate presented by the gateway and any host name in that certificate when connecting. Should only be used during development."
+                          description="Accepts any certificate presented by the gateway and any host name in that certificate when connecting."
                         />
                         <SwitchToggle
                           v-model:value="PhantomConfig.connectOnStart"

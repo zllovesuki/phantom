@@ -25,15 +25,15 @@ import {
   UpdatePhantomConfig,
   UpdateForwaderLabel,
 } from "~/wails/go/specter/Application";
+import { specter } from "~/wails/go/models";
 import { useAlertStore } from "~/store/alert";
 import { useLoadingStore } from "~/store/loading";
-import { specter } from "~/wails/go/models";
 
 const loadingStore = useLoadingStore();
+const { showAlert } = useAlertStore();
 const { setLoading } = loadingStore;
 const { loading: Loading } = storeToRefs(loadingStore);
 
-const { showAlert } = useAlertStore();
 const ChangingSettings = ref(false);
 const NewForwarderModalOpen = ref(false);
 const Forwarders = ref<specter.Listener[]>([]);
@@ -135,7 +135,7 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
       <ResponsiveRow first full>
         <template #heading>
           <h3
-            class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
+            class="text-left text-sm font-medium leading-6 text-gray-700 dark:text-gray-400"
           >
             Forwarders
           </h3>
@@ -176,7 +176,7 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
       <ResponsiveRow>
         <template #heading>
           <h3
-            class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
+            class="text-left text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
           >
             Listener Status
           </h3>
@@ -184,7 +184,7 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
         <template #content>
           <form>
             <div class="overflow-hidden shadow sm:rounded-md">
-              <div class="bg-white px-4 py-5 dark:bg-slate-800 sm:p-6">
+              <div class="bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6">
                 <div class="grid grid-cols-6 gap-6">
                   <div class="col-span-12 sm:col-span-6">
                     <span
@@ -211,7 +211,7 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
                   open
                     ? 'text-gray-900 dark:text-gray-300'
                     : 'text-gray-400 dark:text-gray-600',
-                  'text-lg font-medium leading-6',
+                  'text-left text-lg font-medium leading-6',
                 ]"
               >
                 Listener Config
@@ -250,13 +250,13 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
               <form>
                 <div class="shadow sm:overflow-hidden sm:rounded-md">
                   <div
-                    class="space-y-6 bg-white px-4 py-5 dark:bg-slate-800 sm:p-6"
+                    class="space-y-6 bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6"
                   >
                     <fieldset>
                       <legend class="sr-only">Options</legend>
                       <label
                         for="specter-apex"
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                        class="block text-sm font-medium text-gray-800 dark:text-gray-300"
                       >
                         Options
                       </label>

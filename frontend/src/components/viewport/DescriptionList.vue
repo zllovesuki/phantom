@@ -30,7 +30,7 @@ watch(
       :key="item.Key"
       class="py-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-5"
     >
-      <dt class="text-sm font-semibold text-gray-500 dark:text-gray-200">
+      <dt class="text-sm font-semibold text-gray-700 dark:text-gray-200">
         {{ item.Key }}
       </dt>
       <dd

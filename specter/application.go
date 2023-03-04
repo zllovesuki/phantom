@@ -90,26 +90,32 @@ func (app *Application) OnStartup(ctx context.Context) {
 
 	app.specterCfg = specterCfg
 	app.phantomCfg = phantomCfg
+
+	runtime.EventsOnce(app.appCtx, "broker:Ready", app.onBrokerReady)
 }
 
 func (app *Application) OnShutdown(ctx context.Context) {
 	app.StopClient()
-	app.stopAllForwarders()
+	app.StopAllForwarders()
 	app.logger.Sync()
 }
 
-func (app *Application) OnDomReady(ctx context.Context) {
+func (app *Application) onBrokerReady(_ ...interface{}) {
 	app.stateMu.RLock()
 	defer app.stateMu.RUnlock()
 
 	if app.phantomCfg.ConnectOnStart {
+		// this is called when the broker is ready,
+		// so we need to hydrate the state of Connecting
+		// to hide the config DisclosurePanel.
+		runtime.EventsEmit(app.appCtx, "specter:Connecting")
 		go func() {
 			if err := app.StartClient(); err != nil {
-				app.logger.Error("Fail to start specter client on start", zap.Error(err))
+				app.logger.Error("Fail to start specter client", zap.Error(err))
 			}
 		}()
 	}
 	if app.phantomCfg.ListenOnStart {
-		go app.startAllForwarders()
+		go app.StartAllForwarders()
 	}
 }

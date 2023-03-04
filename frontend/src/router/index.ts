@@ -13,22 +13,14 @@ function lazy(view: string): () => Promise<RouteComponent> {
 export const routes: RouteRecordRaw[] = [
   {
     path: "/",
-    redirect: "/config",
-  },
-  {
-    path: "/config",
-    name: "config",
-    component: lazy("ClientConfiguration"),
-    meta: {
-      displayName: "Configure Client",
-    },
+    redirect: "/tunnel",
   },
   {
     path: "/tunnel",
     name: "tunnel",
     component: lazy("TunnelsView"),
     meta: {
-      displayName: "Configure Tunnels",
+      displayName: "Reverse Tunnel",
     },
   },
   {

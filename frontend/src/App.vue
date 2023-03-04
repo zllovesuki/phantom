@@ -20,15 +20,15 @@ onMounted(() => {
 
 <template>
   <div class="min-h-full">
+    <Nav />
     <ProgressBar
-      v-show="Loading"
-      class="absolute top-0"
-      color-class="bg-slate-800 dark:bg-gray-200"
+      v-if="Loading"
+      class="fixed"
+      color-class="bg-indigo-600 dark:bg-indigo-600"
       bg-color-class="bg-black/0"
       :rounded="false"
       indeterminate
     />
-    <Nav />
     <main class="py-10 dark:bg-slate-900">
       <div class="mx-auto max-w-screen-2xl sm:px-6 lg:px-8">
         <AlertSection class="mb-10" />

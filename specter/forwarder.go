@@ -45,7 +45,7 @@ func (f *forwarder) stop() {
 	f.cancel()
 }
 
-func (app *Application) startAllForwarders() {
+func (app *Application) StartAllForwarders() error {
 	app.stateMu.Lock()
 	defer app.stateMu.Unlock()
 
@@ -58,28 +58,53 @@ func (app *Application) startAllForwarders() {
 	}
 
 	if len(toStart) == 0 {
-		return
+		return nil
 	}
+
+	runtime.EventsEmit(app.appCtx, "forwarders:Starting")
 
 	startJobs := make([]func(context.Context) (int, error), len(toStart))
 	for i, l := range toStart {
 		l := l
 		startJobs[i] = func(ctx context.Context) (int, error) {
-			app.logger.Info("Starting forwarder on startup", zap.Object("listener", &l))
 			err := app.startForwarder(l)
 			if err != nil {
-				app.logger.Error("Failed to start forwarder on startup", zap.Object("listener", &l), zap.Error(err))
+				app.logger.Error("Failed to start forwarder", zap.Object("listener", &l), zap.Error(err))
 			}
 			return 0, err
 		}
 	}
-	promise.All(app.appCtx, startJobs...)
+
+	var (
+		hasError = false
+		errIndex int
+	)
+	_, errors := promise.All(app.appCtx, startJobs...)
+	for i, err := range errors {
+		if err != nil {
+			errIndex = i
+			hasError = true
+			break
+		}
+	}
+
+	if hasError {
+		runtime.EventsEmit(app.appCtx, "forwarders:Stopped")
+		return errors[errIndex]
+	} else {
+		runtime.EventsEmit(app.appCtx, "forwarders:Started")
+		return nil
+	}
 }
 
-func (app *Application) stopAllForwarders() {
+func (app *Application) StopAllForwarders() {
+	defer runtime.EventsEmit(app.appCtx, "forwarders:Stopped")
+
+	app.stateMu.Lock()
+	defer app.stateMu.Unlock()
+
 	app.forwarders.Range(func(listen string, f *forwarder) bool {
-		app.logger.Info("Stopping forwarder on exit", zap.String("listen", f.listener.Addr().String()))
-		f.stop()
+		app.stopForwarder(f.cfg, f)
 		return true
 	})
 }
@@ -97,6 +122,17 @@ func (app *Application) getNewForwarder(l Listener) (*forwarder, error) {
 		listener: listener,
 		cfg:      l,
 	}, nil
+}
+
+func (app *Application) AllForwardersStarted() bool {
+	app.stateMu.RLock()
+	defer app.stateMu.RUnlock()
+
+	if app.forwarders.Len() == len(app.phantomCfg.Listeners) {
+		return true
+	} else {
+		return false
+	}
 }
 
 func (app *Application) ForwarderStarted(listen string) bool {
@@ -142,6 +178,8 @@ func (app *Application) startForwarder(l Listener) error {
 		return fmt.Errorf("error parsing hostname: %w", err)
 	}
 
+	app.logger.Info("Starting forwarder", zap.Object("listener", &l))
+
 	f, err := app.getNewForwarder(l)
 	if err != nil {
 		return fmt.Errorf("error listening locally: %w", err)
@@ -178,8 +216,9 @@ func (app *Application) startForwarder(l Listener) error {
 }
 
 func (app *Application) stopForwarder(l Listener, f *forwarder) {
-	f.stop()
+	app.logger.Info("Stopping forwarder", zap.Object("listener", &l))
 
+	f.stop()
 	app.forwarders.Delete(l.Listen)
 	runtime.EventsEmit(app.appCtx, "forwarder:Stopped", l.Listen)
 }
@@ -227,17 +266,18 @@ func (app *Application) RemoveForwarder(index int) error {
 		return err
 	}
 
-	if !ok {
-		return fmt.Errorf("forwarder with index %d does not exist", index)
+	app.logger.Info("Removing forwarder", zap.Object("listener", &l))
+	if ok {
+		app.stopForwarder(l, f)
 	}
-
-	app.logger.Info("Removing forwarder", zap.String("listen", f.listener.Addr().String()))
-	app.stopForwarder(l, f)
-
 	app.phantomCfg.Listeners = append(app.phantomCfg.Listeners[:index], app.phantomCfg.Listeners[index+1:]...)
 
 	if err := app.persistPhantomConfig(app.phantomCfg); err != nil {
 		return fmt.Errorf("failed to persist forwarder config: %w", err)
+	}
+
+	if len(app.phantomCfg.Listeners) == 0 {
+		runtime.EventsEmit(app.appCtx, "forwarders:Stopped")
 	}
 
 	return nil
@@ -252,9 +292,14 @@ func (app *Application) StopForwarder(index int) error {
 		return err
 	}
 
-	if ok {
-		app.logger.Info("Stopping forwarder", zap.String("listen", f.listener.Addr().String()))
-		app.stopForwarder(l, f)
+	if !ok {
+		return nil
+	}
+
+	app.logger.Info("Stopping forwarder", zap.String("listen", f.listener.Addr().String()))
+	app.stopForwarder(l, f)
+	if app.forwarders.Len() == 0 {
+		runtime.EventsEmit(app.appCtx, "forwarders:Stopped")
 	}
 
 	return nil
@@ -272,6 +317,10 @@ func (app *Application) StartForwarder(index int) error {
 	err = app.startForwarder(l)
 	if err != nil {
 		return err
+	}
+
+	if len(app.phantomCfg.Listeners) == app.forwarders.Len() {
+		runtime.EventsEmit(app.appCtx, "forwarders:Started")
 	}
 
 	return nil

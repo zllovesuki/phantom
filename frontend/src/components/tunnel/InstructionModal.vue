@@ -6,12 +6,12 @@ import {
   TransitionChild,
   TransitionRoot,
 } from "@miragespace/headlessui-vue";
-import ClickToCopy from "../utility/ClickToCopy";
+import ClickToCopy from "~/components/utility/ClickToCopy";
 
 import { GetSpecterConfig } from "~/wails/go/specter/Application";
 import { client } from "~/wails/go/models";
 
-import { computed, ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 
 const initialFocusRef = ref(null);
 const SpecterConfig = ref<client.Config>(

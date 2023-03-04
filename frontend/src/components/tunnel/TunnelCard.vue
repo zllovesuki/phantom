@@ -5,18 +5,18 @@ import {
   StopIcon,
 } from "@heroicons/vue/20/solid";
 import InstructionModal from "~/components/tunnel/InstructionModal.vue";
-import ConfirmModal from "~/components/utility/ConfirmModal.vue";
+import ConfirmModal from "~/components/viewport/ConfirmModal.vue";
 import TunnelModal from "~/components/tunnel/TunnelModal.vue";
 
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 
 import type { client } from "~/wails/go/models";
 import { useLoadingStore } from "~/store/loading";
 import { useRuntimeStore } from "~/store/runtime";
 
-defineProps<{
-  tunnel: Readonly<client.Tunnel>;
+const props = defineProps<{
+  tunnel: client.Tunnel;
 }>();
 
 const emit = defineEmits<{
@@ -30,6 +30,13 @@ const UnpublishModalOpen = ref(false);
 const EditModalOpen = ref(false);
 const { loading: Loading } = storeToRefs(useLoadingStore());
 const { ClientConnected } = storeToRefs(useRuntimeStore());
+
+const unassigned = computed<boolean>(() => {
+  if (props.tunnel.hostname === undefined) {
+    return true;
+  }
+  return props.tunnel.hostname === "";
+});
 </script>
 
 <template>
@@ -47,13 +54,20 @@ const { ClientConnected } = storeToRefs(useRuntimeStore());
         </span>
         <p class="text-xs text-gray-600 dark:text-gray-400">
           <a
-            href="#"
+            :href="unassigned ? undefined : '#'"
             :class="[
-              tunnel.hostname
+              !unassigned
                 ? 'cursor-pointer hover:text-gray-400 dark:hover:text-gray-100'
                 : '',
             ]"
-            @click.prevent="InstructionModalOpen = true"
+            @click.prevent="
+              () => {
+                if (unassigned) {
+                  return;
+                }
+                InstructionModalOpen = true;
+              }
+            "
           >
             {{ tunnel.hostname ?? "(Pending hostname assignment)" }}
           </a>
@@ -61,7 +75,7 @@ const { ClientConnected } = storeToRefs(useRuntimeStore());
       </div>
       <div class="flex-shrink-0 pr-2">
         <button
-          v-show="!!tunnel.hostname && ClientConnected"
+          v-show="!unassigned && ClientConnected"
           type="button"
           class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400 hover:text-gray-500"
           :disabled="Loading"

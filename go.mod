@@ -8,7 +8,7 @@ require (
 	github.com/zhangyunhao116/skipmap v0.10.1
 	go.uber.org/zap v1.24.0
 	golang.design/x/clipboard v0.6.3
-	kon.nect.sh/specter v0.0.0-20230302091036-42688c138be2
+	kon.nect.sh/specter v0.0.0-20230304045723-9164d9975250
 )
 
 require (
@@ -18,7 +18,6 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/golang/mock v1.6.0 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/pprof v0.0.0-20230131232505-5a9e8f65f08f // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect

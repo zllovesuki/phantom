@@ -54,7 +54,7 @@ withDefaults(defineProps<Props>(), {
     width: 30%;
     left: -40%;
   }
-  80% {
+  50% {
     left: 100%;
     width: 100%;
   }

@@ -5,6 +5,8 @@ import {client} from '../models';
 
 export function AddForwarder(arg1:specter.Listener):Promise<void>;
 
+export function AllForwardersStarted():Promise<boolean>;
+
 export function Connected():Promise<boolean>;
 
 export function ForwarderStarted(arg1:string):Promise<boolean>;
@@ -25,9 +27,13 @@ export function ReleaseTunnel(arg1:number):Promise<void>;
 
 export function RemoveForwarder(arg1:number):Promise<void>;
 
+export function StartAllForwarders():Promise<void>;
+
 export function StartClient():Promise<void>;
 
 export function StartForwarder(arg1:number):Promise<void>;
+
+export function StopAllForwarders():Promise<void>;
 
 export function StopClient():Promise<void>;
 

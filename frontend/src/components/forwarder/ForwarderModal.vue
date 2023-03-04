@@ -5,9 +5,10 @@ import {
   TransitionChild,
   TransitionRoot,
 } from "@miragespace/headlessui-vue";
-import SwitchToggle from "~/components/utility/SwitchToggle.vue";
+import SwitchToggle from "~/components/viewport/SwitchToggle.vue";
 
 import { ref, computed, watch } from "vue";
+
 import type { specter } from "~/wails/go/models";
 
 export interface Props {

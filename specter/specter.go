@@ -15,7 +15,6 @@ import (
 	"kon.nect.sh/specter/tun/client/dialer"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"go.uber.org/zap"
 )
 
 func (app *Application) Connected() bool {
@@ -50,7 +49,6 @@ func (app *Application) RebuildTunnels(tunnels []client.Tunnel) {
 	if app.cli == nil {
 		app.specterCfg.Tunnels = tunnels
 	} else {
-		app.logger.Info("rebuild", zap.Any("tunnels", tunnels))
 		app.cli.RebuildTunnels(tunnels)
 	}
 }
@@ -111,7 +109,7 @@ func (app *Application) UpdateApex(apex string) {
 	}
 }
 
-func (app *Application) StartClient() error {
+func (app *Application) StartClient() (err error) {
 	app.stateMu.Lock()
 	defer app.stateMu.Unlock()
 
@@ -119,16 +117,24 @@ func (app *Application) StartClient() error {
 		return nil
 	}
 
+	defer func() {
+		if err != nil {
+			runtime.EventsEmit(app.appCtx, "specter:Disconnected")
+		}
+	}()
+
 	runtime.EventsEmit(app.appCtx, "specter:Connecting")
 
 	if app.specterCfg.Apex == "" {
-		return fmt.Errorf("apex cannot be empty")
+		err = fmt.Errorf("apex cannot be empty")
+		return
 	}
 
-	parsed, err := dialer.ParseApex(app.specterCfg.Apex)
+	var parsed *dialer.ParsedApex
+	parsed, err = dialer.ParseApex(app.specterCfg.Apex)
 	if err != nil {
 		runtime.LogError(app.appCtx, err.Error())
-		return err
+		return
 	}
 
 	clientTLSConf := &tls.Config{
@@ -149,8 +155,9 @@ func (app *Application) StartClient() error {
 		RTTRecorder: app.transportRTT,
 	})
 
+	var c *client.Client
 	app.cliCtx, app.cliCtxCancel = context.WithCancel(app.appCtx)
-	c, err := client.NewClient(app.cliCtx, client.ClientConfig{
+	c, err = client.NewClient(app.cliCtx, client.ClientConfig{
 		Logger:          app.logger,
 		Configuration:   app.specterCfg,
 		ServerTransport: app.transport,
@@ -159,17 +166,17 @@ func (app *Application) StartClient() error {
 	})
 	if err != nil {
 		runtime.LogError(app.appCtx, err.Error())
-		return err
+		return
 	}
 
-	if err := c.Register(app.cliCtx); err != nil {
+	if err = c.Register(app.cliCtx); err != nil {
 		runtime.LogError(app.appCtx, err.Error())
-		return err
+		return
 	}
 
-	if err := c.Initialize(app.cliCtx); err != nil {
+	if err = c.Initialize(app.cliCtx); err != nil {
 		runtime.LogError(app.appCtx, err.Error())
-		return err
+		return
 	}
 
 	c.Start(app.cliCtx)
@@ -177,7 +184,7 @@ func (app *Application) StartClient() error {
 	app.cli = c
 	runtime.EventsEmit(app.appCtx, "specter:Connected")
 
-	return nil
+	return
 }
 
 func (app *Application) StopClient() {
@@ -188,6 +195,8 @@ func (app *Application) StopClient() {
 		return
 	}
 
+	defer runtime.EventsEmit(app.appCtx, "specter:Disconnected")
+
 	app.logger.Info("Shutting down specter client")
 
 	app.cli.Close()
@@ -195,7 +204,6 @@ func (app *Application) StopClient() {
 	app.transport.Stop()
 
 	app.cli = nil
-	runtime.EventsEmit(app.appCtx, "specter:Disconnected")
 }
 
 type TunnelNode struct {

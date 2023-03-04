@@ -6,6 +6,10 @@ export function AddForwarder(arg1) {
   return window['go']['specter']['Application']['AddForwarder'](arg1);
 }
 
+export function AllForwardersStarted() {
+  return window['go']['specter']['Application']['AllForwardersStarted']();
+}
+
 export function Connected() {
   return window['go']['specter']['Application']['Connected']();
 }
@@ -46,12 +50,20 @@ export function RemoveForwarder(arg1) {
   return window['go']['specter']['Application']['RemoveForwarder'](arg1);
 }
 
+export function StartAllForwarders() {
+  return window['go']['specter']['Application']['StartAllForwarders']();
+}
+
 export function StartClient() {
   return window['go']['specter']['Application']['StartClient']();
 }
 
 export function StartForwarder(arg1) {
   return window['go']['specter']['Application']['StartForwarder'](arg1);
+}
+
+export function StopAllForwarders() {
+  return window['go']['specter']['Application']['StopAllForwarders']();
 }
 
 export function StopClient() {

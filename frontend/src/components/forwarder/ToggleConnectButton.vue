@@ -1,69 +1,65 @@
 <script setup lang="ts">
+import { onMounted } from "vue";
 import { storeToRefs } from "pinia";
 
-import { StartClient, StopClient } from "~/wails/go/specter/Application";
+import {
+  StartAllForwarders,
+  StopAllForwarders,
+} from "~/wails/go/specter/Application";
 import { useAlertStore } from "~/store/alert";
 import { useRuntimeStore } from "~/store/runtime";
 
-const props = defineProps<{
-  onBeforeConnect?: () => Promise<void>;
-}>();
-
-const emit = defineEmits<{
-  (event: "stateToggled"): void;
-}>();
-
 const { showAlert, hideAlert } = useAlertStore();
 
-const { ClientConnected, ClientConnecting } = storeToRefs(useRuntimeStore());
+const runtimeStore = useRuntimeStore();
+const { ForwardersStarted, ForwardersStarting } = storeToRefs(runtimeStore);
+const { reloadForwardersStatus } = runtimeStore;
 
-async function toggleClientState() {
+async function toggleListenersState() {
   try {
     hideAlert();
-    if (ClientConnected.value) {
-      await StopClient();
+    if (ForwardersStarted.value) {
+      await StopAllForwarders();
     } else {
-      if (props.onBeforeConnect) {
-        await props.onBeforeConnect();
-      }
-      await StartClient();
+      await StartAllForwarders();
     }
-    emit("stateToggled");
   } catch (e) {
     showAlert(
       "fail",
-      `Error ${ClientConnected.value ? "disconnecting" : "connecting"}: ${
-        e as string
-      }`
+      `Error ${
+        ForwardersStarted.value ? "stopping" : "starting"
+      } some forwarders: ${e as string}`
     );
   }
 }
+
+onMounted(reloadForwardersStatus);
 </script>
 
 <template>
   <button
     type="button"
-    :disabled="ClientConnecting"
+    :disabled="ForwardersStarting"
     :class="[
-      ClientConnecting ? 'cursor-not-allowed' : 'cursor-pointer',
-      ClientConnecting
+      ForwardersStarting ? 'cursor-not-allowed' : 'cursor-pointer',
+      ForwardersStarting
         ? 'bg-gray-100 text-black dark:bg-gray-700 dark:text-white'
-        : ClientConnected
+        : ForwardersStarted
         ? 'bg-red-500 text-white hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-800'
         : 'bg-indigo-500 text-white hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700',
       'inline-flex items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium shadow-sm focus:border-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:border-black dark:focus:ring-white',
     ]"
-    @click="toggleClientState"
+    @click="toggleListenersState"
   >
     {{
-      ClientConnecting
+      ForwardersStarting
         ? "Working..."
-        : ClientConnected
-        ? "Disconnect from Gateway"
-        : "Connect to Gateway"
+        : ForwardersStarted
+        ? "Stop All Forwarders"
+        : "Start All Forwaders"
     }}
     <svg
-      v-show="ClientConnecting"
+      v-show="ForwardersStarting"
       aria-hidden="true"
       role="status"
       class="ml-3 inline h-4 w-4 animate-spin text-gray-600"

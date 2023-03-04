@@ -7,7 +7,7 @@ import {
 import ForwarderStatusIndicator from "~/components/forwarder/ForwarderStatusIndicator";
 import ForwarderLifecycleButton from "~/components/forwarder/ForwarderLifecycleButton";
 import ForwarderModal from "~/components/forwarder/ForwarderModal.vue";
-import ConfirmModal from "~/components/utility/ConfirmModal.vue";
+import ConfirmModal from "~/components/viewport/ConfirmModal.vue";
 
 import { ref } from "vue";
 import { storeToRefs } from "pinia";
@@ -52,7 +52,7 @@ function updateLabel(ev: Event) {
         <span class="font-medium text-gray-900 dark:text-gray-300">
           <ForwarderStatusIndicator
             :listen="listener.listen"
-            class="mr-0.5 h-5 w-5"
+            class="mr-0.5 h-4 w-4"
           />
           tcp://{{ listener.listen }}
           <LockOpenIcon
@@ -70,7 +70,7 @@ function updateLabel(ev: Event) {
         </span>
         <p class="text-xs text-gray-600 dark:text-gray-400">
           <ArrowsRightLeftIcon
-            class="mr-0.5 inline-block h-5 w-5 text-indigo-500 dark:text-indigo-400"
+            class="mr-0.5 inline-block h-4 w-4 text-indigo-500 dark:text-indigo-400"
           />
           {{ (listener.tcp ? "tcp://" : "quic://") + listener.hostname }}
         </p>

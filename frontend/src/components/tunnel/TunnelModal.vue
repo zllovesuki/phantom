@@ -6,11 +6,11 @@ import {
   TransitionRoot,
 } from "@miragespace/headlessui-vue";
 import { TrashIcon } from "@heroicons/vue/24/outline";
-import SwitchToggle from "~/components/utility/SwitchToggle.vue";
-import ConfirmModal from "~/components/utility/ConfirmModal.vue";
 import DropdownList, {
   type DropdownOption,
-} from "~/components/utility/DropdownList.vue";
+} from "~/components/viewport/DropdownList.vue";
+import SwitchToggle from "~/components/viewport/SwitchToggle.vue";
+import ConfirmModal from "~/components/viewport/ConfirmModal.vue";
 
 import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";

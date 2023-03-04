@@ -1,16 +1,17 @@
 import { PlayIcon, StopIcon } from "@heroicons/vue/20/solid";
-import ConfirmModal from "~/components/utility/ConfirmModal.vue";
+import ConfirmModal from "~/components/viewport/ConfirmModal.vue";
 
 import { defineComponent, onUnmounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 
-import { useLoadingStore } from "~/store/loading";
 import {
   GetPhantomConfig,
   StartForwarder,
   StopForwarder,
 } from "~/wails/go/specter/Application";
 import broker from "~/events";
+import { useAlertStore } from "~/store/alert";
+import { useLoadingStore } from "~/store/loading";
 
 export default defineComponent({
   Name: "ForwarderLifecycleButton",
@@ -21,6 +22,8 @@ export default defineComponent({
     const loadingStore = useLoadingStore();
     const { loading } = storeToRefs(loadingStore);
     const { setLoading } = loadingStore;
+    const { showAlert, hideAlert } = useAlertStore();
+
     const confirmStopModalOpen = ref(false);
     const started = ref(false);
 
@@ -36,8 +39,8 @@ export default defineComponent({
 
     async function toggleForwarderState() {
       try {
+        hideAlert();
         setLoading(true);
-        await new Promise((resolve) => setTimeout(resolve, 500));
         const i = await getForwarderIndex();
         if (started.value) {
           await StopForwarder(i);
@@ -45,7 +48,12 @@ export default defineComponent({
           await StartForwarder(i);
         }
       } catch (e) {
-        /* empty */
+        showAlert(
+          "fail",
+          `Error ${started.value ? "stopping" : "starting"} forwarder: ${
+            e as string
+          }`
+        );
       } finally {
         setLoading(false);
       }

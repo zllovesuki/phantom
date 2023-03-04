@@ -1,9 +1,19 @@
 <script setup lang="ts">
+import {
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+} from "@miragespace/headlessui-vue";
+import {
+  ChevronRightIcon,
+  ArrowRightOnRectangleIcon,
+} from "@heroicons/vue/24/outline";
+import ResponsiveRow from "~/components/viewport/ResponsiveRow.vue";
 import ForwarderCard from "~/components/forwarder/ForwarderCard.vue";
+import ToggleConnectButton from "~/components/forwarder/ToggleConnectButton.vue";
 import ForwarderModal from "~/components/forwarder/ForwarderModal.vue";
-import SwitchToggle from "~/components/utility/SwitchToggle.vue";
-import HorizontalDivider from "~/components/utility/HorizontalDivider.vue";
-import FullWidthCTA from "~/components/utility/FullWidthCTA";
+import NewEntryCard from "~/components/utility/NewEntryCard";
+import SwitchToggle from "~/components/viewport/SwitchToggle.vue";
 
 import { storeToRefs } from "pinia";
 import { ref, onMounted, watch, nextTick } from "vue";
@@ -19,9 +29,9 @@ import { useAlertStore } from "~/store/alert";
 import { useLoadingStore } from "~/store/loading";
 import { specter } from "~/wails/go/models";
 
-const Loading = useLoadingStore();
-const { setLoading } = Loading;
-const { loading } = storeToRefs(Loading);
+const loadingStore = useLoadingStore();
+const { setLoading } = loadingStore;
+const { loading: Loading } = storeToRefs(loadingStore);
 
 const { showAlert } = useAlertStore();
 const ChangingSettings = ref(false);
@@ -100,11 +110,13 @@ async function synchronizeSettings() {
 
 const _loaded = ref(false);
 onMounted(async () => {
-  const phantomCfg = await GetPhantomConfig();
+  const [phantomCfg] = await Promise.all([
+    GetPhantomConfig(),
+    reloadForwarders(),
+  ]);
   if (phantomCfg !== null) {
     PhantomConfig.value = phantomCfg;
   }
-  await reloadForwarders();
   nextTick(() => {
     _loaded.value = true;
   });
@@ -120,65 +132,98 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
 <template>
   <div class="box">
     <div class="box-wrapper text-gray-900 dark:text-gray-300">
-      <div>
-        <div class="md:grid md:grid-cols-4 md:gap-6">
-          <div class="md:col-span-full">
-            <div class="px-4 sm:px-0">
-              <h3
-                class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
-              >
-                Forwarders
-              </h3>
-            </div>
-          </div>
-          <div class="mt-5 md:col-span-full md:mt-0">
-            <form @submit.prevent>
-              <ul
-                v-show="Forwarders.length > 0"
-                role="list"
-                class="mb-5 grid grid-cols-1 gap-6 md:grid-cols-2"
-              >
-                <ForwarderCard
-                  v-for="(listener, i) in Forwarders"
-                  :key="i"
-                  :listener="listener"
-                  @delete="removeForwarder(i)"
-                  @update:label="updateLabel(i, $event)"
-                />
-              </ul>
-              <FullWidthCTA
-                icon="ArrowRightOnRectangleIcon"
-                :disabled="loading"
+      <ResponsiveRow first full>
+        <template #heading>
+          <h3
+            class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
+          >
+            Forwarders
+          </h3>
+        </template>
+        <template #content>
+          <form>
+            <ul role="list" class="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <ForwarderCard
+                v-for="(listener, i) in Forwarders"
+                :key="i"
+                :listener="listener"
+                @delete="removeForwarder(i)"
+                @update:label="updateLabel(i, $event)"
+              />
+              <NewEntryCard
+                :icon="ArrowRightOnRectangleIcon"
+                :disabled="Loading"
                 description="Add a new forwarder"
                 @triggered="NewForwarderModalOpen = true"
               />
-              <ForwarderModal
-                v-model:show="NewForwarderModalOpen"
-                :create="true"
-                :listener="{
-                  label: '',
-                  listen: '',
-                  hostname: '',
-                  tcp: false,
-                  insecure: false,
-                }"
-                @update:listener="appendNewForwarder"
-              />
-            </form>
-          </div>
-        </div>
-      </div>
+            </ul>
+            <ForwarderModal
+              v-model:show="NewForwarderModalOpen"
+              :create="true"
+              :listener="{
+                label: '',
+                listen: '',
+                hostname: '',
+                tcp: false,
+                insecure: false,
+              }"
+              @update:listener="appendNewForwarder"
+            />
+          </form>
+        </template>
+      </ResponsiveRow>
 
-      <HorizontalDivider />
+      <ResponsiveRow>
+        <template #heading>
+          <h3
+            class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
+          >
+            Listener Status
+          </h3>
+        </template>
+        <template #content>
+          <form>
+            <div class="overflow-hidden shadow sm:rounded-md">
+              <div class="bg-white px-4 py-5 dark:bg-slate-800 sm:p-6">
+                <div class="grid grid-cols-6 gap-6">
+                  <div class="col-span-12 sm:col-span-6">
+                    <span
+                      class="inline-block text-sm text-gray-700 dark:text-gray-300"
+                    >
+                      <div class="flex space-x-3">
+                        <ToggleConnectButton />
+                      </div>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </template>
+      </ResponsiveRow>
 
-      <div class="mt-10 sm:mt-0">
-        <div class="md:grid md:grid-cols-4 md:gap-6">
-          <div class="md:col-span-1">
-            <div class="px-4 sm:px-0">
+      <Disclosure v-slot="{ open }">
+        <ResponsiveRow>
+          <template #heading>
+            <DisclosureButton>
               <h3
-                class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-300"
+                :class="[
+                  open
+                    ? 'text-gray-900 dark:text-gray-300'
+                    : 'text-gray-400 dark:text-gray-600',
+                  'text-lg font-medium leading-6',
+                ]"
               >
-                Configuration
+                Listener Config
+                <ChevronRightIcon
+                  :class="[
+                    open && 'rotate-90 transform',
+                    'ml-2 inline h-4 w-4',
+                    !open
+                      ? 'text-gray-900 dark:text-gray-300'
+                      : 'text-gray-400 dark:text-gray-600',
+                  ]"
+                />
                 <svg
                   v-show="ChangingSettings"
                   aria-hidden="true"
@@ -198,38 +243,39 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
                   />
                 </svg>
               </h3>
-            </div>
-          </div>
-
-          <div class="mt-5 md:col-span-3 md:mt-0">
-            <form>
-              <div class="shadow sm:overflow-hidden sm:rounded-md">
-                <div
-                  class="space-y-6 bg-white px-4 py-5 dark:bg-slate-800 sm:p-6"
-                >
-                  <fieldset>
-                    <legend class="sr-only">Options</legend>
-                    <label
-                      for="specter-apex"
-                      class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Options
-                    </label>
-                    <div class="mt-4 space-y-4">
-                      <SwitchToggle
-                        v-model:value="PhantomConfig.listenOnStart"
-                        :disabled="ChangingSettings"
-                        label="Forwarders Autostart"
-                        description="Start forwarders when Phantom starts"
-                      />
-                    </div>
-                  </fieldset>
+            </DisclosureButton>
+          </template>
+          <template #content>
+            <DisclosurePanel>
+              <form>
+                <div class="shadow sm:overflow-hidden sm:rounded-md">
+                  <div
+                    class="space-y-6 bg-white px-4 py-5 dark:bg-slate-800 sm:p-6"
+                  >
+                    <fieldset>
+                      <legend class="sr-only">Options</legend>
+                      <label
+                        for="specter-apex"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Options
+                      </label>
+                      <div class="mt-4 space-y-4">
+                        <SwitchToggle
+                          v-model:value="PhantomConfig.listenOnStart"
+                          :disabled="ChangingSettings"
+                          label="Forwarders Autostart"
+                          description="Start forwarders when Phantom starts"
+                        />
+                      </div>
+                    </fieldset>
+                  </div>
                 </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+              </form>
+            </DisclosurePanel>
+          </template>
+        </ResponsiveRow>
+      </Disclosure>
     </div>
   </div>
 </template>

@@ -50,7 +50,7 @@ export default defineComponent({
           class={[
             "inline-block",
             started.value
-              ? "text-green-400 dark:text-green-400"
+              ? "text-green-500 dark:text-green-400"
               : "text-red-500 dark:text-red-500",
           ].join(" ")}
           {...otherProps}

@@ -32,7 +32,6 @@ func main() {
 		Height:     800,
 		OnStartup:  app.OnStartup,
 		OnShutdown: app.OnShutdown,
-		OnDomReady: app.OnDomReady,
 		Bind: []interface{}{
 			app,
 			helper,
@@ -44,7 +43,7 @@ func main() {
 		Windows: &windows.Options{
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,
-			DisableWindowIcon:    true,
+			DisableWindowIcon:    false,
 		},
 		Mac: &mac.Options{
 			TitleBar:             mac.TitleBarHidden(),

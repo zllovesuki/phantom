@@ -2,14 +2,17 @@
 import Nav from "~/components/NavBar.vue";
 import AlertSection from "~/components/AlertSection.vue";
 import ProgressBar from "~/components/utility/ProgressBar.vue";
+import DevMenu from "./components/utility/DevMenu.vue";
 
 import { RouterView } from "vue-router";
 import { onMounted } from "vue";
 import { storeToRefs } from "pinia";
 
 import { useLoadingStore } from "~/store/loading";
+import { useRuntimeStore } from "~/store/runtime";
 
 const { loading: Loading } = storeToRefs(useLoadingStore());
+const { environment } = storeToRefs(useRuntimeStore());
 
 onMounted(() => {
   setTimeout(() => {
@@ -35,5 +38,6 @@ onMounted(() => {
         <RouterView />
       </div>
     </main>
+    <DevMenu v-if="environment?.buildType === 'dev'" />
   </div>
 </template>

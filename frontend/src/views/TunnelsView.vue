@@ -19,7 +19,7 @@ import StatusBadge from "~/components/utility/StatusBadge.vue";
 import SwitchToggle from "~/components/viewport/SwitchToggle.vue";
 
 import { storeToRefs } from "pinia";
-import { ref, onMounted, computed, nextTick, watch } from "vue";
+import { ref, computed, nextTick, watch, onMounted, onUnmounted } from "vue";
 
 import {
   GetSpecterConfig,
@@ -36,6 +36,7 @@ import { client, specter } from "~/wails/go/models";
 import { useAlertStore } from "~/store/alert";
 import { useLoadingStore } from "~/store/loading";
 import { useRuntimeStore } from "~/store/runtime";
+import broker from "~/events";
 
 const loadingStore = useLoadingStore();
 const runtimeStore = useRuntimeStore();
@@ -178,6 +179,38 @@ watch(
     await synchronizeSettings();
   }
 );
+
+// DEV MENU
+function showPopulatedState() {
+  reloadTunnels();
+}
+function showEmptyState() {
+  Tunnels.value = [];
+}
+function addState() {
+  const randomTarget = Math.random() < 0.5;
+  if (randomTarget) {
+    Tunnels.value.push({
+      target: "tcp://127.0.0.1:22",
+      hostname: "ipsum-quia-dolor-sit-amet",
+      insecure: false,
+    });
+  } else {
+    Tunnels.value.push({
+      target: "https://127.0.0.1:8080",
+      hostname: "porro-quisquam-est-qui-dolorem",
+      insecure: Math.random() < 0.5,
+    });
+  }
+}
+broker.on("dev:RestoreState", showPopulatedState);
+broker.on("dev:EmptyState", showEmptyState);
+broker.on("dev:AddState", addState);
+onUnmounted(() => {
+  broker.off("dev:RestoreState", showPopulatedState);
+  broker.off("dev:EmptyState", showEmptyState);
+  broker.off("dev:AddState", addState);
+});
 </script>
 
 <template>

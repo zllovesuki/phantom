@@ -8,7 +8,7 @@ import ResponsiveRow from "~/components/viewport/ResponsiveRow.vue";
 import SynchronizeButton from "~/components/tunnel/SynchronizeButton.vue";
 import StatusBadge from "~/components/utility/StatusBadge.vue";
 
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import {
   GetSpecterConfig,
   GetPhantomConfig,
@@ -18,6 +18,7 @@ import {
 import { client, specter } from "~/wails/go/models";
 import { GetFilePaths } from "~/wails/go/specter/Helper";
 import { useRuntimeStore } from "~/store/runtime";
+import broker from "~/events";
 
 const runtime = useRuntimeStore();
 
@@ -100,7 +101,7 @@ async function loadLogs() {
   }
 }
 
-onMounted(async () => {
+async function loadInfo() {
   [ConnectedTunnelNodes.value, ConnectedForwarderNodes.value, FilePaths.value] =
     await Promise.all([
       GetConnectedTunnelNodes(),
@@ -108,6 +109,16 @@ onMounted(async () => {
       GetFilePaths(),
       loadLogs(),
     ]);
+}
+
+function clearInfo() {
+  ConnectedTunnelNodes.value = [];
+  ConnectedForwarderNodes.value = [];
+  LogEntries.value = [];
+}
+
+onMounted(async () => {
+  await loadInfo();
   const [specterConfig, phantomCfg] = await Promise.all([
     GetSpecterConfig(),
     GetPhantomConfig(),
@@ -121,6 +132,14 @@ onMounted(async () => {
     }
     PhantomConfig.value = phantomCfg;
   }
+});
+
+// DEV MENU
+broker.on("dev:RestoreState", loadInfo);
+broker.on("dev:EmptyState", clearInfo);
+onUnmounted(() => {
+  broker.off("dev:RestoreState", loadInfo);
+  broker.off("dev:EmptyState", clearInfo);
 });
 </script>
 

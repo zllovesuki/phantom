@@ -16,7 +16,7 @@ import NewEntryCard from "~/components/utility/NewEntryCard";
 import SwitchToggle from "~/components/viewport/SwitchToggle.vue";
 
 import { storeToRefs } from "pinia";
-import { ref, onMounted, watch, nextTick } from "vue";
+import { ref, watch, nextTick, onMounted, onUnmounted } from "vue";
 
 import {
   GetPhantomConfig,
@@ -28,6 +28,7 @@ import {
 import { specter } from "~/wails/go/models";
 import { useAlertStore } from "~/store/alert";
 import { useLoadingStore } from "~/store/loading";
+import broker from "~/events";
 
 const loadingStore = useLoadingStore();
 const { showAlert } = useAlertStore();
@@ -126,6 +127,37 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
     return;
   }
   await synchronizeSettings();
+});
+
+// DEV MENU
+function showPopulatedState() {
+  reloadForwarders();
+}
+function showEmptyState() {
+  Forwarders.value = [];
+}
+function addState() {
+  const randomForwarder: specter.Listener = {
+    label: "Donec id",
+    listen: `127.0.0.1:${Math.floor(Math.random() * (60000 - 1024) + 1024)}`,
+    hostname: "ipsum-quia-dolor-sit-amet.dev.host.dev",
+    insecure: Math.random() < 0.5,
+    tcp: Math.random() < 0.5,
+  };
+  Forwarders.value.push(randomForwarder);
+  if (Math.random() < 0.5) {
+    setTimeout(() => {
+      broker.emit("forwarder:Started", randomForwarder.listen);
+    }, 200);
+  }
+}
+broker.on("dev:RestoreState", showPopulatedState);
+broker.on("dev:EmptyState", showEmptyState);
+broker.on("dev:AddState", addState);
+onUnmounted(() => {
+  broker.off("dev:RestoreState", showPopulatedState);
+  broker.off("dev:EmptyState", showEmptyState);
+  broker.off("dev:AddState", addState);
 });
 </script>
 

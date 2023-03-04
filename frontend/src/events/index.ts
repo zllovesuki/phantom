@@ -9,6 +9,10 @@ export type Events = {
   "specter:Connected": void;
   "specter:Connecting": void;
   "specter:Disconnected": void;
+
+  "dev:EmptyState": void;
+  "dev:RestoreState": void;
+  "dev:AddState": void;
 };
 
 const emitter = mitt<Events>();

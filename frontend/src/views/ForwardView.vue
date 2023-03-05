@@ -231,7 +231,9 @@ if (import.meta.env.DEV) {
       <Disclosure v-slot="{ open }">
         <ResponsiveRow>
           <template #heading>
-            <DisclosureButton>
+            <DisclosureButton
+              class="m-0.5 rounded-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
               <h3
                 :class="[
                   open
@@ -272,29 +274,36 @@ if (import.meta.env.DEV) {
             </DisclosureButton>
           </template>
           <template #content>
-            <DisclosurePanel>
-              <div class="shadow sm:overflow-hidden sm:rounded-md">
-                <div class="row-content-bg-color space-y-6 px-4 py-5 sm:p-6">
-                  <fieldset>
-                    <legend class="sr-only">Options</legend>
-                    <label
-                      for="specter-apex"
-                      class="block text-sm font-medium text-gray-800 dark:text-gray-300"
-                    >
-                      Options
-                    </label>
-                    <div class="mt-4 space-y-4">
-                      <SwitchToggle
-                        v-model:value="PhantomConfig.listenOnStart"
-                        :disabled="ChangingSettings"
-                        label="Forwarders Autostart"
-                        description="Start forwarders when Phantom starts"
-                      />
-                    </div>
-                  </fieldset>
+            <transition
+              enter-active-class="transition-opacity duration-200"
+              enter-from-class="opacity-0"
+              leave-active-class="transition-opacity duration-200"
+              leave-to-class="opacity-0"
+            >
+              <DisclosurePanel>
+                <div class="shadow sm:overflow-hidden sm:rounded-md">
+                  <div class="row-content-bg-color space-y-6 px-4 py-5 sm:p-6">
+                    <fieldset>
+                      <legend class="sr-only">Options</legend>
+                      <label
+                        for="specter-apex"
+                        class="block text-sm font-medium text-gray-800 dark:text-gray-300"
+                      >
+                        Options
+                      </label>
+                      <div class="mt-4 space-y-4">
+                        <SwitchToggle
+                          v-model:value="PhantomConfig.listenOnStart"
+                          :disabled="ChangingSettings"
+                          label="Forwarders Autostart"
+                          description="Start forwarders when Phantom starts"
+                        />
+                      </div>
+                    </fieldset>
+                  </div>
                 </div>
-              </div>
-            </DisclosurePanel>
+              </DisclosurePanel>
+            </transition>
           </template>
         </ResponsiveRow>
       </Disclosure>

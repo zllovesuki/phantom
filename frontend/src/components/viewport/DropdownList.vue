@@ -4,7 +4,6 @@ import {
   ListboxButton,
   ListboxOption,
   ListboxOptions,
-  TransitionRoot,
 } from "@miragespace/headlessui-vue";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/vue/20/solid";
 import { computed } from "vue";
@@ -64,10 +63,13 @@ const Selected = computed({
         </span>
       </ListboxButton>
 
-      <TransitionRoot
-        leave-active="transition ease-in duration-100"
-        leave-from="opacity-100"
-        leave-to="opacity-0"
+      <transition
+        enter-active-class="transition duration-100 ease-out"
+        enter-from-class="transform scale-95 opacity-0"
+        enter-to-class="transform scale-100 opacity-100"
+        leave-active-class="transition ease-in duration-100"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
       >
         <ListboxOptions
           :class="[
@@ -109,7 +111,7 @@ const Selected = computed({
             </li>
           </ListboxOption>
         </ListboxOptions>
-      </TransitionRoot>
+      </transition>
     </div>
   </Listbox>
 </template>

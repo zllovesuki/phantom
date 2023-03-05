@@ -90,6 +90,7 @@ export default defineComponent({
             class={[
               "inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400",
               !Loading.value ? "hover:text-gray-500" : "cursor-not-allowed",
+              "focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500",
             ].join(" ")}
             disabled={Loading.value}
             onClick={() => {

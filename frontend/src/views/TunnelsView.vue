@@ -297,7 +297,9 @@ if (import.meta.env.DEV) {
       >
         <ResponsiveRow>
           <template #heading>
-            <DisclosureButton>
+            <DisclosureButton
+              class="m-0.5 rounded-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
               <h3
                 :class="[
                   open
@@ -338,69 +340,78 @@ if (import.meta.env.DEV) {
             </DisclosureButton>
           </template>
           <template #content>
-            <DisclosurePanel as="div" class="mt-5 md:col-span-3 md:mt-0">
-              <form @submit.prevent="synchronizeSettings">
-                <div class="shadow sm:overflow-hidden sm:rounded-md">
-                  <div class="row-content-bg-color space-y-6 px-4 py-5 sm:p-6">
-                    <div class="grid grid-cols-3 gap-6">
-                      <div class="col-span-3 sm:col-span-2">
+            <transition
+              enter-active-class="transition-opacity duration-200"
+              enter-from-class="opacity-0"
+              leave-active-class="transition-opacity duration-200"
+              leave-to-class="opacity-0"
+            >
+              <DisclosurePanel as="div" class="mt-5 md:col-span-3 md:mt-0">
+                <form @submit.prevent="synchronizeSettings">
+                  <div class="shadow sm:overflow-hidden sm:rounded-md">
+                    <div
+                      class="row-content-bg-color space-y-6 px-4 py-5 sm:p-6"
+                    >
+                      <div class="grid grid-cols-3 gap-6">
+                        <div class="col-span-3 sm:col-span-2">
+                          <label
+                            for="specter-apex"
+                            class="block text-sm font-medium text-gray-800 dark:text-gray-300"
+                          >
+                            Specter Gateway
+                          </label>
+                          <div class="mt-1 flex rounded-md shadow-sm">
+                            <span
+                              class="inline-flex items-center rounded-l-md border border-r-0 border-gray-200 bg-gray-200/60 px-2.5 text-sm text-black dark:border-gray-700 dark:bg-slate-700/50 dark:text-white"
+                              >https://</span
+                            >
+                            <input
+                              id="specter-apex"
+                              v-model="SpecterConfig.apex"
+                              type="text"
+                              name="specter-apex"
+                              :disabled="DisableSettingsModification"
+                              class="block w-full flex-1 rounded-none rounded-r-md border-gray-200 bg-transparent text-black placeholder-gray-600 outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 disabled:text-gray-400 dark:border-gray-700 dark:text-white dark:placeholder-gray-400 dark:disabled:text-gray-400 sm:text-sm"
+                              placeholder="specter.im:443"
+                            />
+                          </div>
+                          <p
+                            id="helper-text-explanation"
+                            class="mt-2 text-xs text-gray-500 dark:text-gray-400"
+                          >
+                            Changing to a different specter gateway may require
+                            a reset.
+                          </p>
+                        </div>
+                      </div>
+                      <fieldset>
+                        <legend class="sr-only">Options</legend>
                         <label
                           for="specter-apex"
                           class="block text-sm font-medium text-gray-800 dark:text-gray-300"
                         >
-                          Specter Gateway
+                          Options
                         </label>
-                        <div class="mt-1 flex rounded-md shadow-sm">
-                          <span
-                            class="inline-flex items-center rounded-l-md border border-r-0 border-gray-200 bg-gray-200/60 px-2.5 text-sm text-black dark:border-gray-700 dark:bg-slate-700/50 dark:text-white"
-                            >https://</span
-                          >
-                          <input
-                            id="specter-apex"
-                            v-model="SpecterConfig.apex"
-                            type="text"
-                            name="specter-apex"
+                        <div class="mt-4 space-y-4">
+                          <SwitchToggle
+                            v-model:value="PhantomConfig.specterInsecure"
                             :disabled="DisableSettingsModification"
-                            class="block w-full flex-1 rounded-none rounded-r-md border-gray-200 bg-transparent text-black placeholder-gray-600 outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 disabled:text-gray-400 dark:border-gray-700 dark:text-white dark:placeholder-gray-400 dark:disabled:text-gray-400 sm:text-sm"
-                            placeholder="specter.im:443"
+                            label="Disable TLS Verification"
+                            description="Accepts any certificate presented by the gateway and any host name in that certificate when connecting."
+                          />
+                          <SwitchToggle
+                            v-model:value="PhantomConfig.connectOnStart"
+                            :disabled="SynchronizingSettings"
+                            label="Client Autostart"
+                            description="Start specter client when Phantom starts"
                           />
                         </div>
-                        <p
-                          id="helper-text-explanation"
-                          class="mt-2 text-xs text-gray-500 dark:text-gray-400"
-                        >
-                          Changing to a different specter gateway may require a
-                          reset.
-                        </p>
-                      </div>
+                      </fieldset>
                     </div>
-                    <fieldset>
-                      <legend class="sr-only">Options</legend>
-                      <label
-                        for="specter-apex"
-                        class="block text-sm font-medium text-gray-800 dark:text-gray-300"
-                      >
-                        Options
-                      </label>
-                      <div class="mt-4 space-y-4">
-                        <SwitchToggle
-                          v-model:value="PhantomConfig.specterInsecure"
-                          :disabled="DisableSettingsModification"
-                          label="Disable TLS Verification"
-                          description="Accepts any certificate presented by the gateway and any host name in that certificate when connecting."
-                        />
-                        <SwitchToggle
-                          v-model:value="PhantomConfig.connectOnStart"
-                          :disabled="SynchronizingSettings"
-                          label="Client Autostart"
-                          description="Start specter client when Phantom starts"
-                        />
-                      </div>
-                    </fieldset>
                   </div>
-                </div>
-              </form>
-            </DisclosurePanel>
+                </form>
+              </DisclosurePanel>
+            </transition>
           </template>
         </ResponsiveRow>
       </Disclosure>

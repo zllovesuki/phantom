@@ -60,6 +60,7 @@ const unassigned = computed<boolean>(() => {
               unassigned
                 ? ''
                 : 'cursor-pointer hover:text-gray-400 dark:hover:text-gray-100',
+              'focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500',
             ]"
             @click.prevent="
               () => {
@@ -85,6 +86,7 @@ const unassigned = computed<boolean>(() => {
           :class="[
             'inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400',
             !Loading ? 'hover:text-gray-500' : 'cursor-not-allowed',
+            'focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500',
           ]"
           :disabled="Loading"
           @click="UnpublishModalOpen = true"
@@ -97,6 +99,7 @@ const unassigned = computed<boolean>(() => {
           :class="[
             'inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400',
             !Loading ? 'hover:text-gray-500' : 'cursor-not-allowed',
+            'focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500',
           ]"
           :disabled="Loading"
           @click="EditModalOpen = true"

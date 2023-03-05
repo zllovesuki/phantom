@@ -90,10 +90,10 @@ watch(
     >
       <TransitionChild
         as="template"
-        enter="ease-out duration-300"
+        enter="ease-out duration-200"
         enter-from="opacity-0"
         enter-to="opacity-100"
-        leave="ease-in duration-200"
+        leave="ease-in duration-100"
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
@@ -108,10 +108,10 @@ watch(
         >
           <TransitionChild
             as="template"
-            enter="ease-out duration-300"
+            enter="ease-out duration-200"
             enter-from="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             enter-to="opacity-100 translate-y-0 sm:scale-100"
-            leave="ease-in duration-200"
+            leave="ease-in duration-100"
             leave-from="opacity-100 translate-y-0 sm:scale-100"
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
@@ -178,7 +178,7 @@ watch(
                       v-model="hostname"
                       type="text"
                       name="hostname"
-                      class="block w-full rounded-lg border border-gray-300 bg-transparent p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 disabled:text-gray-400 dark:border-gray-500 dark:text-white dark:placeholder-gray-400 dark:disabled:text-gray-400"
+                      class="block w-full rounded-lg border border-gray-300 bg-transparent p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-indigo-500 disabled:text-gray-400 dark:border-gray-500 dark:text-white dark:placeholder-gray-400 dark:disabled:text-gray-400"
                       placeholder="jinx-jockstrap-gristle-subpanel-violin.specter.im"
                       required
                     />

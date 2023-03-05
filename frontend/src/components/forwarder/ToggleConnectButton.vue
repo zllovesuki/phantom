@@ -45,8 +45,8 @@ onMounted(reloadForwardersStatus);
       ForwardersStarting
         ? 'bg-gray-100 text-black dark:bg-gray-700 dark:text-white'
         : ForwardersStarted
-        ? 'bg-red-500 text-white hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-800'
-        : 'bg-indigo-500 text-white hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700',
+        ? 'bg-red-500 text-white hover:bg-red-600 dark:bg-red-800 dark:text-gray-200 dark:hover:bg-red-700'
+        : 'bg-indigo-500 text-white hover:bg-indigo-600 dark:bg-indigo-600 dark:text-gray-200 dark:hover:bg-indigo-700',
       'inline-flex items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium shadow-sm focus:border-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:border-black dark:focus:ring-white',
     ]"
     @click="toggleListenersState"

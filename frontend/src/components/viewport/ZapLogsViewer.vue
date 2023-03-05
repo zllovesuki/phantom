@@ -88,7 +88,7 @@ function textColorClass(level: string): string[] {
     case "info":
       return ["text-blue-500", "dark:text-blue-400"];
     case "debug":
-      return ["text-purple-300", "dark:text-purple-400"];
+      return ["text-cyan-300", "dark:text-cyan-400"];
     default:
       return ["text-gray-900", "dark:text-gray-300"];
   }

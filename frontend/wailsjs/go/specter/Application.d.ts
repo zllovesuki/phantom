@@ -27,6 +27,8 @@ export function ReleaseTunnel(arg1:number):Promise<void>;
 
 export function RemoveForwarder(arg1:number):Promise<void>;
 
+export function RunningForwarders():Promise<number>;
+
 export function StartAllForwarders():Promise<void>;
 
 export function StartClient():Promise<void>;

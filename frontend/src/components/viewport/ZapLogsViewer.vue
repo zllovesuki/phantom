@@ -103,7 +103,7 @@ function textColorClass(level: string): string[] {
           <tr>
             <th
               scope="col"
-              class="sticky top-0 z-10 whitespace-nowrap bg-white/75 py-3.5 pl-6 pr-3 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/50 dark:text-gray-200 sm:pl-0"
+              class="sticky top-0 z-10 whitespace-nowrap bg-gray-50/75 py-3.5 pl-6 pr-3 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/50 dark:text-gray-200 sm:pl-0"
             >
               <a
                 class="group inline-flex cursor-pointer"
@@ -119,19 +119,19 @@ function textColorClass(level: string): string[] {
             </th>
             <th
               scope="col"
-              class="sticky top-0 z-10 hidden whitespace-nowrap bg-white/75 px-2 py-3.5 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/50 dark:text-gray-200 md:table-cell"
+              class="sticky top-0 z-10 hidden whitespace-nowrap bg-gray-50/75 px-2 py-3.5 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/50 dark:text-gray-200 md:table-cell"
             >
               Level
             </th>
             <th
               scope="col"
-              class="sticky top-0 z-10 whitespace-nowrap bg-white/75 px-2 py-3.5 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/50 dark:text-gray-200"
+              class="sticky top-0 z-10 whitespace-nowrap bg-gray-50/75 px-2 py-3.5 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/50 dark:text-gray-200"
             >
               Message
             </th>
             <th
               scope="col"
-              class="sticky top-0 z-10 whitespace-nowrap bg-white/75 py-3.5 pl-3 pr-6 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/50 dark:text-gray-200 sm:pr-0"
+              class="sticky top-0 z-10 whitespace-nowrap bg-gray-50/75 py-3.5 pl-3 pr-6 text-left text-sm font-semibold text-gray-900 dark:bg-slate-800/50 dark:text-gray-200 sm:pr-0"
             >
               Error
             </th>

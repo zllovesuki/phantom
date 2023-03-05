@@ -11,12 +11,12 @@ import {
   ChevronRightIcon,
 } from "@heroicons/vue/24/outline";
 import ResponsiveRow from "~/components/viewport/ResponsiveRow.vue";
+import SwitchToggle from "~/components/viewport/SwitchToggle.vue";
 import TunnelCard from "~/components/tunnel/TunnelCard.vue";
 import TunnelModal from "~/components/tunnel/TunnelModal.vue";
 import ToggleConnectButton from "~/components/tunnel/ToggleConnectButton.vue";
 import NewEntryCard from "~/components/utility/NewEntryCard";
 import StatusBadge from "~/components/utility/StatusBadge.vue";
-import SwitchToggle from "~/components/viewport/SwitchToggle.vue";
 
 import { storeToRefs } from "pinia";
 import { ref, computed, nextTick, watch, onMounted, onUnmounted } from "vue";
@@ -68,47 +68,46 @@ const DisableSettingsModification = computed(() => {
   );
 });
 
-async function appendNewTunnel(t: client.Tunnel) {
+async function tunnelFnWrapper(
+  callFn: () => Promise<void>,
+  format: (e: unknown) => string
+) {
   try {
     setLoading(true);
-    await ValidateTarget(t.target);
-
-    Tunnels.value.push(t);
-    await RebuildTunnels(Tunnels.value);
-
-    await Synchronize();
+    await callFn();
+    await new Promise((resolve) => setTimeout(resolve, 500));
     await reloadConfig();
   } catch (e) {
-    showAlert("fail", `Error adding tunnel: ${e as string}`);
+    showAlert("fail", format(e));
   } finally {
     setLoading(false);
   }
+}
+
+async function appendNewTunnel(t: client.Tunnel) {
+  await tunnelFnWrapper(
+    async () => {
+      await ValidateTarget(t.target);
+      const updated = [...Tunnels.value, t];
+      await RebuildTunnels(updated);
+      await Synchronize();
+    },
+    (e: unknown) => `Error adding tunnel: ${e as string}`
+  );
 }
 
 async function unpublishTunnel(i: number) {
-  try {
-    setLoading(true);
-    await UnpublishTunnel(i);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    await reloadConfig();
-  } catch (e) {
-    showAlert("fail", `Error unpublishing tunnel: ${e as string}`);
-  } finally {
-    setLoading(false);
-  }
+  await tunnelFnWrapper(
+    () => UnpublishTunnel(i),
+    (e: unknown) => `Error unpublishing tunnel: ${e as string}`
+  );
 }
 
 async function releaseTunnel(i: number) {
-  try {
-    setLoading(true);
-    await ReleaseTunnel(i);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    await reloadConfig();
-  } catch (e) {
-    showAlert("fail", `Error releasing tunnel: ${e as string}`);
-  } finally {
-    setLoading(false);
-  }
+  await tunnelFnWrapper(
+    () => ReleaseTunnel(i),
+    (e: unknown) => `Error releasing tunnel: ${e as string}`
+  );
 }
 
 async function updateTunnel(i: number, t: client.Tunnel) {
@@ -247,12 +246,12 @@ onUnmounted(() => {
           <p class="mt-2 text-xs text-gray-600">
             <StatusBadge
               :text="ClientConnected ? 'Connected' : 'Disconnected'"
-              :enabled="ClientConnected"
+              :level="ClientConnected ? 'healthy' : 'down'"
             >
-              <template #enabled>
+              <template #healthy>
                 <SparklesIcon class="ml-1 h-4 w-4" />
               </template>
-              <template #disabled>
+              <template #down>
                 <BoltSlashIcon class="ml-1 h-4 w-4" />
               </template>
             </StatusBadge>

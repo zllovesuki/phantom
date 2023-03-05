@@ -215,7 +215,7 @@ watch(
         leave-to="opacity-0"
       >
         <div
-          class="fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity"
+          class="fixed inset-0 bg-gray-600/75 transition-opacity dark:bg-gray-700/75"
         />
       </TransitionChild>
 

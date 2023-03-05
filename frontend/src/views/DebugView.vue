@@ -6,6 +6,7 @@ import DescriptionList, {
 import ZapLogsViewer from "~/components/viewport/ZapLogsViewer.vue";
 import ResponsiveRow from "~/components/viewport/ResponsiveRow.vue";
 import SynchronizeButton from "~/components/tunnel/SynchronizeButton.vue";
+import ListenerStatus from "~/components/forwarder/ListenerStatus.vue";
 import StatusBadge from "~/components/utility/StatusBadge.vue";
 
 import { ref, computed, onMounted, onUnmounted } from "vue";
@@ -162,12 +163,12 @@ onUnmounted(() => {
                 ].join(' ')
               "
               class="mb-2"
-              :enabled="ConnectedTunnelNodes.length > 0"
+              :level="ConnectedTunnelNodes.length > 0 ? 'healthy' : 'down'"
             >
-              <template #enabled>
+              <template #healthy>
                 <SparklesIcon class="ml-1 h-4 w-4" />
               </template>
-              <template #disabled>
+              <template #down>
                 <BoltSlashIcon class="ml-1 h-4 w-4" />
               </template>
             </StatusBadge>
@@ -284,23 +285,7 @@ onUnmounted(() => {
             Forwarder Nodes
           </h3>
           <p class="mt-2 text-xs text-gray-600 dark:text-gray-500">
-            <StatusBadge
-              :text="
-                [
-                  ConnectedForwarderNodes.length > 0 ? 'Has' : 'No',
-                  'Listeners',
-                ].join(' ')
-              "
-              class="mb-2"
-              :enabled="ConnectedForwarderNodes.length > 0"
-            >
-              <template #enabled>
-                <SparklesIcon class="ml-1 h-4 w-4" />
-              </template>
-              <template #disabled>
-                <BoltSlashIcon class="ml-1 h-4 w-4" />
-              </template>
-            </StatusBadge>
+            <ListenerStatus />
           </p>
         </template>
         <template #content>

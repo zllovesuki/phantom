@@ -50,6 +50,10 @@ export function RemoveForwarder(arg1) {
   return window['go']['specter']['Application']['RemoveForwarder'](arg1);
 }
 
+export function RunningForwarders() {
+  return window['go']['specter']['Application']['RunningForwarders']();
+}
+
 export function StartAllForwarders() {
   return window['go']['specter']['Application']['StartAllForwarders']();
 }

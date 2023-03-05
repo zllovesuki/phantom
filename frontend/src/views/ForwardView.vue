@@ -9,11 +9,12 @@ import {
   ArrowRightOnRectangleIcon,
 } from "@heroicons/vue/24/outline";
 import ResponsiveRow from "~/components/viewport/ResponsiveRow.vue";
+import SwitchToggle from "~/components/viewport/SwitchToggle.vue";
 import ForwarderCard from "~/components/forwarder/ForwarderCard.vue";
 import ToggleConnectButton from "~/components/forwarder/ToggleConnectButton.vue";
+import ListenerStatus from "~/components/forwarder/ListenerStatus.vue";
 import ForwarderModal from "~/components/forwarder/ForwarderModal.vue";
 import NewEntryCard from "~/components/utility/NewEntryCard";
-import SwitchToggle from "~/components/viewport/SwitchToggle.vue";
 
 import { storeToRefs } from "pinia";
 import { ref, watch, nextTick, onMounted, onUnmounted } from "vue";
@@ -46,42 +47,41 @@ const PhantomConfig = ref<specter.PhantomConfig>(
   })
 );
 
-async function appendNewForwarder(l: specter.Listener) {
+async function forwarderFnWrapper(
+  callFn: () => Promise<void>,
+  format: (e: unknown) => string
+) {
   try {
     setLoading(true);
-    await AddForwarder(l);
+    await callFn();
+    await new Promise((resolve) => setTimeout(resolve, 500));
     await reloadConfig();
   } catch (e) {
-    showAlert("fail", `Error adding forwarder: ${e as string}`);
+    showAlert("fail", format(e));
   } finally {
     setLoading(false);
   }
+}
+
+async function appendNewForwarder(l: specter.Listener) {
+  await forwarderFnWrapper(
+    () => AddForwarder(l),
+    (e: unknown) => `Error adding forwarder: ${e as string}`
+  );
 }
 
 async function removeForwarder(i: number) {
-  try {
-    setLoading(true);
-    await RemoveForwarder(i);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    await reloadConfig();
-  } catch (e) {
-    showAlert("fail", `Error removing forwarder: ${e as string}`);
-  } finally {
-    setLoading(false);
-  }
+  await forwarderFnWrapper(
+    () => RemoveForwarder(i),
+    (e: unknown) => `Error removing forwarder: ${e as string}`
+  );
 }
 
 async function updateLabel(i: number, label: string) {
-  try {
-    setLoading(true);
-    await UpdateForwaderLabel(i, label);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    await reloadConfig();
-  } catch (e) {
-    showAlert("fail", `Error updating label: ${e as string}`);
-  } finally {
-    setLoading(false);
-  }
+  await forwarderFnWrapper(
+    () => UpdateForwaderLabel(i, label),
+    (e: unknown) => `Error updating label: ${e as string}`
+  );
 }
 
 async function reloadConfig() {
@@ -202,6 +202,9 @@ onUnmounted(() => {
           >
             Listener Status
           </h3>
+          <p class="mt-2 text-xs text-gray-600 dark:text-gray-500">
+            <ListenerStatus />
+          </p>
         </template>
         <template #content>
           <div class="overflow-hidden shadow sm:rounded-md">

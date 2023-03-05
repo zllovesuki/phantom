@@ -124,33 +124,36 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
   await synchronizeSettings();
 });
 
-// DEV MENU
-function showEmptyState() {
-  Forwarders.value = [];
-}
-function addState() {
-  const randomForwarder: phantom.Listener = {
-    label: "Donec id",
-    listen: `127.0.0.1:${Math.floor(Math.random() * (60000 - 1024) + 1024)}`,
-    hostname: "ipsum-quia-dolor-sit-amet.dev.host.dev",
-    insecure: Math.random() < 0.5,
-    tcp: Math.random() < 0.5,
+let showEmptyState: () => void;
+let addState: () => void;
+if (import.meta.env.DEV) {
+  showEmptyState = () => {
+    Forwarders.value = [];
   };
-  Forwarders.value.push(randomForwarder);
-  if (Math.random() < 0.5) {
-    setTimeout(() => {
-      broker.emit("forwarder:Started", randomForwarder.listen);
-    }, 200);
-  }
+  addState = () => {
+    const randomForwarder: phantom.Listener = {
+      label: "Donec id",
+      listen: `127.0.0.1:${Math.floor(Math.random() * (60000 - 1024) + 1024)}`,
+      hostname: "ipsum-quia-dolor-sit-amet.dev.host.dev",
+      insecure: Math.random() < 0.5,
+      tcp: Math.random() < 0.5,
+    };
+    Forwarders.value.push(randomForwarder);
+    if (Math.random() < 0.5) {
+      setTimeout(() => {
+        broker.emit("forwarder:Started", randomForwarder.listen);
+      }, 200);
+    }
+  };
+  broker.on("dev:RestoreState", reloadConfig);
+  broker.on("dev:EmptyState", showEmptyState);
+  broker.on("dev:AddState", addState);
+  onUnmounted(() => {
+    broker.off("dev:RestoreState", reloadConfig);
+    broker.off("dev:EmptyState", showEmptyState);
+    broker.off("dev:AddState", addState);
+  });
 }
-broker.on("dev:RestoreState", reloadConfig);
-broker.on("dev:EmptyState", showEmptyState);
-broker.on("dev:AddState", addState);
-onUnmounted(() => {
-  broker.off("dev:RestoreState", reloadConfig);
-  broker.off("dev:EmptyState", showEmptyState);
-  broker.off("dev:AddState", addState);
-});
 </script>
 
 <template>

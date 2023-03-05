@@ -61,9 +61,11 @@ async function reloadState() {
   NumRunning.value = num;
 }
 
-broker.on("forwarder:Started", reloadState);
-broker.on("forwarder:Stopped", reloadState);
-onMounted(reloadState);
+onMounted(() => {
+  broker.on("forwarder:Started", reloadState);
+  broker.on("forwarder:Stopped", reloadState);
+  reloadState();
+});
 onUnmounted(() => {
   broker.off("forwarder:Started", reloadState);
   broker.off("forwarder:Stopped", reloadState);

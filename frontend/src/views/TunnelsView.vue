@@ -178,34 +178,37 @@ watch(
   }
 );
 
-// DEV MENU
-function showEmptyState() {
-  Tunnels.value = [];
+let showEmptyState: () => void;
+let addState: () => void;
+if (import.meta.env.DEV) {
+  showEmptyState = () => {
+    Tunnels.value = [];
+  };
+  addState = () => {
+    const randomTarget = Math.random() < 0.5;
+    if (randomTarget) {
+      Tunnels.value.push({
+        target: "tcp://127.0.0.1:22",
+        hostname: "ipsum-quia-dolor-sit-amet",
+        insecure: false,
+      });
+    } else {
+      Tunnels.value.push({
+        target: "https://127.0.0.1:8080",
+        hostname: "porro-quisquam-est-qui-dolorem",
+        insecure: Math.random() < 0.5,
+      });
+    }
+  };
+  broker.on("dev:RestoreState", reloadConfig);
+  broker.on("dev:EmptyState", showEmptyState);
+  broker.on("dev:AddState", addState);
+  onUnmounted(() => {
+    broker.off("dev:RestoreState", reloadConfig);
+    broker.off("dev:EmptyState", showEmptyState);
+    broker.off("dev:AddState", addState);
+  });
 }
-function addState() {
-  const randomTarget = Math.random() < 0.5;
-  if (randomTarget) {
-    Tunnels.value.push({
-      target: "tcp://127.0.0.1:22",
-      hostname: "ipsum-quia-dolor-sit-amet",
-      insecure: false,
-    });
-  } else {
-    Tunnels.value.push({
-      target: "https://127.0.0.1:8080",
-      hostname: "porro-quisquam-est-qui-dolorem",
-      insecure: Math.random() < 0.5,
-    });
-  }
-}
-broker.on("dev:RestoreState", reloadConfig);
-broker.on("dev:EmptyState", showEmptyState);
-broker.on("dev:AddState", addState);
-onUnmounted(() => {
-  broker.off("dev:RestoreState", reloadConfig);
-  broker.off("dev:EmptyState", showEmptyState);
-  broker.off("dev:AddState", addState);
-});
 </script>
 
 <template>

@@ -1,7 +1,7 @@
 import { PlayIcon, StopIcon } from "@heroicons/vue/20/solid";
 import ConfirmModal from "~/components/viewport/ConfirmModal.vue";
 
-import { defineComponent, onUnmounted, ref } from "vue";
+import { defineComponent, ref, onMounted, onUnmounted } from "vue";
 import { storeToRefs } from "pinia";
 
 import {
@@ -70,8 +70,10 @@ export default defineComponent({
     const startedHandler = getEventHandler(true);
     const stoppedHandler = getEventHandler(false);
 
-    broker.on("forwarder:Started", startedHandler);
-    broker.on("forwarder:Stopped", stoppedHandler);
+    onMounted(() => {
+      broker.on("forwarder:Started", startedHandler);
+      broker.on("forwarder:Stopped", stoppedHandler);
+    });
 
     onUnmounted(() => {
       broker.off("forwarder:Started", startedHandler);

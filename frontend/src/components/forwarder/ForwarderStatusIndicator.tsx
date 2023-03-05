@@ -24,15 +24,10 @@ export default defineComponent({
     const startedHandler = getEventHandler(true);
     const stoppedHandler = getEventHandler(false);
 
-    broker.on("forwarder:Started", startedHandler);
-    broker.on("forwarder:Stopped", stoppedHandler);
-
-    onUnmounted(() => {
-      broker.off("forwarder:Started", startedHandler);
-      broker.off("forwarder:Stopped", stoppedHandler);
-    });
-
     onMounted(() => {
+      broker.on("forwarder:Started", startedHandler);
+      broker.on("forwarder:Stopped", stoppedHandler);
+
       ForwarderStarted(props.listen).then((s) => {
         if (s) {
           broker.emit("forwarder:Started", props.listen);
@@ -40,6 +35,11 @@ export default defineComponent({
           broker.emit("forwarder:Stopped", props.listen);
         }
       });
+    });
+
+    onUnmounted(() => {
+      broker.off("forwarder:Started", startedHandler);
+      broker.off("forwarder:Stopped", stoppedHandler);
     });
 
     return () => {

@@ -135,13 +135,14 @@ onMounted(async () => {
   }
 });
 
-// DEV MENU
-broker.on("dev:RestoreState", loadInfo);
-broker.on("dev:EmptyState", clearInfo);
-onUnmounted(() => {
-  broker.off("dev:RestoreState", loadInfo);
-  broker.off("dev:EmptyState", clearInfo);
-});
+if (import.meta.env.DEV) {
+  broker.on("dev:RestoreState", loadInfo);
+  broker.on("dev:EmptyState", clearInfo);
+  onUnmounted(() => {
+    broker.off("dev:RestoreState", loadInfo);
+    broker.off("dev:EmptyState", clearInfo);
+  });
+}
 </script>
 
 <template>

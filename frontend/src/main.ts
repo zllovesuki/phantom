@@ -1,13 +1,14 @@
 import "@fontsource/inter/variable-full.css";
 import "~/assets/main.css";
 
-import { createApp, watchEffect, h } from "vue";
-import { createPinia } from "pinia";
-import { useSettingStore } from "~/store/setting";
-import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
-
 import App from "./App.vue";
 import router from "./router";
+
+import { createApp, watchEffect, h } from "vue";
+import { createPinia } from "pinia";
+import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
+
+import { useSettingStore } from "~/store/setting";
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
@@ -15,13 +16,18 @@ pinia.use(piniaPluginPersistedstate);
 const app = createApp({
   setup() {
     const setting = useSettingStore();
+
     const applyDarkMode = () =>
       document.documentElement.classList[setting.darkMode ? "add" : "remove"](
         "dark"
       );
+
     watchEffect(applyDarkMode);
+
+    return () => {
+      return h(App);
+    };
   },
-  render: () => h(App),
 });
 
 app.use(pinia);

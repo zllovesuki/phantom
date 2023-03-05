@@ -298,7 +298,7 @@ if (import.meta.env.DEV) {
         <ResponsiveRow>
           <template #heading>
             <DisclosureButton
-              class="m-0.5 rounded-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="mb-0.5 rounded-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <h3
                 :class="[

@@ -1,4 +1,4 @@
-import "@fontsource/inter/variable-full.css";
+import "@fontsource/inter/variable.css";
 import "~/assets/main.css";
 
 import App from "./App.vue";

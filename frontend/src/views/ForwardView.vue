@@ -50,7 +50,7 @@ async function appendNewForwarder(l: specter.Listener) {
   try {
     setLoading(true);
     await AddForwarder(l);
-    await reloadForwarders();
+    await reloadConfig();
   } catch (e) {
     showAlert("fail", `Error adding forwarder: ${e as string}`);
   } finally {
@@ -63,7 +63,7 @@ async function removeForwarder(i: number) {
     setLoading(true);
     await RemoveForwarder(i);
     await new Promise((resolve) => setTimeout(resolve, 500));
-    await reloadForwarders();
+    await reloadConfig();
   } catch (e) {
     showAlert("fail", `Error removing forwarder: ${e as string}`);
   } finally {
@@ -76,7 +76,7 @@ async function updateLabel(i: number, label: string) {
     setLoading(true);
     await UpdateForwaderLabel(i, label);
     await new Promise((resolve) => setTimeout(resolve, 500));
-    await reloadForwarders();
+    await reloadConfig();
   } catch (e) {
     showAlert("fail", `Error updating label: ${e as string}`);
   } finally {
@@ -84,11 +84,12 @@ async function updateLabel(i: number, label: string) {
   }
 }
 
-async function reloadForwarders() {
-  const cfg = await GetPhantomConfig();
-  if (cfg !== null) {
-    if (cfg.listeners) {
-      Forwarders.value = cfg.listeners;
+async function reloadConfig() {
+  const phantomCfg = await GetPhantomConfig();
+  if (phantomCfg !== null) {
+    PhantomConfig.value = phantomCfg;
+    if (phantomCfg.listeners) {
+      Forwarders.value = phantomCfg.listeners;
     }
   }
 }
@@ -111,13 +112,7 @@ async function synchronizeSettings() {
 
 const _loaded = ref(false);
 onMounted(async () => {
-  const [phantomCfg] = await Promise.all([
-    GetPhantomConfig(),
-    reloadForwarders(),
-  ]);
-  if (phantomCfg !== null) {
-    PhantomConfig.value = phantomCfg;
-  }
+  await reloadConfig();
   nextTick(() => {
     _loaded.value = true;
   });
@@ -130,9 +125,6 @@ watch([() => PhantomConfig.value.listenOnStart], async () => {
 });
 
 // DEV MENU
-function showPopulatedState() {
-  reloadForwarders();
-}
 function showEmptyState() {
   Forwarders.value = [];
 }
@@ -151,11 +143,11 @@ function addState() {
     }, 200);
   }
 }
-broker.on("dev:RestoreState", showPopulatedState);
+broker.on("dev:RestoreState", reloadConfig);
 broker.on("dev:EmptyState", showEmptyState);
 broker.on("dev:AddState", addState);
 onUnmounted(() => {
-  broker.off("dev:RestoreState", showPopulatedState);
+  broker.off("dev:RestoreState", reloadConfig);
   broker.off("dev:EmptyState", showEmptyState);
   broker.off("dev:AddState", addState);
 });
@@ -173,35 +165,33 @@ onUnmounted(() => {
           </h3>
         </template>
         <template #content>
-          <form>
-            <ul role="list" class="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <ForwarderCard
-                v-for="(listener, i) in Forwarders"
-                :key="i"
-                :listener="listener"
-                @delete="removeForwarder(i)"
-                @update:label="updateLabel(i, $event)"
-              />
-              <NewEntryCard
-                :icon="ArrowRightOnRectangleIcon"
-                :disabled="Loading"
-                description="Add a new forwarder"
-                @triggered="NewForwarderModalOpen = true"
-              />
-            </ul>
-            <ForwarderModal
-              v-model:show="NewForwarderModalOpen"
-              :create="true"
-              :listener="{
-                label: '',
-                listen: '',
-                hostname: '',
-                tcp: false,
-                insecure: false,
-              }"
-              @update:listener="appendNewForwarder"
+          <ul role="list" class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <ForwarderCard
+              v-for="(listener, i) in Forwarders"
+              :key="i"
+              :listener="listener"
+              @delete="removeForwarder(i)"
+              @update:label="updateLabel(i, $event)"
             />
-          </form>
+            <NewEntryCard
+              :icon="ArrowRightOnRectangleIcon"
+              :disabled="Loading"
+              description="Add a new forwarder"
+              @triggered="NewForwarderModalOpen = true"
+            />
+          </ul>
+          <ForwarderModal
+            v-model:show="NewForwarderModalOpen"
+            :create="true"
+            :listener="{
+              label: '',
+              listen: '',
+              hostname: '',
+              tcp: false,
+              insecure: false,
+            }"
+            @update:listener="appendNewForwarder"
+          />
         </template>
       </ResponsiveRow>
 
@@ -214,23 +204,21 @@ onUnmounted(() => {
           </h3>
         </template>
         <template #content>
-          <form>
-            <div class="overflow-hidden shadow sm:rounded-md">
-              <div class="bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6">
-                <div class="grid grid-cols-6 gap-6">
-                  <div class="col-span-12 sm:col-span-6">
-                    <span
-                      class="inline-block text-sm text-gray-700 dark:text-gray-300"
-                    >
-                      <div class="flex space-x-3">
-                        <ToggleConnectButton />
-                      </div>
-                    </span>
-                  </div>
+          <div class="overflow-hidden shadow sm:rounded-md">
+            <div class="bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6">
+              <div class="grid grid-cols-6 gap-6">
+                <div class="col-span-12 sm:col-span-6">
+                  <span
+                    class="inline-block text-sm text-gray-700 dark:text-gray-300"
+                  >
+                    <div class="flex space-x-3">
+                      <ToggleConnectButton />
+                    </div>
+                  </span>
                 </div>
               </div>
             </div>
-          </form>
+          </div>
         </template>
       </ResponsiveRow>
 
@@ -279,31 +267,29 @@ onUnmounted(() => {
           </template>
           <template #content>
             <DisclosurePanel>
-              <form>
-                <div class="shadow sm:overflow-hidden sm:rounded-md">
-                  <div
-                    class="space-y-6 bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6"
-                  >
-                    <fieldset>
-                      <legend class="sr-only">Options</legend>
-                      <label
-                        for="specter-apex"
-                        class="block text-sm font-medium text-gray-800 dark:text-gray-300"
-                      >
-                        Options
-                      </label>
-                      <div class="mt-4 space-y-4">
-                        <SwitchToggle
-                          v-model:value="PhantomConfig.listenOnStart"
-                          :disabled="ChangingSettings"
-                          label="Forwarders Autostart"
-                          description="Start forwarders when Phantom starts"
-                        />
-                      </div>
-                    </fieldset>
-                  </div>
+              <div class="shadow sm:overflow-hidden sm:rounded-md">
+                <div
+                  class="space-y-6 bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6"
+                >
+                  <fieldset>
+                    <legend class="sr-only">Options</legend>
+                    <label
+                      for="specter-apex"
+                      class="block text-sm font-medium text-gray-800 dark:text-gray-300"
+                    >
+                      Options
+                    </label>
+                    <div class="mt-4 space-y-4">
+                      <SwitchToggle
+                        v-model:value="PhantomConfig.listenOnStart"
+                        :disabled="ChangingSettings"
+                        label="Forwarders Autostart"
+                        description="Start forwarders when Phantom starts"
+                      />
+                    </div>
+                  </fieldset>
                 </div>
-              </form>
+              </div>
             </DisclosurePanel>
           </template>
         </ResponsiveRow>

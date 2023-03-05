@@ -5,9 +5,9 @@ import {
   DisclosurePanel,
 } from "@miragespace/headlessui-vue";
 import {
+  ServerIcon,
   SparklesIcon,
   BoltSlashIcon,
-  ServerIcon,
   ChevronRightIcon,
 } from "@heroicons/vue/24/outline";
 import ResponsiveRow from "~/components/viewport/ResponsiveRow.vue";
@@ -23,13 +23,13 @@ import { ref, computed, nextTick, watch, onMounted, onUnmounted } from "vue";
 
 import {
   GetSpecterConfig,
+  GetPhantomConfig,
   RebuildTunnels,
-  ReleaseTunnel,
   UnpublishTunnel,
+  ReleaseTunnel,
   Synchronize,
   UpdateApex,
   UpdatePhantomConfig,
-  GetPhantomConfig,
 } from "~/wails/go/specter/Application";
 import { ValidateTarget } from "~/wails/go/specter/Helper";
 import { client, specter } from "~/wails/go/models";
@@ -72,9 +72,12 @@ async function appendNewTunnel(t: client.Tunnel) {
   try {
     setLoading(true);
     await ValidateTarget(t.target);
+
     Tunnels.value.push(t);
-    await rebuildTunnels();
-    await synchornizeTunnels();
+    await RebuildTunnels(Tunnels.value);
+
+    await Synchronize();
+    await reloadConfig();
   } catch (e) {
     showAlert("fail", `Error adding tunnel: ${e as string}`);
   } finally {
@@ -87,7 +90,7 @@ async function unpublishTunnel(i: number) {
     setLoading(true);
     await UnpublishTunnel(i);
     await new Promise((resolve) => setTimeout(resolve, 500));
-    Tunnels.value.splice(i, 1);
+    await reloadConfig();
   } catch (e) {
     showAlert("fail", `Error unpublishing tunnel: ${e as string}`);
   } finally {
@@ -100,7 +103,7 @@ async function releaseTunnel(i: number) {
     setLoading(true);
     await ReleaseTunnel(i);
     await new Promise((resolve) => setTimeout(resolve, 500));
-    Tunnels.value.splice(i, 1);
+    await reloadConfig();
   } catch (e) {
     showAlert("fail", `Error releasing tunnel: ${e as string}`);
   } finally {
@@ -111,14 +114,13 @@ async function releaseTunnel(i: number) {
 async function updateTunnel(i: number, t: client.Tunnel) {
   Tunnels.value[i].target = t.target;
   Tunnels.value[i].insecure = t.insecure;
-  await rebuildTunnels();
-}
-
-async function rebuildTunnels() {
   await RebuildTunnels(Tunnels.value);
 }
 
 async function synchronizeSettings() {
+  if (SynchronizingSettings.value) {
+    return;
+  }
   try {
     SynchronizingSettings.value = true;
     await UpdateApex(SpecterConfig.value.apex);
@@ -132,37 +134,25 @@ async function synchronizeSettings() {
   }
 }
 
-async function synchornizeTunnels() {
-  try {
-    await Synchronize();
-    await reloadTunnels();
-  } catch (e) {
-    /* empty */
-  }
-}
-
-async function reloadTunnels() {
-  const cfg = await GetSpecterConfig();
-  if (cfg !== null) {
-    if (cfg.tunnels) {
-      Tunnels.value = cfg.tunnels;
+async function reloadConfig() {
+  const [specterConfig, phantomCfg] = await Promise.all([
+    GetSpecterConfig(),
+    GetPhantomConfig(),
+  ]);
+  if (specterConfig !== null) {
+    SpecterConfig.value = specterConfig;
+    if (specterConfig.tunnels) {
+      Tunnels.value = specterConfig.tunnels;
     }
+  }
+  if (phantomCfg !== null) {
+    PhantomConfig.value = phantomCfg;
   }
 }
 
 const _loaded = ref(false);
 onMounted(async () => {
-  const [specterConfig, phantomCfg] = await Promise.all([
-    GetSpecterConfig(),
-    GetPhantomConfig(),
-    reloadTunnels(),
-  ]);
-  if (specterConfig !== null) {
-    SpecterConfig.value = specterConfig;
-  }
-  if (phantomCfg !== null) {
-    PhantomConfig.value = phantomCfg;
-  }
+  await reloadConfig();
   nextTick(() => {
     _loaded.value = true;
   });
@@ -173,7 +163,7 @@ watch(
     () => PhantomConfig.value.connectOnStart,
   ],
   async () => {
-    if (!_loaded.value) {
+    if (!_loaded.value || Loading.value) {
       return;
     }
     await synchronizeSettings();
@@ -181,9 +171,6 @@ watch(
 );
 
 // DEV MENU
-function showPopulatedState() {
-  reloadTunnels();
-}
 function showEmptyState() {
   Tunnels.value = [];
 }
@@ -203,11 +190,11 @@ function addState() {
     });
   }
 }
-broker.on("dev:RestoreState", showPopulatedState);
+broker.on("dev:RestoreState", reloadConfig);
 broker.on("dev:EmptyState", showEmptyState);
 broker.on("dev:AddState", addState);
 onUnmounted(() => {
-  broker.off("dev:RestoreState", showPopulatedState);
+  broker.off("dev:RestoreState", reloadConfig);
   broker.off("dev:EmptyState", showEmptyState);
   broker.off("dev:AddState", addState);
 });
@@ -225,30 +212,28 @@ onUnmounted(() => {
           </h3>
         </template>
         <template #content>
-          <form @submit.prevent>
-            <ul role="list" class="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <TunnelCard
-                v-for="(tunnel, i) in Tunnels"
-                :key="i"
-                :tunnel="tunnel"
-                @update:tunnel="updateTunnel(i, $event)"
-                @unpublish="unpublishTunnel(i)"
-                @release="releaseTunnel(i)"
-              />
-              <NewEntryCard
-                :icon="ServerIcon"
-                :disabled="Loading"
-                description="Add a new tunnel"
-                @triggered="NewTunnelModalOpen = true"
-              />
-            </ul>
-            <TunnelModal
-              v-model:show="NewTunnelModalOpen"
-              :create="true"
-              :tunnel="{ target: '', insecure: false }"
-              @update:tunnel="appendNewTunnel($event)"
+          <ul role="list" class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <TunnelCard
+              v-for="(tunnel, i) in Tunnels"
+              :key="i"
+              :tunnel="tunnel"
+              @update:tunnel="updateTunnel(i, $event)"
+              @unpublish="unpublishTunnel(i)"
+              @release="releaseTunnel(i)"
             />
-          </form>
+            <NewEntryCard
+              :icon="ServerIcon"
+              :disabled="Loading"
+              description="Add a new tunnel"
+              @triggered="NewTunnelModalOpen = true"
+            />
+          </ul>
+          <TunnelModal
+            v-model:show="NewTunnelModalOpen"
+            :create="true"
+            :tunnel="{ target: '', insecure: false }"
+            @update:tunnel="appendNewTunnel($event)"
+          />
         </template>
       </ResponsiveRow>
 
@@ -274,26 +259,24 @@ onUnmounted(() => {
           </p>
         </template>
         <template #content>
-          <form>
-            <div class="overflow-hidden shadow sm:rounded-md">
-              <div class="bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6">
-                <div class="grid grid-cols-6 gap-6">
-                  <div class="col-span-12 sm:col-span-6">
-                    <span
-                      class="inline-block text-sm text-gray-700 dark:text-gray-300"
-                    >
-                      <div class="flex space-x-3">
-                        <ToggleConnectButton
-                          :on-before-connect="synchronizeSettings"
-                          @state-toggled="reloadTunnels"
-                        />
-                      </div>
-                    </span>
-                  </div>
+          <div class="overflow-hidden shadow sm:rounded-md">
+            <div class="bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6">
+              <div class="grid grid-cols-6 gap-6">
+                <div class="col-span-12 sm:col-span-6">
+                  <span
+                    class="inline-block text-sm text-gray-700 dark:text-gray-300"
+                  >
+                    <div class="flex space-x-3">
+                      <ToggleConnectButton
+                        :on-before-connect="synchronizeSettings"
+                        @state-toggled="reloadConfig"
+                      />
+                    </div>
+                  </span>
                 </div>
               </div>
             </div>
-          </form>
+          </div>
         </template>
       </ResponsiveRow>
 
@@ -345,7 +328,7 @@ onUnmounted(() => {
           </template>
           <template #content>
             <DisclosurePanel as="div" class="mt-5 md:col-span-3 md:mt-0">
-              <form>
+              <form @submit.prevent="synchronizeSettings">
                 <div class="shadow sm:overflow-hidden sm:rounded-md">
                   <div
                     class="space-y-6 bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6"

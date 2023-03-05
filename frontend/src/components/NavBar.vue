@@ -75,7 +75,7 @@ const navigation = routes
                   route.name === nav.to
                     ? 'bg-gray-900 text-white dark:bg-gray-700 dark:text-white'
                     : 'text-black hover:text-white dark:text-slate-300',
-                  'rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-500',
+                  'no-drag rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-500',
                 ]"
                 :aria-current="route.name === nav.to ? 'page' : undefined"
                 >{{ nav.name }}

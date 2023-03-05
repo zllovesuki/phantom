@@ -71,7 +71,7 @@ const unassigned = computed<boolean>(() => {
             "
           >
             <ArrowLeftIcon
-              v-show="!unassigned && ClientConnected"
+              v-show="!unassigned"
               class="mr-0.5 inline-block h-4 w-4 text-indigo-500 dark:text-indigo-400"
             />
             {{ tunnel.hostname ?? "(Pending hostname assignment)" }}

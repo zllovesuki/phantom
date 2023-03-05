@@ -124,15 +124,23 @@ func (app *Application) getNewForwarder(l Listener) (*forwarder, error) {
 	}, nil
 }
 
-func (app *Application) AllForwardersStarted() bool {
-	app.stateMu.RLock()
-	defer app.stateMu.RUnlock()
-
-	if app.forwarders.Len() == len(app.phantomCfg.Listeners) {
+// app.stateMu must be held
+// TODO: name this better
+func (app *Application) isAllForwardersStarted() bool {
+	started := app.forwarders.Len()
+	configured := len(app.phantomCfg.Listeners)
+	if configured != 0 && started == configured {
 		return true
 	} else {
 		return false
 	}
+}
+
+func (app *Application) AllForwardersStarted() bool {
+	app.stateMu.RLock()
+	defer app.stateMu.RUnlock()
+
+	return app.isAllForwardersStarted()
 }
 
 func (app *Application) ForwarderStarted(listen string) bool {
@@ -160,6 +168,10 @@ func (app *Application) AddForwarder(l Listener) error {
 
 	if err := app.persistPhantomConfig(app.phantomCfg); err != nil {
 		return fmt.Errorf("failed to persist forwarder config: %w", err)
+	}
+
+	if app.isAllForwardersStarted() {
+		runtime.EventsEmit(app.appCtx, "forwarders:Started")
 	}
 
 	return nil
@@ -276,6 +288,7 @@ func (app *Application) RemoveForwarder(index int) error {
 		return fmt.Errorf("failed to persist forwarder config: %w", err)
 	}
 
+	// need to check the forwarders in config file
 	if len(app.phantomCfg.Listeners) == 0 {
 		runtime.EventsEmit(app.appCtx, "forwarders:Stopped")
 	}
@@ -298,6 +311,7 @@ func (app *Application) StopForwarder(index int) error {
 
 	app.logger.Info("Stopping forwarder", zap.String("listen", f.listener.Addr().String()))
 	app.stopForwarder(l, f)
+	// need to check the running forwarders number
 	if app.forwarders.Len() == 0 {
 		runtime.EventsEmit(app.appCtx, "forwarders:Stopped")
 	}
@@ -319,7 +333,7 @@ func (app *Application) StartForwarder(index int) error {
 		return err
 	}
 
-	if len(app.phantomCfg.Listeners) == app.forwarders.Len() {
+	if app.isAllForwardersStarted() {
 		runtime.EventsEmit(app.appCtx, "forwarders:Started")
 	}
 

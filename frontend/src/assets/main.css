@@ -26,5 +26,5 @@ li,
 td,
 dd,
 .no-drag {
-  --wails-draggable: no-drag;
+  --wails-draggable: no-drag !important;
 }

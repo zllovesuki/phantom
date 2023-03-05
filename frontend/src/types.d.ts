@@ -1,8 +1,11 @@
 import "vue-router";
 
+type TransitionDirection = "left" | "right";
+
 declare module "vue-router" {
   interface RouteMeta {
     displayName: string;
+    transition?: TransitionDirection;
   }
 }
 

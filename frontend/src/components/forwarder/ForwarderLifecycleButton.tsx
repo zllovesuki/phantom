@@ -20,10 +20,10 @@ export default defineComponent({
   },
   setup(props) {
     const loadingStore = useLoadingStore();
-    const { loading } = storeToRefs(loadingStore);
     const { setLoading } = loadingStore;
     const { showAlert, hideAlert } = useAlertStore();
 
+    const { loading: Loading } = storeToRefs(loadingStore);
     const confirmStopModalOpen = ref(false);
     const started = ref(false);
 
@@ -85,8 +85,11 @@ export default defineComponent({
         <span>
           <button
             type="button"
-            class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400 hover:text-gray-500"
-            disabled={loading.value}
+            class={[
+              "inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400",
+              !Loading.value ? "hover:text-gray-500" : "cursor-not-allowed",
+            ].join(" ")}
+            disabled={Loading.value}
             onClick={() => {
               started.value
                 ? (confirmStopModalOpen.value = true)

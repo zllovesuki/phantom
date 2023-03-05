@@ -82,7 +82,10 @@ const unassigned = computed<boolean>(() => {
         <button
           v-show="!unassigned && ClientConnected"
           type="button"
-          class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400 hover:text-gray-500"
+          :class="[
+            'inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400',
+            !Loading ? 'hover:text-gray-500' : 'cursor-not-allowed',
+          ]"
           :disabled="Loading"
           @click="UnpublishModalOpen = true"
         >
@@ -91,7 +94,10 @@ const unassigned = computed<boolean>(() => {
         </button>
         <button
           type="button"
-          class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400 hover:text-gray-500"
+          :class="[
+            'inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400',
+            !Loading ? 'hover:text-gray-500' : 'cursor-not-allowed',
+          ]"
           :disabled="Loading"
           @click="EditModalOpen = true"
         >

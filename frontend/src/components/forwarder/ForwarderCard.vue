@@ -79,7 +79,10 @@ function updateLabel(ev: Event) {
         <ForwarderLifecycleButton :listen="listener.listen" />
         <button
           type="button"
-          class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400 hover:text-gray-500"
+          :class="[
+            'inline-flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-gray-400',
+            !Loading ? 'hover:text-gray-500' : 'cursor-not-allowed',
+          ]"
           :disabled="Loading"
           @click.prevent="ConfirmModalOpen = true"
         >

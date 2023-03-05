@@ -1,8 +1,11 @@
 <script lang="ts" setup>
+import "animate.css";
+
 import Nav from "~/components/NavBar.vue";
 import AlertSection from "~/components/AlertSection.vue";
 import ProgressBar from "~/components/utility/ProgressBar.vue";
 import DevMenu from "./components/utility/DevMenu.vue";
+import RouteTransition from "./RouteTransition.vue";
 
 import { RouterView } from "vue-router";
 import { onMounted } from "vue";
@@ -33,9 +36,11 @@ onMounted(() => {
       indeterminate
     />
     <main class="py-10 dark:bg-slate-900">
-      <div class="mx-auto max-w-screen-2xl sm:px-8 lg:px-10">
+      <div class="mx-auto max-w-screen-2xl overflow-x-hidden sm:px-8 lg:px-10">
         <AlertSection class="mb-10" />
-        <RouterView />
+        <RouterView v-slot="{ Component, route }">
+          <RouteTransition :element="Component" :route="route" />
+        </RouterView>
       </div>
     </main>
     <DevMenu v-if="environment?.buildType === 'dev'" />

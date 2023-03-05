@@ -111,9 +111,18 @@ async function releaseTunnel(i: number) {
 }
 
 async function updateTunnel(i: number, t: client.Tunnel) {
-  Tunnels.value[i].target = t.target;
-  Tunnels.value[i].insecure = t.insecure;
-  await RebuildTunnels(Tunnels.value);
+  await tunnelFnWrapper(
+    async () => {
+      const update = [...Tunnels.value];
+      update[i] = {
+        ...update[i],
+        target: t.target,
+        insecure: t.insecure,
+      };
+      await RebuildTunnels(update);
+    },
+    (e: unknown) => `Error updating tunnel: ${e as string}`
+  );
 }
 
 async function synchronizeSettings() {

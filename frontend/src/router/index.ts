@@ -41,6 +41,11 @@ export const routes: RouteRecordRaw[] = [
   },
 ];
 
+const routeOrder: Record<string, number> = routes.reduce((a, c, i) => {
+  a[c.name ? c.name.toString() : ""] = i;
+  return a;
+}, {} as Record<string, number>);
+
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
@@ -50,6 +55,10 @@ router.afterEach((to, from, failure) => {
   if (failure) return;
   const title = "Phantom - " + to.meta.displayName;
   WindowSetTitle(title);
+
+  const fromPos = routeOrder[from.name ? from.name.toString() : ""];
+  const toPos = routeOrder[to.name ? to.name.toString() : ""];
+  to.meta.transition = toPos < fromPos ? "right" : "left";
 });
 
 export default router;

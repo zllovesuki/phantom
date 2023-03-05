@@ -87,4 +87,10 @@ docker run --rm \
         --staple \
         build/bin/Phantom.app
 
+docker run --rm \
+    -v "$PWD":/app \
+    -w /app \
+    wails-cross:darwin \
+        chown -R $(id -u):$(id -g) build/bin/
+
 (cd build/bin/ && zip -r - Phantom.app) > build/bin/Phantom.app.zip

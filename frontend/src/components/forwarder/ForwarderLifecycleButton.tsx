@@ -8,7 +8,7 @@ import {
   GetPhantomConfig,
   StartForwarder,
   StopForwarder,
-} from "~/wails/go/specter/Application";
+} from "~/wails/go/phantom/Application";
 import broker from "~/events";
 import { useAlertStore } from "~/store/alert";
 import { useLoadingStore } from "~/store/loading";

@@ -18,8 +18,8 @@ import { storeToRefs } from "pinia";
 import {
   GetSpecterConfig,
   GetRegisteredHostnames,
-} from "~/wails/go/specter/Application";
-import { ParseTarget } from "~/wails/go/specter/Helper";
+} from "~/wails/go/phantom/Application";
+import { ParseTarget } from "~/wails/go/phantom/Helper";
 import type { client } from "~/wails/go/models";
 import { useRuntimeStore } from "~/store/runtime";
 

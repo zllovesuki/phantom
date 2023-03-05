@@ -8,7 +8,7 @@ import {
 } from "@miragespace/headlessui-vue";
 import ClickToCopy from "~/components/utility/ClickToCopy";
 
-import { GetSpecterConfig } from "~/wails/go/specter/Application";
+import { GetSpecterConfig } from "~/wails/go/phantom/Application";
 import { client } from "~/wails/go/models";
 
 import { ref, computed, onMounted } from "vue";

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 
-import { StartClient, StopClient } from "~/wails/go/specter/Application";
+import { StartClient, StopClient } from "~/wails/go/phantom/Application";
 import { useAlertStore } from "~/store/alert";
 import { useRuntimeStore } from "~/store/runtime";
 

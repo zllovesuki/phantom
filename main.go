@@ -4,7 +4,7 @@ import (
 	"embed"
 	"runtime"
 
-	"kon.nect.sh/phantom/specter"
+	binding "kon.nect.sh/phantom/phantom"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -22,8 +22,8 @@ var icon []byte
 
 func main() {
 	// Create an instance of the app structure
-	app := &specter.Application{}
-	helper := &specter.Helper{}
+	app := &binding.Application{}
+	helper := &binding.Helper{}
 
 	// Create application with options
 	cfg := &options.App{
@@ -38,7 +38,7 @@ func main() {
 		},
 		AssetServer: &assetserver.Options{
 			Assets:  assets,
-			Handler: specter.NewAssetHandler(),
+			Handler: binding.NewAssetHandler(),
 		},
 		Windows: &windows.Options{
 			WebviewIsTransparent: false,

@@ -10,7 +10,7 @@ import {
 import {
   AllForwardersStarted,
   Connected,
-} from "~/wails/go/specter/Application";
+} from "~/wails/go/phantom/Application";
 import { useLoadingStore } from "~/store/loading";
 import broker from "~/events";
 

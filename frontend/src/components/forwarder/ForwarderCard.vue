@@ -12,11 +12,11 @@ import ConfirmModal from "~/components/viewport/ConfirmModal.vue";
 import { ref } from "vue";
 import { storeToRefs } from "pinia";
 
-import type { specter } from "~/wails/go/models";
+import type { phantom } from "~/wails/go/models";
 import { useLoadingStore } from "~/store/loading";
 
 const props = defineProps<{
-  listener: specter.Listener;
+  listener: phantom.Listener;
 }>();
 
 const emit = defineEmits<{

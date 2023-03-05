@@ -25,8 +25,8 @@ import {
   RemoveForwarder,
   UpdatePhantomConfig,
   UpdateForwaderLabel,
-} from "~/wails/go/specter/Application";
-import { specter } from "~/wails/go/models";
+} from "~/wails/go/phantom/Application";
+import { phantom } from "~/wails/go/models";
 import { useAlertStore } from "~/store/alert";
 import { useLoadingStore } from "~/store/loading";
 import broker from "~/events";
@@ -38,9 +38,9 @@ const { loading: Loading } = storeToRefs(loadingStore);
 
 const ChangingSettings = ref(false);
 const NewForwarderModalOpen = ref(false);
-const Forwarders = ref<specter.Listener[]>([]);
-const PhantomConfig = ref<specter.PhantomConfig>(
-  specter.PhantomConfig.createFrom({
+const Forwarders = ref<phantom.Listener[]>([]);
+const PhantomConfig = ref<phantom.PhantomConfig>(
+  phantom.PhantomConfig.createFrom({
     listeners: [],
     listenOnStart: false,
     specterInsecure: false,
@@ -63,7 +63,7 @@ async function forwarderFnWrapper(
   }
 }
 
-async function appendNewForwarder(l: specter.Listener) {
+async function appendNewForwarder(l: phantom.Listener) {
   await forwarderFnWrapper(
     () => AddForwarder(l),
     (e: unknown) => `Error adding forwarder: ${e as string}`
@@ -129,7 +129,7 @@ function showEmptyState() {
   Forwarders.value = [];
 }
 function addState() {
-  const randomForwarder: specter.Listener = {
+  const randomForwarder: phantom.Listener = {
     label: "Donec id",
     listen: `127.0.0.1:${Math.floor(Math.random() * (60000 - 1024) + 1024)}`,
     hostname: "ipsum-quia-dolor-sit-amet.dev.host.dev",
@@ -208,7 +208,7 @@ onUnmounted(() => {
         </template>
         <template #content>
           <div class="overflow-hidden shadow sm:rounded-md">
-            <div class="bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6">
+            <div class="row-content-bg-color px-4 py-5 sm:p-6">
               <div class="grid grid-cols-6 gap-6">
                 <div class="col-span-12 sm:col-span-6">
                   <span
@@ -271,9 +271,7 @@ onUnmounted(() => {
           <template #content>
             <DisclosurePanel>
               <div class="shadow sm:overflow-hidden sm:rounded-md">
-                <div
-                  class="space-y-6 bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6"
-                >
+                <div class="row-content-bg-color space-y-6 px-4 py-5 sm:p-6">
                   <fieldset>
                     <legend class="sr-only">Options</legend>
                     <label

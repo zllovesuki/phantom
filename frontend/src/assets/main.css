@@ -8,6 +8,15 @@
   }
 }
 
+@layer base {
+  .canvas-bg-color {
+    @apply bg-canvas dark:bg-slate-900;
+  }
+  .row-content-bg-color {
+    @apply bg-gray-50 dark:bg-slate-800/50;
+  }
+}
+
 html {
   height: 100%;
 }

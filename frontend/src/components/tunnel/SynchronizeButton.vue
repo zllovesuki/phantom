@@ -2,7 +2,7 @@
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
-import { Synchronize } from "~/wails/go/specter/Application";
+import { Synchronize } from "~/wails/go/phantom/Application";
 import { useRuntimeStore } from "~/store/runtime";
 
 const emit = defineEmits<{

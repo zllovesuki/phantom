@@ -9,10 +9,10 @@ import SwitchToggle from "~/components/viewport/SwitchToggle.vue";
 
 import { ref, computed, watch } from "vue";
 
-import type { specter } from "~/wails/go/models";
+import type { phantom } from "~/wails/go/models";
 
 export interface Props {
-  listener: Readonly<specter.Listener>;
+  listener: Readonly<phantom.Listener>;
   show: boolean;
   create?: boolean;
 }
@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  (event: "update:listener", listener: specter.Listener): void;
+  (event: "update:listener", listener: phantom.Listener): void;
   (event: "update:show", open: boolean): void;
 }>();
 

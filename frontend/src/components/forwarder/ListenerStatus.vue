@@ -13,13 +13,13 @@ import { computed, ref, onMounted, onUnmounted } from "vue";
 import {
   GetPhantomConfig,
   RunningForwarders,
-} from "~/wails/go/specter/Application";
-import { specter } from "~/wails/go/models";
+} from "~/wails/go/phantom/Application";
+import { phantom } from "~/wails/go/models";
 import broker from "~/events";
 
 const NumRunning = ref<number>(0);
-const PhantomConfig = ref<specter.PhantomConfig>(
-  specter.PhantomConfig.createFrom({
+const PhantomConfig = ref<phantom.PhantomConfig>(
+  phantom.PhantomConfig.createFrom({
     listeners: [],
     listenOnStart: false,
     specterInsecure: false,

@@ -1,4 +1,4 @@
-package specter
+package phantom
 
 import (
 	"net/http"

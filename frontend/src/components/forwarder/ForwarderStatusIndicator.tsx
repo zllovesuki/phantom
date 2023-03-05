@@ -2,7 +2,7 @@ import { SignalIcon, SignalSlashIcon } from "@heroicons/vue/20/solid";
 
 import { defineComponent, ref, onMounted, onUnmounted } from "vue";
 
-import { ForwarderStarted } from "~/wails/go/specter/Application";
+import { ForwarderStarted } from "~/wails/go/phantom/Application";
 import broker from "~/events";
 
 export default defineComponent({

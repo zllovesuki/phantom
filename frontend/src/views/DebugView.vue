@@ -15,23 +15,23 @@ import {
   GetPhantomConfig,
   GetConnectedTunnelNodes,
   GetConnectedForwarderNodes,
-} from "~/wails/go/specter/Application";
-import { client, specter } from "~/wails/go/models";
-import { GetFilePaths } from "~/wails/go/specter/Helper";
+} from "~/wails/go/phantom/Application";
+import { GetFilePaths } from "~/wails/go/phantom/Helper";
+import { client, phantom } from "~/wails/go/models";
 import { useRuntimeStore } from "~/store/runtime";
 import broker from "~/events";
 
 const runtime = useRuntimeStore();
 
-const ConnectedTunnelNodes = ref<specter.TunnelNode[]>([]);
-const ConnectedForwarderNodes = ref<specter.ForwarderNode[]>([]);
-const FilePaths = ref<specter.Paths>(specter.Paths.createFrom({}));
+const ConnectedTunnelNodes = ref<phantom.TunnelNode[]>([]);
+const ConnectedForwarderNodes = ref<phantom.ForwarderNode[]>([]);
+const FilePaths = ref<phantom.Paths>(phantom.Paths.createFrom({}));
 const LogEntries = ref<string[]>([]);
 const SpecterConfig = ref<client.Config>(
   client.Config.createFrom({ apex: "" })
 );
-const PhantomConfig = ref<specter.PhantomConfig>(
-  specter.PhantomConfig.createFrom({
+const PhantomConfig = ref<phantom.PhantomConfig>(
+  phantom.PhantomConfig.createFrom({
     listeners: [],
     listenOnStart: false,
     specterInsecure: false,
@@ -176,7 +176,7 @@ onUnmounted(() => {
         </template>
         <template #content>
           <div class="overflow-hidden shadow sm:rounded-md">
-            <div class="bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6">
+            <div class="row-content-bg-color px-4 py-5 sm:p-6">
               <div class="grid grid-cols-6 gap-6">
                 <div class="col-span-12 sm:col-span-6">
                   <div
@@ -261,7 +261,7 @@ onUnmounted(() => {
         </template>
         <template #content>
           <div class="overflow-hidden shadow sm:rounded-md sm:rounded-b-none">
-            <div class="bg-gray-50 px-5 py-2 dark:bg-slate-800/50 sm:px-6">
+            <div class="row-content-bg-color px-5 py-2 sm:px-6">
               <div class="grid grid-cols-6 gap-6">
                 <div class="col-span-12 sm:col-span-6">
                   <DescriptionList :items="specterConfigEntries" />
@@ -270,7 +270,7 @@ onUnmounted(() => {
             </div>
           </div>
           <div
-            class="bg-gray-100 px-4 py-3 text-right shadow dark:bg-slate-800/[0.7] sm:rounded-md sm:rounded-t-none sm:px-6"
+            class="bg-gray-100 px-4 py-3 text-right shadow dark:bg-slate-800 sm:rounded-md sm:rounded-t-none sm:px-6"
           >
             <SynchronizeButton @synchronized="loadLogs" />
           </div>
@@ -360,7 +360,7 @@ onUnmounted(() => {
         </template>
         <template #content>
           <div class="overflow-hidden shadow sm:rounded-md">
-            <div class="bg-gray-50 px-5 py-2 dark:bg-slate-800/50 sm:px-6">
+            <div class="row-content-bg-color px-5 py-2 sm:px-6">
               <div class="grid grid-cols-6 gap-6">
                 <div class="col-span-12 sm:col-span-6">
                   <DescriptionList :items="phantomConfigEntries" />
@@ -393,7 +393,7 @@ onUnmounted(() => {
               <div
                 class="mr-3 max-h-128 overflow-y-scroll shadow overflow-x-hidden scrollbar-thin scrollbar-track-white scrollbar-thumb-gray-700 dark:scrollbar-track-slate-800 dark:scrollbar-thumb-slate-700 sm:mr-0 sm:rounded-md"
               >
-                <div class="bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6">
+                <div class="row-content-bg-color px-4 py-5 sm:p-6">
                   <div class="grid grid-cols-6 gap-6">
                     <div class="col-span-12 flow-root sm:col-span-6">
                       <ZapLogsViewer :raw="LogEntries" />

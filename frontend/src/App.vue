@@ -35,7 +35,7 @@ onMounted(() => {
       :rounded="false"
       indeterminate
     />
-    <main class="py-10 dark:bg-slate-900">
+    <main class="canvas-bg-color py-10">
       <div class="mx-auto max-w-screen-2xl overflow-x-hidden sm:px-8 lg:px-10">
         <AlertSection class="mb-10" />
         <RouterView v-slot="{ Component, route }">

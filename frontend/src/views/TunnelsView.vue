@@ -30,9 +30,9 @@ import {
   Synchronize,
   UpdateApex,
   UpdatePhantomConfig,
-} from "~/wails/go/specter/Application";
-import { ValidateTarget } from "~/wails/go/specter/Helper";
-import { client, specter } from "~/wails/go/models";
+} from "~/wails/go/phantom/Application";
+import { ValidateTarget } from "~/wails/go/phantom/Helper";
+import { client, phantom } from "~/wails/go/models";
 import { useAlertStore } from "~/store/alert";
 import { useLoadingStore } from "~/store/loading";
 import { useRuntimeStore } from "~/store/runtime";
@@ -51,8 +51,8 @@ const Tunnels = ref<client.Tunnel[]>([]);
 const SpecterConfig = ref<client.Config>(
   client.Config.createFrom({ apex: "" })
 );
-const PhantomConfig = ref<specter.PhantomConfig>(
-  specter.PhantomConfig.createFrom({
+const PhantomConfig = ref<phantom.PhantomConfig>(
+  phantom.PhantomConfig.createFrom({
     listeners: [],
     listenOnStart: false,
     specterInsecure: false,
@@ -268,7 +268,7 @@ onUnmounted(() => {
         </template>
         <template #content>
           <div class="overflow-hidden shadow sm:rounded-md">
-            <div class="bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6">
+            <div class="row-content-bg-color px-4 py-5 sm:p-6">
               <div class="grid grid-cols-6 gap-6">
                 <div class="col-span-12 sm:col-span-6">
                   <span
@@ -338,9 +338,7 @@ onUnmounted(() => {
             <DisclosurePanel as="div" class="mt-5 md:col-span-3 md:mt-0">
               <form @submit.prevent="synchronizeSettings">
                 <div class="shadow sm:overflow-hidden sm:rounded-md">
-                  <div
-                    class="space-y-6 bg-gray-50 px-4 py-5 dark:bg-slate-800/50 sm:p-6"
-                  >
+                  <div class="row-content-bg-color space-y-6 px-4 py-5 sm:p-6">
                     <div class="grid grid-cols-3 gap-6">
                       <div class="col-span-3 sm:col-span-2">
                         <label

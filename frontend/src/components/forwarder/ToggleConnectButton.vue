@@ -5,7 +5,7 @@ import { storeToRefs } from "pinia";
 import {
   StartAllForwarders,
   StopAllForwarders,
-} from "~/wails/go/specter/Application";
+} from "~/wails/go/phantom/Application";
 import { useAlertStore } from "~/store/alert";
 import { useRuntimeStore } from "~/store/runtime";
 

@@ -141,7 +141,7 @@ function textColorClass(level: string): string[] {
           <template v-for="log in logs" :key="log.Index">
             <tr @click="modals[log.Index] = !modals[log.Index]">
               <td
-                class="whitespace-nowrap px-2 pl-6 pr-3 text-xs text-gray-900 dark:text-gray-300 sm:pl-0"
+                class="whitespace-nowrap px-2 pl-6 pr-3 text-xs text-black dark:text-gray-300 sm:pl-0"
               >
                 {{ log.Timestamp.toLocaleString() }}
               </td>
@@ -153,11 +153,11 @@ function textColorClass(level: string): string[] {
               >
                 {{ log.Level }}
               </td>
-              <td class="px-2 py-2 text-xs text-gray-900 dark:text-gray-300">
+              <td class="px-2 py-2 text-xs text-black dark:text-gray-300">
                 {{ log.Message }}
               </td>
               <td
-                class="py-2 pl-3 pr-6 text-xs text-gray-900 dark:text-gray-300 sm:pr-0"
+                class="py-2 pl-3 pr-6 text-xs text-black dark:text-gray-300 sm:pr-0"
               >
                 {{ log.Error ?? "" }}
               </td>
@@ -173,36 +173,36 @@ function textColorClass(level: string): string[] {
                     >
                       <div class="pb-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:pb-3">
                         <dt
-                          class="text-xs font-semibold text-gray-500 dark:text-gray-200"
+                          class="text-xs font-semibold text-black dark:text-gray-200"
                         >
                           Timestamp
                         </dt>
                         <dd
-                          class="mt-1 text-xs text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
+                          class="mt-1 text-xs text-black dark:text-gray-300 sm:col-span-3 sm:mt-0"
                         >
                           {{ log.Timestamp.toLocaleString() }}
                         </dd>
                       </div>
                       <div class="py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-3">
                         <dt
-                          class="text-xs font-semibold text-gray-500 dark:text-gray-200"
+                          class="text-xs font-semibold text-black dark:text-gray-200"
                         >
                           Caller
                         </dt>
                         <dd
-                          class="mt-1 text-xs text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
+                          class="mt-1 text-xs text-black dark:text-gray-300 sm:col-span-3 sm:mt-0"
                         >
                           {{ log.Caller }}
                         </dd>
                       </div>
                       <div class="py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-3">
                         <dt
-                          class="text-xs font-semibold text-gray-500 dark:text-gray-200"
+                          class="text-xs font-semibold text-black dark:text-gray-200"
                         >
                           Message
                         </dt>
                         <dd
-                          class="mt-1 text-xs text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
+                          class="mt-1 text-xs text-black dark:text-gray-300 sm:col-span-3 sm:mt-0"
                         >
                           {{ log.Message }}
                         </dd>
@@ -212,12 +212,12 @@ function textColorClass(level: string): string[] {
                         class="py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-3"
                       >
                         <dt
-                          class="text-xs font-semibold text-gray-500 dark:text-gray-200"
+                          class="text-xs font-semibold text-black dark:text-gray-200"
                         >
                           Error
                         </dt>
                         <dd
-                          class="mt-1 text-xs text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
+                          class="mt-1 text-xs text-black dark:text-gray-300 sm:col-span-3 sm:mt-0"
                         >
                           {{ log.Error }}
                         </dd>
@@ -227,12 +227,12 @@ function textColorClass(level: string): string[] {
                         class="py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:py-3"
                       >
                         <dt
-                          class="text-xs font-semibold text-gray-500 dark:text-gray-200"
+                          class="text-xs font-semibold text-black dark:text-gray-200"
                         >
                           Stacktrace
                         </dt>
                         <dd
-                          class="mt-1 whitespace-pre text-xs text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
+                          class="mt-1 whitespace-pre text-xs text-black dark:text-gray-300 sm:col-span-3 sm:mt-0"
                         >
                           {{ log.Stacktrace }}
                         </dd>
@@ -248,12 +248,12 @@ function textColorClass(level: string): string[] {
                         ]"
                       >
                         <dt
-                          class="text-xs font-normal text-gray-500 dark:text-gray-200"
+                          class="text-xs font-normal text-gray-800 dark:text-gray-200"
                         >
                           tag.{{ entry[0] }}
                         </dt>
                         <dd
-                          class="mt-1 text-xs text-gray-900 dark:text-gray-300 sm:col-span-3 sm:mt-0"
+                          class="mt-1 text-xs text-black dark:text-gray-300 sm:col-span-3 sm:mt-0"
                         >
                           {{ entry[1] }}
                         </dd>

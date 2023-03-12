@@ -1,4 +1,6 @@
 # README
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fzllovesuki%2Fphantom.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fzllovesuki%2Fphantom?ref=badge_shield)
+
 
 ## About
 
@@ -17,3 +19,7 @@ to this in your browser, and you can call your Go code from devtools.
 ## Building
 
 To build a redistributable, production mode package, use `wails build`.
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fzllovesuki%2Fphantom.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fzllovesuki%2Fphantom?ref=badge_large)

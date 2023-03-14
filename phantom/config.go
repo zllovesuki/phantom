@@ -29,15 +29,15 @@ type PhantomConfig struct {
 	ConnectOnStart            bool       `json:"connectOnStart"`
 }
 
-func (app *Application) UpdatePhantomConfig(cfg *PhantomConfig) error {
+func (app *Application) UpdatePhantomConfig(cfg PhantomConfig) error {
 	app.stateMu.Lock()
 	defer app.stateMu.Unlock()
 
-	if err := app.persistPhantomConfig(cfg); err != nil {
+	if err := app.persistPhantomConfig(&cfg); err != nil {
 		return err
 	}
 
-	app.phantomCfg = cfg
+	app.phantomCfg = &cfg
 	return nil
 }
 

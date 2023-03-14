@@ -24,22 +24,22 @@ func (app *Application) Connected() bool {
 	return app.cli != nil
 }
 
-func (app *Application) GetSpecterConfig() *client.Config {
+func (app *Application) GetSpecterConfig() client.Config {
 	app.stateMu.RLock()
 	defer app.stateMu.RUnlock()
 
 	if app.cli == nil {
-		return app.specterCfg
+		return *app.specterCfg
 	} else {
-		return app.cli.GetCurrentConfig()
+		return *app.cli.GetCurrentConfig()
 	}
 }
 
-func (app *Application) GetPhantomConfig() *PhantomConfig {
+func (app *Application) GetPhantomConfig() PhantomConfig {
 	app.stateMu.RLock()
 	defer app.stateMu.RUnlock()
 
-	return app.phantomCfg
+	return *app.phantomCfg
 }
 
 func (app *Application) RebuildTunnels(tunnels []client.Tunnel) {

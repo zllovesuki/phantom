@@ -39,7 +39,7 @@ const navigation = routes
   <Disclosure
     v-slot="{ open }"
     as="nav"
-    class="bg-white shadow-sm dark:bg-slate-800"
+    class="draggable bg-white shadow-sm dark:bg-slate-800"
   >
     <div
       :class="[

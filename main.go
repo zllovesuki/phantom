@@ -44,6 +44,7 @@ func main() {
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,
 			DisableWindowIcon:    false,
+			WebviewGpuIsDisabled: false,
 		},
 		Mac: &mac.Options{
 			TitleBar:             mac.TitleBarHidden(),
@@ -56,8 +57,10 @@ func main() {
 			},
 		},
 		Linux: &linux.Options{
-			Icon: icon,
+			Icon:             icon,
+			WebviewGpuPolicy: linux.WebviewGpuPolicyOnDemand,
 		},
+		EnableFraudulentWebsiteDetection: false,
 	}
 
 	if runtime.GOOS != "darwin" {

@@ -201,9 +201,9 @@ export namespace phantom {
 export namespace rtt {
 	
 	export class Statistics {
-	    // Go type: time.Time
+	    // Go type: time
 	    since: any;
-	    // Go type: time.Time
+	    // Go type: time
 	    until: any;
 	    min: number;
 	    average: number;
